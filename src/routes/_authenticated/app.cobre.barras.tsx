@@ -59,7 +59,7 @@ function CopperBars() {
     setName(bar.name);
     setCode(bar.auxiliary_code);
     setMaterial(bar.material);
-    setLength(bar.original_length_mm.toString());
+    setLength((bar.original_length_mm / 1000).toString());
     setNotes(bar.notes || "");
     setIsEditOpen(true);
   };
@@ -84,7 +84,7 @@ function CopperBars() {
     try {
       if (isEditOpen && selectedBar) {
         const { error } = await supabase.from("copper_bars").update({
-          name, auxiliary_code: code, material, original_length_mm: Number(length), notes
+          name, auxiliary_code: code, material, original_length_mm: Math.round(Number(length) * 1000), notes
         }).eq("id", selectedBar.id);
         
         if (error) throw error;
@@ -92,7 +92,7 @@ function CopperBars() {
         setIsEditOpen(false);
       } else {
         const barResponse: any = await supabase.from("copper_bars").insert({
-          name, auxiliary_code: code, material, original_length_mm: Number(length), notes
+          name, auxiliary_code: code, material, original_length_mm: Math.round(Number(length) * 1000), notes
         }).select().single();
         
         if (barResponse.error) throw barResponse.error;
@@ -100,7 +100,7 @@ function CopperBars() {
 
         const { error: pieceError } = await supabase.from("copper_pieces").insert({
           bar_id: bar.id,
-          current_length_mm: Number(length),
+          current_length_mm: Math.round(Number(length) * 1000),
           status: 'disponivel',
           notes: 'Pedaço original'
         });
@@ -155,8 +155,8 @@ function CopperBars() {
                   <Input required placeholder="Ex: CB-001" value={code} onChange={e => setCode(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Comprimento Inicial (mm)</Label>
-                  <Input type="number" required min="1" placeholder="Ex: 6000" value={length} onChange={e => setLength(e.target.value)} />
+                  <Label>Comprimento Inicial (m)</Label>
+                  <Input type="number" step="0.01" required min="0.01" placeholder="Ex: 6.00" value={length} onChange={e => setLength(e.target.value)} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -208,7 +208,7 @@ function CopperBars() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={totalDisponivel > 0 ? "default" : "destructive"}>
-                        {totalDisponivel} mm
+                        {(totalDisponivel / 1000).toFixed(2)} m
                       </Badge>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -230,7 +230,7 @@ function CopperBars() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Original:</span>
-                      <span className="font-medium">{bar.original_length_mm} mm</span>
+                      <span className="font-medium">{(bar.original_length_mm / 1000).toFixed(2)} m</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Material:</span>
@@ -265,8 +265,8 @@ function CopperBars() {
                 <Input required placeholder="Ex: CB-001" value={code} onChange={e => setCode(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Comprimento Inicial (mm)</Label>
-                <Input type="number" required min="1" value={length} onChange={e => setLength(e.target.value)} />
+                <Label>Comprimento Inicial (m)</Label>
+                <Input type="number" step="0.01" required min="0.01" value={length} onChange={e => setLength(e.target.value)} />
               </div>
             </div>
             <div className="space-y-2">

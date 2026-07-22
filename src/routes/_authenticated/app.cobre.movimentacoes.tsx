@@ -27,7 +27,7 @@ function CobreMovimentacoes() {
 
   // Form states
   const [selectedPieceId, setSelectedPieceId] = useState("");
-  const [lengthMm, setLengthMm] = useState("");
+  const [lengthM, setLengthM] = useState("");
   const [clientName, setClientName] = useState("");
   const [pco, setPco] = useState("");
   const [userRequesting, setUserRequesting] = useState("");
@@ -76,11 +76,11 @@ function CobreMovimentacoes() {
       const piece = availablePieces.find(p => p.id === selectedPieceId);
       if (!piece && type === "saida") throw new Error("Selecione um pedaço válido");
 
-      const lengthNum = Number(lengthMm);
+      const lengthNum = Number(lengthM);
 
       if (type === "saida") {
-        if (lengthNum > piece.current_length_mm) {
-          throw new Error(`Não há comprimento suficiente. O pedaço tem apenas ${piece.current_length_mm} mm.`);
+        if (lengthNum * 1000 > piece.current_length_mm) {
+          throw new Error(`Não há comprimento suficiente. O pedaço tem apenas ${(piece.current_length_mm / 1000).toFixed(2)} m.`);
         }
 
         // Criar movimentação de saída
@@ -89,7 +89,7 @@ function CobreMovimentacoes() {
           .insert({
             piece_id: selectedPieceId,
             type: "saida",
-            length_mm: lengthNum,
+            length_mm: Math.round(lengthNum * 1000),
             client_name: clientName,
             pco,
             user_requesting: userRequesting
@@ -98,7 +98,7 @@ function CobreMovimentacoes() {
         if (movError) throw movError;
 
         // Atualizar tamanho do pedaço atual ou marcar como esgotado
-        const newLength = piece.current_length_mm - lengthNum;
+        const newLength = piece.current_length_mm - Math.round(lengthNum * 1000);
         const newStatus = newLength <= 0 ? "esgotado" : "disponivel";
 
         const { error: pieceError } = await supabase
@@ -116,7 +116,7 @@ function CobreMovimentacoes() {
 
       toast.success("Movimentação registrada com sucesso!");
       setIsAddOpen(false);
-      setLengthMm(""); setClientName(""); setPco(""); setUserRequesting("");
+      setLengthM(""); setClientName(""); setPco(""); setUserRequesting("");
       loadData();
     } catch (error: any) {
       toast.error("Erro: " + error.message);
@@ -150,7 +150,7 @@ function CobreMovimentacoes() {
                   <SelectContent>
                     {availablePieces.map(p => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.bar?.name} ({p.bar?.auxiliary_code}) - {p.current_length_mm}mm disp.
+                        {p.bar?.name} ({p.bar?.auxiliary_code}) - {(p.current_length_mm / 1000).toFixed(2)} m disp.
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -158,8 +158,8 @@ function CobreMovimentacoes() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Tamanho do Corte (mm)</Label>
-                  <Input type="number" required min="1" placeholder="Ex: 500" value={lengthMm} onChange={e => setLengthMm(e.target.value)} />
+                  <Label>Tamanho do Corte (m)</Label>
+                  <Input type="number" required min="0.01" step="0.01" placeholder="Ex: 0.5" value={lengthM} onChange={e => setLengthM(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label>PCO (Obra)</Label>
@@ -216,7 +216,7 @@ function CobreMovimentacoes() {
                       {mov.piece?.bar?.name} <span className="text-muted-foreground text-xs">({mov.piece?.bar?.auxiliary_code})</span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="destructive">-{mov.length_mm} mm</Badge>
+                      <Badge variant="destructive">-{((mov.length_mm || 0) / 1000).toFixed(2)} m</Badge>
                     </TableCell>
                     <TableCell>{mov.client_name}</TableCell>
                     <TableCell>{mov.pco || '-'}</TableCell>
