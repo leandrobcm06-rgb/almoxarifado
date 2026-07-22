@@ -19,7 +19,7 @@ export function NotificationsBadge() {
   useEffect(() => {
     async function loadNotifications() {
       try {
-        const newNotifications = [];
+        const newNotifications: any[] = [];
         
         // 1. Ferramentas Atrasadas
         const today = new Date().toISOString();

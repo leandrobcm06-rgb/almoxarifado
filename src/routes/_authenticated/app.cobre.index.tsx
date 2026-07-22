@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Layers, CheckCircle2, TrendingDown, ArrowLeftRight, Activity, Users, HardHat, Clock } from "lucide-react";
+import { Layers, CheckCircle2, TrendingDown, ArrowLeftRight, Activity, Users, HardHat, Clock, Package2 } from "lucide-react";
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, 
   LineChart, Line, PieChart, Pie, Cell, Legend
