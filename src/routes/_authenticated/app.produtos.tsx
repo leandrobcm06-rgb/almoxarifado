@@ -27,21 +27,45 @@ function Page() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["products"],
-    queryFn: async () => (await supabase.from("products").select("*").order("codigo").limit(2000)).data ?? [],
+    queryFn: async () => {
+      const all: any[] = [];
+      let page = 0;
+      while (true) {
+        const { data: rows } = await supabase.from("products").select("*").order("codigo").range(page * 1000, (page + 1) * 1000 - 1);
+        if (!rows || rows.length === 0) break;
+        all.push(...rows);
+        if (rows.length < 1000) break;
+        page++;
+      }
+      return all;
+    },
   });
 
   const { data: totals } = useQuery({
     queryKey: ["product-totals"],
     queryFn: async () => {
-      const { data: snap } = await supabase.from("stock_snapshots").select("id").eq("status", "confirmado").order("snapshot_date", { ascending: false }).limit(1).maybeSingle();
-      if (!snap) return new Map<string, number>();
+      // Pega as últimas 50 importações confirmadas
+      const { data: snaps } = await supabase.from("stock_snapshots").select("id, snapshot_date").eq("status", "confirmado").order("snapshot_date", { ascending: false }).limit(50);
+      if (!snaps || snaps.length === 0) return new Map<string, number>();
+      
       const map = new Map<string, number>();
-      const pageSize = 1000;
-      for (let from = 0; ; from += pageSize) {
-        const { data: rows, error } = await supabase.from("stock_snapshot_items").select("product_id, qty").eq("snapshot_id", snap.id).range(from, from + pageSize - 1);
-        if (error) throw error;
-        for (const r of rows ?? []) map.set(r.product_id, (map.get(r.product_id) ?? 0) + Number(r.qty));
-        if (!rows || rows.length < pageSize) break;
+      const seen = new Set<string>(); // company_id | product_id
+      
+      for (const snap of snaps) {
+        let from = 0;
+        while (true) {
+          const { data: rows } = await supabase.from("stock_snapshot_items").select("product_id, company_id, qty").eq("snapshot_id", snap.id).range(from, from + 999);
+          if (!rows || rows.length === 0) break;
+          for (const r of rows) {
+            const key = `${r.company_id}|${r.product_id}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              map.set(r.product_id, (map.get(r.product_id) ?? 0) + Number(r.qty));
+            }
+          }
+          if (rows.length < 1000) break;
+          from += 1000;
+        }
       }
       return map;
     },

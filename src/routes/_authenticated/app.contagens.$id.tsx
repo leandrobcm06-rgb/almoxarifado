@@ -83,6 +83,7 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
   const ocrFn = useServerFn(runOcrOnPhoto);
   const fileRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
+  const [locFilter, setLocFilter] = useState("TODAS");
 
   const { data: items } = useQuery({
     queryKey: ["round-items", roundId],
@@ -94,11 +95,20 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
   });
 
   const itemMap = useMemo(() => new Map((items ?? []).map((i: any) => [i.product_id, i])), [items]);
+  
+  const locations = useMemo(() => {
+    const locs = new Set((products ?? []).map((p: any) => p.localizacao).filter(Boolean));
+    return Array.from(locs).sort();
+  }, [products]);
+
   const filtered = (products ?? []).filter((p) => {
+    if (locFilter !== "TODAS" && p.localizacao !== locFilter) return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return p.codigo.toLowerCase().includes(s) || p.descricao.toLowerCase().includes(s);
-  }).slice(0, 200);
+  });
+  
+  const displayFiltered = filtered.slice(0, 200);
 
   const upsertItem = useMutation({
     mutationFn: async ({ productId, qty }: { productId: string; qty: number }) => {
@@ -195,26 +205,37 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
           <CardTitle className="text-base">Lançamento manual ({items?.length ?? 0} itens contados)</CardTitle>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => exportToExcel(
-              (products ?? []).map((p: any) => ({
-                "COD. AUXILIAR": p.cod_auxiliar ?? "", "FABRICANTE": p.fabricante ?? "",
+              filtered.map((p: any) => ({
+                "COD. REFERENCIA": p.codigo ?? "", "COD. AUXILIAR": p.cod_auxiliar ?? "", "FABRICANTE": p.fabricante ?? "",
                 "LOCALIZAÇÃO": p.localizacao ?? "", "NOME": p.descricao, "FÍSICO": "",
               })), "lista-contagem-em-branco")}><FileDown className="h-4 w-4 mr-2" />Excel em branco</Button>
             <Button variant="outline" size="sm" onClick={() => exportToPDF(
-              `Lista de contagem`,
-              ["COD. AUXILIAR", "FABRICANTE", "LOCALIZAÇÃO", "NOME", "FÍSICO"],
-              (products ?? []).map((p: any) => [p.cod_auxiliar ?? "", p.fabricante ?? "", p.localizacao ?? "", p.descricao, ""]),
+              `Lista de contagem ${locFilter !== "TODAS" ? `- ${locFilter}` : ""}`,
+              ["COD. REFERENCIA", "COD. AUXILIAR", "FABRICANTE", "LOCALIZAÇÃO", "NOME", "FÍSICO"],
+              filtered.map((p: any) => [p.codigo ?? "", p.cod_auxiliar ?? "", p.fabricante ?? "", p.localizacao ?? "", p.descricao, ""]),
               "lista-contagem", "landscape",
             )}><FileDown className="h-4 w-4 mr-2" />PDF para imprimir</Button>
 
           </div>
         </CardHeader>
         <CardContent>
-          <Input placeholder="Buscar produto..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-md mb-3" />
+          <div className="flex flex-wrap gap-3 mb-3">
+            <Input placeholder="Buscar produto..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-md" />
+            <div className="w-64">
+              <Select value={locFilter} onValueChange={setLocFilter}>
+                <SelectTrigger><SelectValue placeholder="Filtrar por localização" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TODAS">Todas as localizações</SelectItem>
+                  {locations.map((loc: any) => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="max-h-[500px] overflow-y-auto">
             <Table>
               <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="w-32 text-right">Contado</TableHead><TableHead>Origem</TableHead></TableRow></TableHeader>
               <TableBody>
-                {filtered.map((p) => {
+                {displayFiltered.map((p) => {
                   const item = itemMap.get(p.id);
                   return (
                     <TableRow key={p.id}>
@@ -233,7 +254,7 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
               </TableBody>
             </Table>
           </div>
-          {(products ?? []).length > 200 && <p className="text-xs text-muted-foreground mt-2">Mostrando 200 — use a busca.</p>}
+          {filtered.length > 200 && <p className="text-xs text-muted-foreground mt-2">Mostrando 200 de {filtered.length} — use a busca.</p>}
         </CardContent>
       </Card>
     </div>
