@@ -49,7 +49,7 @@ function Page() {
       const rows = await parseExcelFile(file);
       const parsed: Row[] = [];
       for (const r of rows) {
-        const codigo = String(pick(r, ["codauxiliar", "cod_auxiliar", "auxiliar", "codigo", "codreferencia", "cod_referencia", "referencia", "cod"]) ?? "").trim();
+        const codigo = String(pick(r, ["codauxiliar", "cod_auxiliar", "auxiliar", "codigo", "codreferencia", "cod_referencia", "referencia", "cod"]) ?? "").trim().toUpperCase();
         const qtyRaw = pick(r, ["quantidadesistema", "quantidade_sistema", "qtdsistema", "sistema", "qty", "quantidade", "saldo", "estoque", "qtd", "fisico"]);
         const qty = Number(String(qtyRaw ?? "").toString().replace(",", "."));
         if (!codigo || isNaN(qty)) continue;
@@ -85,16 +85,31 @@ function Page() {
   const confirm = useMutation({
     mutationFn: async () => {
       if (pending.length === 0) throw new Error("Nada para confirmar");
-      // resolve product ids
-      const codes = Array.from(new Set(pending.map((r) => r.codigo)));
-      const { data: prods } = await supabase.from("products").select("id, codigo").in("codigo", codes);
-      const productMap = new Map((prods ?? []).map((p) => [p.codigo, p.id]));
+      toast.info("Iniciando processamento...");
+      
+      const codes = Array.from(new Set(pending.map((r) => r.codigo.toUpperCase())));
+      
+      // Fetch ALL products to ensure we don't miss any due to case sensitivity or 1000 row limits
+      toast.info("Buscando produtos no banco...");
+      let prods: any[] = [];
+      let page = 0;
+      while (true) {
+        const { data, error } = await supabase.from("products").select("id, codigo").range(page * 1000, (page + 1) * 1000 - 1);
+        if (error) throw new Error("Erro ao buscar produtos: " + error.message);
+        if (!data || data.length === 0) break;
+        prods.push(...data);
+        if (data.length < 1000) break;
+        page++;
+      }
+      
+      const productMap = new Map(prods.map((p) => [p.codigo.toUpperCase(), p.id]));
 
       // create missing products
       const missing = codes.filter((c) => !productMap.has(c));
       if (missing.length > 0) {
+        toast.info(`Cadastrando ${missing.length} novos produtos...`);
         const toCreate = missing.map((c) => {
-          const sample = pending.find((p) => p.codigo === c);
+          const sample = pending.find((p) => p.codigo.toUpperCase() === c);
           return {
             codigo: c,
             descricao: sample?.descricao || c,
@@ -105,35 +120,43 @@ function Page() {
           };
         });
 
-        const { data: created, error } = await supabase.from("products").insert(toCreate).select("id, codigo");
-        if (error) throw error;
-        for (const p of created ?? []) productMap.set(p.codigo, p.id);
+        for (let i = 0; i < toCreate.length; i += 200) {
+          const chunkCreate = toCreate.slice(i, i + 200);
+          const { data: created, error } = await supabase.from("products").insert(chunkCreate).select("id, codigo");
+          if (error) throw new Error("Erro ao criar produto: " + error.message);
+          for (const p of created ?? []) productMap.set(p.codigo.toUpperCase(), p.id);
+        }
       }
 
+      toast.info("Criando registro de snapshot...");
       const { data: snap, error: snapErr } = await supabase.from("stock_snapshots")
         .insert({ snapshot_date: snapshotDate, status: "confirmado", confirmed_at: new Date().toISOString() })
         .select().single();
-      if (snapErr) throw snapErr;
+      if (snapErr) throw new Error("Erro ao criar snapshot: " + snapErr.message);
 
+      toast.info("Processando itens...");
       // Consolida por (empresa, produto) somando qty — protege contra códigos auxiliares duplicados
       const itemsMap = new Map<string, { snapshot_id: string; product_id: string; company_id: string; qty: number }>();
       for (const r of pending) {
-        const pid = productMap.get(r.codigo)!;
+        const pid = productMap.get(r.codigo.toUpperCase());
+        if (!pid) throw new Error(`Produto não encontrado após criação: ${r.codigo}`);
         const key = `${r.company_id}|${pid}`;
         const ex = itemsMap.get(key);
         if (ex) ex.qty += r.qty;
         else itemsMap.set(key, { snapshot_id: snap.id, product_id: pid, company_id: r.company_id, qty: r.qty });
       }
       const items = Array.from(itemsMap.values());
+      
+      toast.info(`Salvando ${items.length} itens no banco...`);
       for (let i = 0; i < items.length; i += 500) {
         const chunk = items.slice(i, i + 500);
         const { error } = await supabase.from("stock_snapshot_items").insert(chunk);
-        if (error) throw error;
+        if (error) throw new Error("Erro ao salvar itens: " + error.message);
       }
       return snap.id;
     },
-    onSuccess: () => { toast.success("Estoque confirmado"); setPending([]); qc.invalidateQueries({ queryKey: ["snapshots"] }); },
-    onError: (e: any) => toast.error(e.message),
+    onSuccess: () => { toast.success("Estoque confirmado com sucesso!"); setPending([]); qc.invalidateQueries({ queryKey: ["snapshots"] }); },
+    onError: (e: any) => { console.error(e); toast.error(e?.message || "Erro desconhecido ao confirmar"); },
   });
 
   const groupedByCompany = (companies ?? []).map((c) => ({
