@@ -19,6 +19,7 @@ import { exportToExcel, exportToPDF } from "@/lib/export-utils";
 export const Route = createFileRoute("/_authenticated/app/contagens/$id")({
   head: () => ({ meta: [{ title: "Contagem | Almoxarifado" }] }),
   component: Page,
+  errorComponent: ({ error }) => <div className="p-4 text-red-500">Erro na rota: {error.message} <pre>{error.stack}</pre></div>,
 });
 
 function Page() {
@@ -106,7 +107,7 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
     if (locFilter !== "TODAS" && p.localizacao !== locFilter) return false;
     if (!search) return true;
     const s = search.toLowerCase();
-    return p.codigo.toLowerCase().includes(s) || p.descricao.toLowerCase().includes(s);
+    return String(p.codigo ?? "").toLowerCase().includes(s) || String(p.descricao ?? "").toLowerCase().includes(s);
   });
   
   const displayFiltered = filtered.slice(0, 200);
