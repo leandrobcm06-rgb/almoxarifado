@@ -14,7 +14,6 @@ import { toast } from "sonner";
 import { ChevronLeft, Camera, Save, CheckCircle2, Loader2, FileDown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { runOcrOnPhoto } from "@/lib/ocr.functions";
-import { exportToExcel, exportToPDF } from "@/lib/export-utils";
 
 export const Route = createFileRoute("/_authenticated/app/contagens/$id")({
   head: () => ({ meta: [{ title: "Contagem | Almoxarifado" }] }),
@@ -206,17 +205,23 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
         <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle className="text-base">Lançamento manual ({items?.length ?? 0} itens contados)</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => exportToExcel(
-              filtered.map((p: any) => ({
-                "COD. REFERENCIA": p.codigo ?? "", "COD. AUXILIAR": p.cod_auxiliar ?? "", "FABRICANTE": p.fabricante ?? "",
-                "LOCALIZAÇÃO": p.localizacao ?? "", "NOME": p.descricao, "FÍSICO": "",
-              })), "lista-contagem-em-branco")}><FileDown className="h-4 w-4 mr-2" />Excel em branco</Button>
-            <Button variant="outline" size="sm" onClick={() => exportToPDF(
-              `Lista de contagem ${locFilter !== "TODAS" ? `- ${locFilter}` : ""}`,
-              ["COD. REFERENCIA", "COD. AUXILIAR", "FABRICANTE", "LOCALIZAÇÃO", "NOME", "FÍSICO"],
-              filtered.map((p: any) => [p.codigo ?? "", p.cod_auxiliar ?? "", p.fabricante ?? "", p.localizacao ?? "", p.descricao, ""]),
-              "lista-contagem", "landscape",
-            )}><FileDown className="h-4 w-4 mr-2" />PDF para imprimir</Button>
+            <Button variant="outline" size="sm" onClick={async () => {
+              const { exportToExcel } = await import("@/lib/export-utils");
+              exportToExcel(
+                filtered.map((p: any) => ({
+                  "COD. REFERENCIA": p.codigo ?? "", "COD. AUXILIAR": p.cod_auxiliar ?? "", "FABRICANTE": p.fabricante ?? "",
+                  "LOCALIZAÇÃO": p.localizacao ?? "", "NOME": p.descricao, "FÍSICO": "",
+                })), "lista-contagem-em-branco")
+            }}><FileDown className="h-4 w-4 mr-2" />Excel em branco</Button>
+            <Button variant="outline" size="sm" onClick={async () => {
+              const { exportToPDF } = await import("@/lib/export-utils");
+              exportToPDF(
+                `Lista de contagem ${locFilter !== "TODAS" ? `- ${locFilter}` : ""}`,
+                ["COD. REFERENCIA", "COD. AUXILIAR", "FABRICANTE", "LOCALIZAÇÃO", "NOME", "FÍSICO"],
+                filtered.map((p: any) => [p.codigo ?? "", p.cod_auxiliar ?? "", p.fabricante ?? "", p.localizacao ?? "", p.descricao, ""]),
+                "lista-contagem", "landscape",
+              )
+            }}><FileDown className="h-4 w-4 mr-2" />PDF para imprimir</Button>
 
           </div>
         </CardHeader>
