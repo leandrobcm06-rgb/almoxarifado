@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { exportToExcel, exportToPDF } from "@/lib/export-utils";
 import { FileDown, FileText, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 
@@ -163,13 +162,19 @@ function ReportSection({ report }: { report: any }) {
                 <SelectItem value="ignorado">Ignorado</SelectItem>
               </SelectContent>
             </Select>
-            <Button size="sm" variant="outline" onClick={() => exportToExcel(filtered.map((i: any) => ({
-              codigo: i.products?.codigo, descricao: i.products?.descricao, empresa: i.companies?.nome,
-              saldo_sistema: i.saldo_sistema, qtd_contada: i.qty_contada, diferenca: i.diferenca, ajuste_sugerido: i.ajuste_sugerido, status: i.status,
-            })), `divergencias-${report.id.slice(0, 6)}`)}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
-            <Button size="sm" variant="outline" onClick={() => exportToPDF("Divergências", ["Código", "Descrição", "Empresa", "Sistema", "Contado", "Dif.", "Ajuste", "Status"],
+            <Button size="sm" variant="outline" onClick={async () => {
+              const { exportToExcel } = await import("@/lib/export-utils");
+              exportToExcel(filtered.map((i: any) => ({
+                codigo: i.products?.codigo, descricao: i.products?.descricao, empresa: i.companies?.nome,
+                saldo_sistema: i.saldo_sistema, qtd_contada: i.qty_contada, diferenca: i.diferenca, ajuste_sugerido: i.ajuste_sugerido, status: i.status,
+              })), `divergencias-${report.id.slice(0, 6)}`);
+            }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
+            <Button size="sm" variant="outline" onClick={async () => {
+              const { exportToPDF } = await import("@/lib/export-utils");
+              exportToPDF("Divergências", ["Código", "Descrição", "Empresa", "Sistema", "Contado", "Dif.", "Ajuste", "Status"],
               filtered.map((i: any) => [i.products?.codigo, i.products?.descricao, i.companies?.nome, i.saldo_sistema, i.qty_contada, i.diferenca, i.ajuste_sugerido, i.status]),
-              `divergencias-${report.id.slice(0, 6)}`, "landscape")}><FileText className="h-4 w-4 mr-2" />PDF</Button>
+              `divergencias-${report.id.slice(0, 6)}`, "landscape");
+            }}><FileText className="h-4 w-4 mr-2" />PDF</Button>
           </div>
           <Table>
             <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Empresa</TableHead><TableHead className="text-right">Sistema</TableHead><TableHead className="text-right">Contado</TableHead><TableHead className="text-right">Diferença</TableHead><TableHead className="text-right">Ajuste</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>

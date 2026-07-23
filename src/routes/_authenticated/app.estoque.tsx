@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { parseExcelFile, exportToExcel } from "@/lib/export-utils";
 import { Upload, FileDown, Save, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -46,6 +45,7 @@ function Page() {
   const handleFile = async (file: File, companyId: string) => {
     if (!companyId) return toast.error("Selecione a empresa antes");
     try {
+      const { parseExcelFile } = await import("@/lib/export-utils");
       const rows = await parseExcelFile(file);
       const parsed: Row[] = [];
       let skipped = 0;
@@ -230,7 +230,10 @@ function Page() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Revisão ({pending.length} linhas)</CardTitle>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => exportToExcel(pending, "estoque-revisao")}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
+              <Button variant="outline" onClick={async () => {
+                const { exportToExcel } = await import("@/lib/export-utils");
+                exportToExcel(pending, "estoque-revisao");
+              }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
               <Button variant="outline" onClick={() => setPending([])}><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
               <Button onClick={() => confirm.mutate()} disabled={confirm.isPending}><Save className="h-4 w-4 mr-2" />Confirmar</Button>
             </div>

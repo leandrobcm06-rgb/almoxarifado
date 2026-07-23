@@ -12,7 +12,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { exportToExcel, exportToPDF } from "@/lib/export-utils";
 import { FileDown, FileText, Wrench } from "lucide-react";
 import { format } from "date-fns";
 
@@ -60,13 +59,19 @@ function Page() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div><h1 className="text-2xl font-semibold">Gestão de ajustes</h1><p className="text-sm text-muted-foreground">Fluxo: pendente → em andamento → ajustado.</p></div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => exportToExcel(filtered.map((i: any) => ({
-            codigo: i.products?.codigo, descricao: i.products?.descricao, empresa: i.companies?.nome,
-            ajuste: i.ajuste_sugerido, status: i.status, observacao: i.observacao,
-          })), `ajustes-${status}`)}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
-          <Button variant="outline" size="sm" onClick={() => exportToPDF("Ajustes — " + status, ["Código", "Descrição", "Empresa", "Ajuste", "Obs."],
-            filtered.map((i: any) => [i.products?.codigo, i.products?.descricao, i.companies?.nome, i.ajuste_sugerido, i.observacao ?? ""]),
-            `ajustes-${status}`, "landscape")}><FileText className="h-4 w-4 mr-2" />PDF</Button>
+          <Button variant="outline" size="sm" onClick={async () => {
+            const { exportToExcel } = await import("@/lib/export-utils");
+            exportToExcel(filtered.map((i: any) => ({
+              codigo: i.products?.codigo, descricao: i.products?.descricao, empresa: i.companies?.nome,
+              ajuste: i.ajuste_sugerido, status: i.status, observacao: i.observacao,
+            })), `ajustes-${status}`)
+          }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
+          <Button variant="outline" size="sm" onClick={async () => {
+            const { exportToPDF } = await import("@/lib/export-utils");
+            exportToPDF("Ajustes — " + status, ["Código", "Descrição", "Empresa", "Ajuste", "Obs."],
+              filtered.map((i: any) => [i.products?.codigo, i.products?.descricao, i.companies?.nome, i.ajuste_sugerido, i.observacao ?? ""]),
+              `ajustes-${status}`, "landscape")
+          }}><FileText className="h-4 w-4 mr-2" />PDF</Button>
         </div>
       </div>
 

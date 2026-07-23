@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, FileDown, FileText, Upload } from "lucide-react";
-import { exportToExcel, exportToPDF, parseExcelFile } from "@/lib/export-utils";
 
 export const Route = createFileRoute("/_authenticated/app/produtos")({
   head: () => ({ meta: [{ title: "Produtos | Almoxarifado" }] }),
@@ -88,6 +87,7 @@ function Page() {
 
   const importExcel = useMutation({
     mutationFn: async (file: File) => {
+      const { parseExcelFile } = await import("@/lib/export-utils");
       const rows = await parseExcelFile(file);
       const products = rows.map((r: any) => ({
         codigo: String(r.codigo ?? r.Codigo ?? r.código ?? r.Código ?? r.CODIGO ?? "").trim(),
@@ -112,8 +112,14 @@ function Page() {
             <input type="file" className="hidden" accept=".xlsx,.xls" onChange={(e) => e.target.files?.[0] && importExcel.mutate(e.target.files[0])} />
             <Button asChild variant="outline"><span><Upload className="h-4 w-4 mr-2" />Importar Excel</span></Button>
           </label>
-          <Button variant="outline" onClick={() => exportToExcel(filtered, "produtos")}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
-          <Button variant="outline" onClick={() => exportToPDF("Produtos", ["Código", "Descrição", "UN"], filtered.map(p => [p.codigo, p.descricao, p.unidade]), "produtos")}><FileText className="h-4 w-4 mr-2" />PDF</Button>
+          <Button variant="outline" onClick={async () => {
+            const { exportToExcel } = await import("@/lib/export-utils");
+            exportToExcel(filtered, "produtos");
+          }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
+          <Button variant="outline" onClick={async () => {
+            const { exportToPDF } = await import("@/lib/export-utils");
+            exportToPDF("Produtos", ["Código", "Descrição", "UN"], filtered.map(p => [p.codigo, p.descricao, p.unidade]), "produtos");
+          }}><FileText className="h-4 w-4 mr-2" />PDF</Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Novo</Button></DialogTrigger>
             <DialogContent>
