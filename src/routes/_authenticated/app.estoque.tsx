@@ -48,11 +48,25 @@ function Page() {
     try {
       const rows = await parseExcelFile(file);
       const parsed: Row[] = [];
+      let skipped = 0;
       for (const r of rows) {
         const codigo = String(pick(r, ["codauxiliar", "cod_auxiliar", "auxiliar", "codigo", "codreferencia", "cod_referencia", "referencia", "cod"]) ?? "").trim().toUpperCase();
+        
         const qtyRaw = pick(r, ["quantidadesistema", "quantidade_sistema", "qtdsistema", "sistema", "qty", "quantidade", "saldo", "estoque", "qtd", "fisico"]);
-        const qty = Number(String(qtyRaw ?? "").toString().replace(",", "."));
-        if (!codigo || isNaN(qty)) continue;
+        let qty = 0;
+        if (typeof qtyRaw === "number") {
+          qty = qtyRaw;
+        } else {
+          let str = String(qtyRaw ?? "0").trim();
+          if (str.includes(",")) str = str.replace(/\./g, "").replace(",", ".");
+          qty = Number(str);
+        }
+
+        if (!codigo || isNaN(qty)) {
+          skipped++;
+          continue;
+        }
+        
         parsed.push({
           codigo,
           descricao: String(pick(r, ["produto", "descricao", "nome", "descricaoproduto"]) ?? ""),
@@ -63,19 +77,32 @@ function Page() {
           company_id: companyId,
         });
       }
-      if (parsed.length === 0) return toast.error("Nenhuma linha reconhecida. Verifique se a planilha tem colunas Cod. Auxiliar, Produto, Fabricante, Localizacao e Quantidade sistema.");
+      
+      if (parsed.length === 0) return toast.error("Nenhuma linha reconhecida. Verifique se a planilha tem colunas Codigo e Quantidade.");
+      
       // consolidate duplicates
       const map = new Map<string, Row>();
+      let consolidated = 0;
       for (const p of parsed) {
         const key = `${p.company_id}|${p.codigo}`;
         const ex = map.get(key);
-        if (ex) ex.qty += p.qty; else map.set(key, { ...p });
+        if (ex) {
+          ex.qty += p.qty;
+          consolidated++;
+        } else {
+          map.set(key, { ...p });
+        }
       }
+      
       setPending((prev) => {
         const others = prev.filter((r) => r.company_id !== companyId);
         return [...others, ...Array.from(map.values())];
       });
-      toast.success(`${map.size} linhas carregadas para revisão`);
+      
+      let msg = `${map.size} linhas carregadas prontas para revisão.`;
+      if (consolidated > 0) msg += ` (${consolidated} itens repetidos foram somados).`;
+      if (skipped > 0) toast.warning(`${skipped} linhas da planilha foram ignoradas por não terem código ou quantidade válida.`);
+      toast.success(msg);
     } catch (e: any) {
       toast.error(e.message);
     }
