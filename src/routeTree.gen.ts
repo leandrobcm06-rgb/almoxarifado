@@ -15,7 +15,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAjustesRouteImport } from './routes/_authenticated/app.ajustes'
-import { Route as AuthenticatedAppContagensRouteImport } from './routes/_authenticated/app.contagens'
 import { Route as AuthenticatedAppDivergenciasRouteImport } from './routes/_authenticated/app.divergencias'
 import { Route as AuthenticatedAppEmpresasRouteImport } from './routes/_authenticated/app.empresas'
 import { Route as AuthenticatedAppEstoqueRouteImport } from './routes/_authenticated/app.estoque'
@@ -30,6 +29,7 @@ import { Route as AuthenticatedAppCobrePedacosRouteImport } from './routes/_auth
 import { Route as AuthenticatedAppCobrePesquisaRouteImport } from './routes/_authenticated/app.cobre.pesquisa'
 import { Route as AuthenticatedAppCobreRelatoriosRouteImport } from './routes/_authenticated/app.cobre.relatorios'
 import { Route as AuthenticatedAppCobreSaidaRouteImport } from './routes/_authenticated/app.cobre.saida'
+import { Route as AuthenticatedAppContagensIndexRouteImport } from './routes/_authenticated/app.contagens.index'
 import { Route as AuthenticatedAppContagensIdRouteImport } from './routes/_authenticated/app.contagens.$id'
 import { Route as AuthenticatedAppFerramentasIndexRouteImport } from './routes/_authenticated/app.ferramentas.index'
 import { Route as AuthenticatedAppFerramentasEmprestimosRouteImport } from './routes/_authenticated/app.ferramentas.emprestimos'
@@ -67,12 +67,6 @@ const AuthenticatedAppAjustesRoute = AuthenticatedAppAjustesRouteImport.update({
   path: '/ajustes',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AuthenticatedAppContagensRoute =
-  AuthenticatedAppContagensRouteImport.update({
-    id: '/contagens',
-    path: '/contagens',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
 const AuthenticatedAppDivergenciasRoute =
   AuthenticatedAppDivergenciasRouteImport.update({
     id: '/divergencias',
@@ -156,11 +150,17 @@ const AuthenticatedAppCobreSaidaRoute =
     path: '/cobre/saida',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppContagensIndexRoute =
+  AuthenticatedAppContagensIndexRouteImport.update({
+    id: '/contagens/',
+    path: '/contagens/',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppContagensIdRoute =
   AuthenticatedAppContagensIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedAppContagensRoute,
+    id: '/contagens/$id',
+    path: '/contagens/$id',
+    getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppFerramentasIndexRoute =
   AuthenticatedAppFerramentasIndexRouteImport.update({
@@ -204,7 +204,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/ajustes': typeof AuthenticatedAppAjustesRoute
-  '/app/contagens': typeof AuthenticatedAppContagensRouteWithChildren
   '/app/divergencias': typeof AuthenticatedAppDivergenciasRoute
   '/app/empresas': typeof AuthenticatedAppEmpresasRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
@@ -226,13 +225,13 @@ export interface FileRoutesByFullPath {
   '/app/ferramentas/pesquisa': typeof AuthenticatedAppFerramentasPesquisaRoute
   '/app/ferramentas/relatorios': typeof AuthenticatedAppFerramentasRelatoriosRoute
   '/app/cobre/': typeof AuthenticatedAppCobreIndexRoute
+  '/app/contagens/': typeof AuthenticatedAppContagensIndexRoute
   '/app/ferramentas/': typeof AuthenticatedAppFerramentasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/ajustes': typeof AuthenticatedAppAjustesRoute
-  '/app/contagens': typeof AuthenticatedAppContagensRouteWithChildren
   '/app/divergencias': typeof AuthenticatedAppDivergenciasRoute
   '/app/empresas': typeof AuthenticatedAppEmpresasRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
@@ -254,6 +253,7 @@ export interface FileRoutesByTo {
   '/app/ferramentas/pesquisa': typeof AuthenticatedAppFerramentasPesquisaRoute
   '/app/ferramentas/relatorios': typeof AuthenticatedAppFerramentasRelatoriosRoute
   '/app/cobre': typeof AuthenticatedAppCobreIndexRoute
+  '/app/contagens': typeof AuthenticatedAppContagensIndexRoute
   '/app/ferramentas': typeof AuthenticatedAppFerramentasIndexRoute
 }
 export interface FileRoutesById {
@@ -263,7 +263,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/ajustes': typeof AuthenticatedAppAjustesRoute
-  '/_authenticated/app/contagens': typeof AuthenticatedAppContagensRouteWithChildren
   '/_authenticated/app/divergencias': typeof AuthenticatedAppDivergenciasRoute
   '/_authenticated/app/empresas': typeof AuthenticatedAppEmpresasRoute
   '/_authenticated/app/estoque': typeof AuthenticatedAppEstoqueRoute
@@ -285,6 +284,7 @@ export interface FileRoutesById {
   '/_authenticated/app/ferramentas/pesquisa': typeof AuthenticatedAppFerramentasPesquisaRoute
   '/_authenticated/app/ferramentas/relatorios': typeof AuthenticatedAppFerramentasRelatoriosRoute
   '/_authenticated/app/cobre/': typeof AuthenticatedAppCobreIndexRoute
+  '/_authenticated/app/contagens/': typeof AuthenticatedAppContagensIndexRoute
   '/_authenticated/app/ferramentas/': typeof AuthenticatedAppFerramentasIndexRoute
 }
 export interface FileRouteTypes {
@@ -294,7 +294,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app'
     | '/app/ajustes'
-    | '/app/contagens'
     | '/app/divergencias'
     | '/app/empresas'
     | '/app/estoque'
@@ -316,13 +315,13 @@ export interface FileRouteTypes {
     | '/app/ferramentas/pesquisa'
     | '/app/ferramentas/relatorios'
     | '/app/cobre/'
+    | '/app/contagens/'
     | '/app/ferramentas/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/app/ajustes'
-    | '/app/contagens'
     | '/app/divergencias'
     | '/app/empresas'
     | '/app/estoque'
@@ -344,6 +343,7 @@ export interface FileRouteTypes {
     | '/app/ferramentas/pesquisa'
     | '/app/ferramentas/relatorios'
     | '/app/cobre'
+    | '/app/contagens'
     | '/app/ferramentas'
   id:
     | '__root__'
@@ -352,7 +352,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/app'
     | '/_authenticated/app/ajustes'
-    | '/_authenticated/app/contagens'
     | '/_authenticated/app/divergencias'
     | '/_authenticated/app/empresas'
     | '/_authenticated/app/estoque'
@@ -374,6 +373,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/ferramentas/pesquisa'
     | '/_authenticated/app/ferramentas/relatorios'
     | '/_authenticated/app/cobre/'
+    | '/_authenticated/app/contagens/'
     | '/_authenticated/app/ferramentas/'
   fileRoutesById: FileRoutesById
 }
@@ -425,13 +425,6 @@ declare module '@tanstack/react-router' {
       path: '/ajustes'
       fullPath: '/app/ajustes'
       preLoaderRoute: typeof AuthenticatedAppAjustesRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/contagens': {
-      id: '/_authenticated/app/contagens'
-      path: '/contagens'
-      fullPath: '/app/contagens'
-      preLoaderRoute: typeof AuthenticatedAppContagensRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/divergencias': {
@@ -532,12 +525,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCobreSaidaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/contagens/': {
+      id: '/_authenticated/app/contagens/'
+      path: '/contagens'
+      fullPath: '/app/contagens/'
+      preLoaderRoute: typeof AuthenticatedAppContagensIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/contagens/$id': {
       id: '/_authenticated/app/contagens/$id'
-      path: '/$id'
+      path: '/contagens/$id'
       fullPath: '/app/contagens/$id'
       preLoaderRoute: typeof AuthenticatedAppContagensIdRouteImport
-      parentRoute: typeof AuthenticatedAppContagensRoute
+      parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/ferramentas/': {
       id: '/_authenticated/app/ferramentas/'
@@ -584,23 +584,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedAppContagensRouteChildren {
-  AuthenticatedAppContagensIdRoute: typeof AuthenticatedAppContagensIdRoute
-}
-
-const AuthenticatedAppContagensRouteChildren: AuthenticatedAppContagensRouteChildren =
-  {
-    AuthenticatedAppContagensIdRoute: AuthenticatedAppContagensIdRoute,
-  }
-
-const AuthenticatedAppContagensRouteWithChildren =
-  AuthenticatedAppContagensRoute._addFileChildren(
-    AuthenticatedAppContagensRouteChildren,
-  )
-
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAjustesRoute: typeof AuthenticatedAppAjustesRoute
-  AuthenticatedAppContagensRoute: typeof AuthenticatedAppContagensRouteWithChildren
   AuthenticatedAppDivergenciasRoute: typeof AuthenticatedAppDivergenciasRoute
   AuthenticatedAppEmpresasRoute: typeof AuthenticatedAppEmpresasRoute
   AuthenticatedAppEstoqueRoute: typeof AuthenticatedAppEstoqueRoute
@@ -615,18 +600,19 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppCobrePesquisaRoute: typeof AuthenticatedAppCobrePesquisaRoute
   AuthenticatedAppCobreRelatoriosRoute: typeof AuthenticatedAppCobreRelatoriosRoute
   AuthenticatedAppCobreSaidaRoute: typeof AuthenticatedAppCobreSaidaRoute
+  AuthenticatedAppContagensIdRoute: typeof AuthenticatedAppContagensIdRoute
   AuthenticatedAppFerramentasEmprestimosRoute: typeof AuthenticatedAppFerramentasEmprestimosRoute
   AuthenticatedAppFerramentasHistoricoRoute: typeof AuthenticatedAppFerramentasHistoricoRoute
   AuthenticatedAppFerramentasListaRoute: typeof AuthenticatedAppFerramentasListaRoute
   AuthenticatedAppFerramentasPesquisaRoute: typeof AuthenticatedAppFerramentasPesquisaRoute
   AuthenticatedAppFerramentasRelatoriosRoute: typeof AuthenticatedAppFerramentasRelatoriosRoute
   AuthenticatedAppCobreIndexRoute: typeof AuthenticatedAppCobreIndexRoute
+  AuthenticatedAppContagensIndexRoute: typeof AuthenticatedAppContagensIndexRoute
   AuthenticatedAppFerramentasIndexRoute: typeof AuthenticatedAppFerramentasIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAjustesRoute: AuthenticatedAppAjustesRoute,
-  AuthenticatedAppContagensRoute: AuthenticatedAppContagensRouteWithChildren,
   AuthenticatedAppDivergenciasRoute: AuthenticatedAppDivergenciasRoute,
   AuthenticatedAppEmpresasRoute: AuthenticatedAppEmpresasRoute,
   AuthenticatedAppEstoqueRoute: AuthenticatedAppEstoqueRoute,
@@ -642,6 +628,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCobrePesquisaRoute: AuthenticatedAppCobrePesquisaRoute,
   AuthenticatedAppCobreRelatoriosRoute: AuthenticatedAppCobreRelatoriosRoute,
   AuthenticatedAppCobreSaidaRoute: AuthenticatedAppCobreSaidaRoute,
+  AuthenticatedAppContagensIdRoute: AuthenticatedAppContagensIdRoute,
   AuthenticatedAppFerramentasEmprestimosRoute:
     AuthenticatedAppFerramentasEmprestimosRoute,
   AuthenticatedAppFerramentasHistoricoRoute:
@@ -652,6 +639,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppFerramentasRelatoriosRoute:
     AuthenticatedAppFerramentasRelatoriosRoute,
   AuthenticatedAppCobreIndexRoute: AuthenticatedAppCobreIndexRoute,
+  AuthenticatedAppContagensIndexRoute: AuthenticatedAppContagensIndexRoute,
   AuthenticatedAppFerramentasIndexRoute: AuthenticatedAppFerramentasIndexRoute,
 }
 

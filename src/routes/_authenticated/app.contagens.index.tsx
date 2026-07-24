@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 import { format } from "date-fns";
 
-export const Route = createFileRoute("/_authenticated/app/contagens")({
+export const Route = createFileRoute("/_authenticated/app/contagens/")({
   head: () => ({ meta: [{ title: "Contagens | Almoxarifado" }] }),
   component: Page,
 });
