@@ -8,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Plus, FileDown, FileText, Upload } from "lucide-react";
+import { Plus, FileDown, FileText, Upload, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/produtos")({
   head: () => ({ meta: [{ title: "Produtos | Almoxarifado" }] }),
@@ -120,18 +121,41 @@ function Page() {
             const { exportToPDF } = await import("@/lib/export-utils");
             exportToPDF("Produtos", ["Código", "Descrição", "UN"], filtered.map(p => [p.codigo, p.descricao, p.unidade]), "produtos");
           }}><FileText className="h-4 w-4 mr-2" />PDF</Button>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Novo</Button></DialogTrigger>
-            <DialogContent>
-              <DialogHeader><DialogTitle>Novo produto</DialogTitle></DialogHeader>
-              <div className="space-y-3">
-                <div><Label>Código</Label><Input value={codigo} onChange={(e) => setCodigo(e.target.value)} /></div>
-                <div><Label>Descrição</Label><Input value={descricao} onChange={(e) => setDescricao(e.target.value)} /></div>
-                <div><Label>Unidade</Label><Input value={unidade} onChange={(e) => setUnidade(e.target.value)} /></div>
-                <Button onClick={() => create.mutate()} disabled={!codigo || !descricao} className="w-full">Salvar</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive"><Trash2 className="h-4 w-4 mr-2" />Limpar Banco</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Tem certeza absoluta?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Isso irá apagar <b>TODOS</b> os produtos, empresas, fotos e contagens do banco de dados. 
+                  Use isso apenas se quiser recomeçar o sistema do zero para uma nova implantação.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={async () => {
+                  try {
+                    await supabase.from("count_items").delete().not("id", "is", null);
+                    await supabase.from("count_photos").delete().not("id", "is", null);
+                    await supabase.from("count_rounds").delete().not("id", "is", null);
+                    await supabase.from("divergence_items").delete().not("id", "is", null);
+                    await supabase.from("divergence_reports").delete().not("id", "is", null);
+                    await supabase.from("counts").delete().not("id", "is", null);
+                    await supabase.from("stock_snapshot_items").delete().not("id", "is", null);
+                    await supabase.from("stock_snapshots").delete().not("id", "is", null);
+                    await supabase.from("products").delete().not("id", "is", null);
+                    await supabase.from("companies").delete().not("id", "is", null);
+                    toast.success("Banco de dados limpo com sucesso!");
+                    window.location.reload();
+                  } catch (e: any) {
+                    toast.error("Erro ao limpar: " + e.message);
+                  }
+                }}>Sim, apagar tudo</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
       <Input placeholder="Buscar por código ou descrição..." value={q} onChange={(e) => setQ(e.target.value)} className="max-w-md" />

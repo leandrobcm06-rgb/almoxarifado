@@ -9,47 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
-import { Route as AuthenticatedAppUsuariosRouteImport } from './routes/_authenticated/app.usuarios'
-import { Route as AuthenticatedAppProdutosRouteImport } from './routes/_authenticated/app.produtos'
-import { Route as AuthenticatedAppEstoqueRouteImport } from './routes/_authenticated/app.estoque'
-import { Route as AuthenticatedAppEmpresasRouteImport } from './routes/_authenticated/app.empresas'
-import { Route as AuthenticatedAppDivergenciasRouteImport } from './routes/_authenticated/app.divergencias'
-import { Route as AuthenticatedAppContagensRouteImport } from './routes/_authenticated/app.contagens'
 import { Route as AuthenticatedAppAjustesRouteImport } from './routes/_authenticated/app.ajustes'
-import { Route as AuthenticatedAppFerramentasIndexRouteImport } from './routes/_authenticated/app.ferramentas.index'
+import { Route as AuthenticatedAppContagensRouteImport } from './routes/_authenticated/app.contagens'
+import { Route as AuthenticatedAppDivergenciasRouteImport } from './routes/_authenticated/app.divergencias'
+import { Route as AuthenticatedAppEmpresasRouteImport } from './routes/_authenticated/app.empresas'
+import { Route as AuthenticatedAppEstoqueRouteImport } from './routes/_authenticated/app.estoque'
+import { Route as AuthenticatedAppProdutosRouteImport } from './routes/_authenticated/app.produtos'
+import { Route as AuthenticatedAppUsuariosRouteImport } from './routes/_authenticated/app.usuarios'
 import { Route as AuthenticatedAppCobreIndexRouteImport } from './routes/_authenticated/app.cobre.index'
-import { Route as AuthenticatedAppFerramentasRelatoriosRouteImport } from './routes/_authenticated/app.ferramentas.relatorios'
-import { Route as AuthenticatedAppFerramentasPesquisaRouteImport } from './routes/_authenticated/app.ferramentas.pesquisa'
-import { Route as AuthenticatedAppFerramentasListaRouteImport } from './routes/_authenticated/app.ferramentas.lista'
-import { Route as AuthenticatedAppFerramentasHistoricoRouteImport } from './routes/_authenticated/app.ferramentas.historico'
-import { Route as AuthenticatedAppFerramentasEmprestimosRouteImport } from './routes/_authenticated/app.ferramentas.emprestimos'
-import { Route as AuthenticatedAppContagensIdRouteImport } from './routes/_authenticated/app.contagens.$id'
-import { Route as AuthenticatedAppCobreSaidaRouteImport } from './routes/_authenticated/app.cobre.saida'
-import { Route as AuthenticatedAppCobreRelatoriosRouteImport } from './routes/_authenticated/app.cobre.relatorios'
-import { Route as AuthenticatedAppCobrePesquisaRouteImport } from './routes/_authenticated/app.cobre.pesquisa'
-import { Route as AuthenticatedAppCobrePedacosRouteImport } from './routes/_authenticated/app.cobre.pedacos'
-import { Route as AuthenticatedAppCobreMovimentacoesRouteImport } from './routes/_authenticated/app.cobre.movimentacoes'
-import { Route as AuthenticatedAppCobreHistoricoRouteImport } from './routes/_authenticated/app.cobre.historico'
-import { Route as AuthenticatedAppCobreDevolucaoRouteImport } from './routes/_authenticated/app.cobre.devolucao'
 import { Route as AuthenticatedAppCobreBarrasRouteImport } from './routes/_authenticated/app.cobre.barras'
+import { Route as AuthenticatedAppCobreDevolucaoRouteImport } from './routes/_authenticated/app.cobre.devolucao'
+import { Route as AuthenticatedAppCobreHistoricoRouteImport } from './routes/_authenticated/app.cobre.historico'
+import { Route as AuthenticatedAppCobreMovimentacoesRouteImport } from './routes/_authenticated/app.cobre.movimentacoes'
+import { Route as AuthenticatedAppCobrePedacosRouteImport } from './routes/_authenticated/app.cobre.pedacos'
+import { Route as AuthenticatedAppCobrePesquisaRouteImport } from './routes/_authenticated/app.cobre.pesquisa'
+import { Route as AuthenticatedAppCobreRelatoriosRouteImport } from './routes/_authenticated/app.cobre.relatorios'
+import { Route as AuthenticatedAppCobreSaidaRouteImport } from './routes/_authenticated/app.cobre.saida'
+import { Route as AuthenticatedAppContagensIdRouteImport } from './routes/_authenticated/app.contagens.$id'
+import { Route as AuthenticatedAppFerramentasIndexRouteImport } from './routes/_authenticated/app.ferramentas.index'
+import { Route as AuthenticatedAppFerramentasEmprestimosRouteImport } from './routes/_authenticated/app.ferramentas.emprestimos'
+import { Route as AuthenticatedAppFerramentasHistoricoRouteImport } from './routes/_authenticated/app.ferramentas.historico'
+import { Route as AuthenticatedAppFerramentasListaRouteImport } from './routes/_authenticated/app.ferramentas.lista'
+import { Route as AuthenticatedAppFerramentasPesquisaRouteImport } from './routes/_authenticated/app.ferramentas.pesquisa'
+import { Route as AuthenticatedAppFerramentasRelatoriosRouteImport } from './routes/_authenticated/app.ferramentas.relatorios'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
@@ -62,27 +62,15 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AuthenticatedAppUsuariosRoute =
-  AuthenticatedAppUsuariosRouteImport.update({
-    id: '/usuarios',
-    path: '/usuarios',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppProdutosRoute =
-  AuthenticatedAppProdutosRouteImport.update({
-    id: '/produtos',
-    path: '/produtos',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppEstoqueRoute = AuthenticatedAppEstoqueRouteImport.update({
-  id: '/estoque',
-  path: '/estoque',
+const AuthenticatedAppAjustesRoute = AuthenticatedAppAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AuthenticatedAppEmpresasRoute =
-  AuthenticatedAppEmpresasRouteImport.update({
-    id: '/empresas',
-    path: '/empresas',
+const AuthenticatedAppContagensRoute =
+  AuthenticatedAppContagensRouteImport.update({
+    id: '/contagens',
+    path: '/contagens',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppDivergenciasRoute =
@@ -91,21 +79,27 @@ const AuthenticatedAppDivergenciasRoute =
     path: '/divergencias',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
-const AuthenticatedAppContagensRoute =
-  AuthenticatedAppContagensRouteImport.update({
-    id: '/contagens',
-    path: '/contagens',
+const AuthenticatedAppEmpresasRoute =
+  AuthenticatedAppEmpresasRouteImport.update({
+    id: '/empresas',
+    path: '/empresas',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
-const AuthenticatedAppAjustesRoute = AuthenticatedAppAjustesRouteImport.update({
-  id: '/ajustes',
-  path: '/ajustes',
+const AuthenticatedAppEstoqueRoute = AuthenticatedAppEstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AuthenticatedAppFerramentasIndexRoute =
-  AuthenticatedAppFerramentasIndexRouteImport.update({
-    id: '/ferramentas/',
-    path: '/ferramentas/',
+const AuthenticatedAppProdutosRoute =
+  AuthenticatedAppProdutosRouteImport.update({
+    id: '/produtos',
+    path: '/produtos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppUsuariosRoute =
+  AuthenticatedAppUsuariosRouteImport.update({
+    id: '/usuarios',
+    path: '/usuarios',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppCobreIndexRoute =
@@ -114,76 +108,10 @@ const AuthenticatedAppCobreIndexRoute =
     path: '/cobre/',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
-const AuthenticatedAppFerramentasRelatoriosRoute =
-  AuthenticatedAppFerramentasRelatoriosRouteImport.update({
-    id: '/ferramentas/relatorios',
-    path: '/ferramentas/relatorios',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppFerramentasPesquisaRoute =
-  AuthenticatedAppFerramentasPesquisaRouteImport.update({
-    id: '/ferramentas/pesquisa',
-    path: '/ferramentas/pesquisa',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppFerramentasListaRoute =
-  AuthenticatedAppFerramentasListaRouteImport.update({
-    id: '/ferramentas/lista',
-    path: '/ferramentas/lista',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppFerramentasHistoricoRoute =
-  AuthenticatedAppFerramentasHistoricoRouteImport.update({
-    id: '/ferramentas/historico',
-    path: '/ferramentas/historico',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppFerramentasEmprestimosRoute =
-  AuthenticatedAppFerramentasEmprestimosRouteImport.update({
-    id: '/ferramentas/emprestimos',
-    path: '/ferramentas/emprestimos',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppContagensIdRoute =
-  AuthenticatedAppContagensIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedAppContagensRoute,
-  } as any)
-const AuthenticatedAppCobreSaidaRoute =
-  AuthenticatedAppCobreSaidaRouteImport.update({
-    id: '/cobre/saida',
-    path: '/cobre/saida',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppCobreRelatoriosRoute =
-  AuthenticatedAppCobreRelatoriosRouteImport.update({
-    id: '/cobre/relatorios',
-    path: '/cobre/relatorios',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppCobrePesquisaRoute =
-  AuthenticatedAppCobrePesquisaRouteImport.update({
-    id: '/cobre/pesquisa',
-    path: '/cobre/pesquisa',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppCobrePedacosRoute =
-  AuthenticatedAppCobrePedacosRouteImport.update({
-    id: '/cobre/pedacos',
-    path: '/cobre/pedacos',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppCobreMovimentacoesRoute =
-  AuthenticatedAppCobreMovimentacoesRouteImport.update({
-    id: '/cobre/movimentacoes',
-    path: '/cobre/movimentacoes',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppCobreHistoricoRoute =
-  AuthenticatedAppCobreHistoricoRouteImport.update({
-    id: '/cobre/historico',
-    path: '/cobre/historico',
+const AuthenticatedAppCobreBarrasRoute =
+  AuthenticatedAppCobreBarrasRouteImport.update({
+    id: '/cobre/barras',
+    path: '/cobre/barras',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppCobreDevolucaoRoute =
@@ -192,10 +120,82 @@ const AuthenticatedAppCobreDevolucaoRoute =
     path: '/cobre/devolucao',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
-const AuthenticatedAppCobreBarrasRoute =
-  AuthenticatedAppCobreBarrasRouteImport.update({
-    id: '/cobre/barras',
-    path: '/cobre/barras',
+const AuthenticatedAppCobreHistoricoRoute =
+  AuthenticatedAppCobreHistoricoRouteImport.update({
+    id: '/cobre/historico',
+    path: '/cobre/historico',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCobreMovimentacoesRoute =
+  AuthenticatedAppCobreMovimentacoesRouteImport.update({
+    id: '/cobre/movimentacoes',
+    path: '/cobre/movimentacoes',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCobrePedacosRoute =
+  AuthenticatedAppCobrePedacosRouteImport.update({
+    id: '/cobre/pedacos',
+    path: '/cobre/pedacos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCobrePesquisaRoute =
+  AuthenticatedAppCobrePesquisaRouteImport.update({
+    id: '/cobre/pesquisa',
+    path: '/cobre/pesquisa',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCobreRelatoriosRoute =
+  AuthenticatedAppCobreRelatoriosRouteImport.update({
+    id: '/cobre/relatorios',
+    path: '/cobre/relatorios',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCobreSaidaRoute =
+  AuthenticatedAppCobreSaidaRouteImport.update({
+    id: '/cobre/saida',
+    path: '/cobre/saida',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppContagensIdRoute =
+  AuthenticatedAppContagensIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAppContagensRoute,
+  } as any)
+const AuthenticatedAppFerramentasIndexRoute =
+  AuthenticatedAppFerramentasIndexRouteImport.update({
+    id: '/ferramentas/',
+    path: '/ferramentas/',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppFerramentasEmprestimosRoute =
+  AuthenticatedAppFerramentasEmprestimosRouteImport.update({
+    id: '/ferramentas/emprestimos',
+    path: '/ferramentas/emprestimos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppFerramentasHistoricoRoute =
+  AuthenticatedAppFerramentasHistoricoRouteImport.update({
+    id: '/ferramentas/historico',
+    path: '/ferramentas/historico',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppFerramentasListaRoute =
+  AuthenticatedAppFerramentasListaRouteImport.update({
+    id: '/ferramentas/lista',
+    path: '/ferramentas/lista',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppFerramentasPesquisaRoute =
+  AuthenticatedAppFerramentasPesquisaRouteImport.update({
+    id: '/ferramentas/pesquisa',
+    path: '/ferramentas/pesquisa',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppFerramentasRelatoriosRoute =
+  AuthenticatedAppFerramentasRelatoriosRouteImport.update({
+    id: '/ferramentas/relatorios',
+    path: '/ferramentas/relatorios',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 
@@ -385,11 +385,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -399,11 +399,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -420,39 +420,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/usuarios': {
-      id: '/_authenticated/app/usuarios'
-      path: '/usuarios'
-      fullPath: '/app/usuarios'
-      preLoaderRoute: typeof AuthenticatedAppUsuariosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/produtos': {
-      id: '/_authenticated/app/produtos'
-      path: '/produtos'
-      fullPath: '/app/produtos'
-      preLoaderRoute: typeof AuthenticatedAppProdutosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/estoque': {
-      id: '/_authenticated/app/estoque'
-      path: '/estoque'
-      fullPath: '/app/estoque'
-      preLoaderRoute: typeof AuthenticatedAppEstoqueRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/empresas': {
-      id: '/_authenticated/app/empresas'
-      path: '/empresas'
-      fullPath: '/app/empresas'
-      preLoaderRoute: typeof AuthenticatedAppEmpresasRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/divergencias': {
-      id: '/_authenticated/app/divergencias'
-      path: '/divergencias'
-      fullPath: '/app/divergencias'
-      preLoaderRoute: typeof AuthenticatedAppDivergenciasRouteImport
+    '/_authenticated/app/ajustes': {
+      id: '/_authenticated/app/ajustes'
+      path: '/ajustes'
+      fullPath: '/app/ajustes'
+      preLoaderRoute: typeof AuthenticatedAppAjustesRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/contagens': {
@@ -462,18 +434,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppContagensRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/ajustes': {
-      id: '/_authenticated/app/ajustes'
-      path: '/ajustes'
-      fullPath: '/app/ajustes'
-      preLoaderRoute: typeof AuthenticatedAppAjustesRouteImport
+    '/_authenticated/app/divergencias': {
+      id: '/_authenticated/app/divergencias'
+      path: '/divergencias'
+      fullPath: '/app/divergencias'
+      preLoaderRoute: typeof AuthenticatedAppDivergenciasRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/ferramentas/': {
-      id: '/_authenticated/app/ferramentas/'
-      path: '/ferramentas'
-      fullPath: '/app/ferramentas/'
-      preLoaderRoute: typeof AuthenticatedAppFerramentasIndexRouteImport
+    '/_authenticated/app/empresas': {
+      id: '/_authenticated/app/empresas'
+      path: '/empresas'
+      fullPath: '/app/empresas'
+      preLoaderRoute: typeof AuthenticatedAppEmpresasRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/estoque': {
+      id: '/_authenticated/app/estoque'
+      path: '/estoque'
+      fullPath: '/app/estoque'
+      preLoaderRoute: typeof AuthenticatedAppEstoqueRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/produtos': {
+      id: '/_authenticated/app/produtos'
+      path: '/produtos'
+      fullPath: '/app/produtos'
+      preLoaderRoute: typeof AuthenticatedAppProdutosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/usuarios': {
+      id: '/_authenticated/app/usuarios'
+      path: '/usuarios'
+      fullPath: '/app/usuarios'
+      preLoaderRoute: typeof AuthenticatedAppUsuariosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/cobre/': {
@@ -483,88 +476,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCobreIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/ferramentas/relatorios': {
-      id: '/_authenticated/app/ferramentas/relatorios'
-      path: '/ferramentas/relatorios'
-      fullPath: '/app/ferramentas/relatorios'
-      preLoaderRoute: typeof AuthenticatedAppFerramentasRelatoriosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/ferramentas/pesquisa': {
-      id: '/_authenticated/app/ferramentas/pesquisa'
-      path: '/ferramentas/pesquisa'
-      fullPath: '/app/ferramentas/pesquisa'
-      preLoaderRoute: typeof AuthenticatedAppFerramentasPesquisaRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/ferramentas/lista': {
-      id: '/_authenticated/app/ferramentas/lista'
-      path: '/ferramentas/lista'
-      fullPath: '/app/ferramentas/lista'
-      preLoaderRoute: typeof AuthenticatedAppFerramentasListaRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/ferramentas/historico': {
-      id: '/_authenticated/app/ferramentas/historico'
-      path: '/ferramentas/historico'
-      fullPath: '/app/ferramentas/historico'
-      preLoaderRoute: typeof AuthenticatedAppFerramentasHistoricoRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/ferramentas/emprestimos': {
-      id: '/_authenticated/app/ferramentas/emprestimos'
-      path: '/ferramentas/emprestimos'
-      fullPath: '/app/ferramentas/emprestimos'
-      preLoaderRoute: typeof AuthenticatedAppFerramentasEmprestimosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/contagens/$id': {
-      id: '/_authenticated/app/contagens/$id'
-      path: '/$id'
-      fullPath: '/app/contagens/$id'
-      preLoaderRoute: typeof AuthenticatedAppContagensIdRouteImport
-      parentRoute: typeof AuthenticatedAppContagensRoute
-    }
-    '/_authenticated/app/cobre/saida': {
-      id: '/_authenticated/app/cobre/saida'
-      path: '/cobre/saida'
-      fullPath: '/app/cobre/saida'
-      preLoaderRoute: typeof AuthenticatedAppCobreSaidaRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/cobre/relatorios': {
-      id: '/_authenticated/app/cobre/relatorios'
-      path: '/cobre/relatorios'
-      fullPath: '/app/cobre/relatorios'
-      preLoaderRoute: typeof AuthenticatedAppCobreRelatoriosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/cobre/pesquisa': {
-      id: '/_authenticated/app/cobre/pesquisa'
-      path: '/cobre/pesquisa'
-      fullPath: '/app/cobre/pesquisa'
-      preLoaderRoute: typeof AuthenticatedAppCobrePesquisaRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/cobre/pedacos': {
-      id: '/_authenticated/app/cobre/pedacos'
-      path: '/cobre/pedacos'
-      fullPath: '/app/cobre/pedacos'
-      preLoaderRoute: typeof AuthenticatedAppCobrePedacosRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/cobre/movimentacoes': {
-      id: '/_authenticated/app/cobre/movimentacoes'
-      path: '/cobre/movimentacoes'
-      fullPath: '/app/cobre/movimentacoes'
-      preLoaderRoute: typeof AuthenticatedAppCobreMovimentacoesRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/cobre/historico': {
-      id: '/_authenticated/app/cobre/historico'
-      path: '/cobre/historico'
-      fullPath: '/app/cobre/historico'
-      preLoaderRoute: typeof AuthenticatedAppCobreHistoricoRouteImport
+    '/_authenticated/app/cobre/barras': {
+      id: '/_authenticated/app/cobre/barras'
+      path: '/cobre/barras'
+      fullPath: '/app/cobre/barras'
+      preLoaderRoute: typeof AuthenticatedAppCobreBarrasRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/cobre/devolucao': {
@@ -574,11 +490,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCobreDevolucaoRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/cobre/barras': {
-      id: '/_authenticated/app/cobre/barras'
-      path: '/cobre/barras'
-      fullPath: '/app/cobre/barras'
-      preLoaderRoute: typeof AuthenticatedAppCobreBarrasRouteImport
+    '/_authenticated/app/cobre/historico': {
+      id: '/_authenticated/app/cobre/historico'
+      path: '/cobre/historico'
+      fullPath: '/app/cobre/historico'
+      preLoaderRoute: typeof AuthenticatedAppCobreHistoricoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/cobre/movimentacoes': {
+      id: '/_authenticated/app/cobre/movimentacoes'
+      path: '/cobre/movimentacoes'
+      fullPath: '/app/cobre/movimentacoes'
+      preLoaderRoute: typeof AuthenticatedAppCobreMovimentacoesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/cobre/pedacos': {
+      id: '/_authenticated/app/cobre/pedacos'
+      path: '/cobre/pedacos'
+      fullPath: '/app/cobre/pedacos'
+      preLoaderRoute: typeof AuthenticatedAppCobrePedacosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/cobre/pesquisa': {
+      id: '/_authenticated/app/cobre/pesquisa'
+      path: '/cobre/pesquisa'
+      fullPath: '/app/cobre/pesquisa'
+      preLoaderRoute: typeof AuthenticatedAppCobrePesquisaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/cobre/relatorios': {
+      id: '/_authenticated/app/cobre/relatorios'
+      path: '/cobre/relatorios'
+      fullPath: '/app/cobre/relatorios'
+      preLoaderRoute: typeof AuthenticatedAppCobreRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/cobre/saida': {
+      id: '/_authenticated/app/cobre/saida'
+      path: '/cobre/saida'
+      fullPath: '/app/cobre/saida'
+      preLoaderRoute: typeof AuthenticatedAppCobreSaidaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/contagens/$id': {
+      id: '/_authenticated/app/contagens/$id'
+      path: '/$id'
+      fullPath: '/app/contagens/$id'
+      preLoaderRoute: typeof AuthenticatedAppContagensIdRouteImport
+      parentRoute: typeof AuthenticatedAppContagensRoute
+    }
+    '/_authenticated/app/ferramentas/': {
+      id: '/_authenticated/app/ferramentas/'
+      path: '/ferramentas'
+      fullPath: '/app/ferramentas/'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/ferramentas/emprestimos': {
+      id: '/_authenticated/app/ferramentas/emprestimos'
+      path: '/ferramentas/emprestimos'
+      fullPath: '/app/ferramentas/emprestimos'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasEmprestimosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/ferramentas/historico': {
+      id: '/_authenticated/app/ferramentas/historico'
+      path: '/ferramentas/historico'
+      fullPath: '/app/ferramentas/historico'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasHistoricoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/ferramentas/lista': {
+      id: '/_authenticated/app/ferramentas/lista'
+      path: '/ferramentas/lista'
+      fullPath: '/app/ferramentas/lista'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasListaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/ferramentas/pesquisa': {
+      id: '/_authenticated/app/ferramentas/pesquisa'
+      path: '/ferramentas/pesquisa'
+      fullPath: '/app/ferramentas/pesquisa'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasPesquisaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/ferramentas/relatorios': {
+      id: '/_authenticated/app/ferramentas/relatorios'
+      path: '/ferramentas/relatorios'
+      fullPath: '/app/ferramentas/relatorios'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasRelatoriosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
   }
