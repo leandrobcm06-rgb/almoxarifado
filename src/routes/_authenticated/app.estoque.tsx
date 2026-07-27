@@ -50,7 +50,10 @@ function Page() {
       const parsed: Row[] = [];
       let skipped = 0;
       for (const r of rows) {
-        const codigo = String(pick(r, ["codauxiliar", "cod_auxiliar", "auxiliar", "codigo", "codreferencia", "cod_referencia", "referencia", "cod"]) ?? "").trim().toUpperCase();
+        const codigoRef = String(pick(r, ["codreferencia", "cod_referencia", "referencia", "cod. referencia", "codigo", "cod"]) ?? "").trim().toUpperCase();
+        const codAux = String(pick(r, ["codauxiliar", "cod_auxiliar", "auxiliar", "cod. auxiliar"]) ?? "").trim().toUpperCase();
+        
+        const codigo = codigoRef || codAux;
         
         const qtyRaw = pick(r, ["quantidadesistema", "quantidade_sistema", "qtdsistema", "sistema", "qty", "quantidade", "saldo", "estoque", "qtd", "fisico"]);
         let qty = 0;
@@ -67,12 +70,20 @@ function Page() {
           continue;
         }
         
+        let loc = pick(r, ["localizacao", "local", "endereco"]) ? String(pick(r, ["localizacao", "local", "endereco"])).trim().toUpperCase() : undefined;
+        if (loc) {
+          const letterCount = (loc.match(/[A-Z]/g) || []).length;
+          if (letterCount > 1 || loc === "UNICA") {
+            loc = undefined;
+          }
+        }
+
         parsed.push({
           codigo,
           descricao: String(pick(r, ["produto", "descricao", "nome", "descricaoproduto"]) ?? ""),
-          cod_auxiliar: codigo,
+          cod_auxiliar: codAux || undefined,
           fabricante: pick(r, ["fabricante", "marca"]) ? String(pick(r, ["fabricante", "marca"])) : undefined,
-          localizacao: pick(r, ["localizacao", "local", "endereco"]) ? String(pick(r, ["localizacao", "local", "endereco"])) : undefined,
+          localizacao: loc,
           qty,
           company_id: companyId,
         });

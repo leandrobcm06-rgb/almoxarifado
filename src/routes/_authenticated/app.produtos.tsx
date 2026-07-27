@@ -90,11 +90,29 @@ function Page() {
     mutationFn: async (file: File) => {
       const { parseExcelFile } = await import("@/lib/export-utils");
       const rows = await parseExcelFile(file);
-      const products = rows.map((r: any) => ({
-        codigo: String(r.codigo ?? r.Codigo ?? r.código ?? r.Código ?? r.CODIGO ?? "").trim(),
-        descricao: String(r.descricao ?? r.Descricao ?? r.descrição ?? r.Descrição ?? r.DESCRICAO ?? "").trim(),
-        unidade: String(r.unidade ?? r.Unidade ?? r.UN ?? "UN").trim() || "UN",
-      })).filter((p) => p.codigo && p.descricao);
+      const products = rows.map((r: any) => {
+        const codigoRef = String(r.codreferencia ?? r.cod_referencia ?? r.referencia ?? r["cod. referencia"] ?? r.codigo ?? r.Codigo ?? r.código ?? r.Código ?? r.CODIGO ?? "").trim().toUpperCase();
+        const codAux = String(r.codauxiliar ?? r.cod_auxiliar ?? r.auxiliar ?? r["cod. auxiliar"] ?? "").trim().toUpperCase();
+        const codigo = codigoRef || codAux;
+        
+        let loc = r.localizacao ?? r.local ?? r.endereco;
+        if (loc) {
+          loc = String(loc).trim().toUpperCase();
+          const letterCount = (loc.match(/[A-Z]/g) || []).length;
+          if (letterCount > 1 || loc === "UNICA") {
+            loc = null;
+          }
+        }
+        
+        return {
+          codigo,
+          descricao: String(r.descricao ?? r.Descricao ?? r.descrição ?? r.Descrição ?? r.DESCRICAO ?? "").trim(),
+          unidade: String(r.unidade ?? r.Unidade ?? r.UN ?? "UN").trim() || "UN",
+          cod_auxiliar: codAux || null,
+          fabricante: r.fabricante ?? r.marca ?? null,
+          localizacao: loc ?? null,
+        };
+      }).filter((p) => p.codigo && p.descricao);
       if (products.length === 0) throw new Error("Planilha vazia ou sem colunas codigo/descricao");
       const { error } = await supabase.from("products").upsert(products, { onConflict: "codigo" });
       if (error) throw error;

@@ -119,7 +119,8 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
   const ocrFn = useServerFn(runOcrOnPhoto);
   const fileRef = useRef<HTMLInputElement>(null);
   const [search, setSearch] = useState("");
-  const [locFilter, setLocFilter] = useState("TODAS");
+  const [locStart, setLocStart] = useState("TODAS");
+  const [locEnd, setLocEnd] = useState("TODAS");
 
   const { data: items } = useQuery({
     queryKey: ["round-items", roundId],
@@ -138,13 +139,25 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
   }, [products]);
 
   const filtered = (products ?? []).filter((p) => {
-    if (locFilter !== "TODAS" && p.localizacao !== locFilter) return false;
+    if (locStart !== "TODAS" || locEnd !== "TODAS") {
+      if (!p.localizacao) return false;
+      if (locStart !== "TODAS" && p.localizacao < locStart) return false;
+      if (locEnd !== "TODAS" && p.localizacao > locEnd) return false;
+    }
     if (!search) return true;
     const s = search.toLowerCase();
     return String(p.codigo ?? "").toLowerCase().includes(s) || String(p.descricao ?? "").toLowerCase().includes(s);
   });
   
   const displayFiltered = filtered.slice(0, 200);
+
+  const getLocTitle = () => {
+    if (locStart === "TODAS" && locEnd === "TODAS") return "";
+    if (locStart !== "TODAS" && locEnd === "TODAS") return ` - De ${locStart} em diante`;
+    if (locStart === "TODAS" && locEnd !== "TODAS") return ` - Até ${locEnd}`;
+    if (locStart === locEnd) return ` - ${locStart}`;
+    return ` - ${locStart} até ${locEnd}`;
+  };
 
   const upsertItem = useMutation({
     mutationFn: async ({ productId, qty }: { productId: string; qty: number }) => {
@@ -251,7 +264,7 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
             <Button variant="outline" size="sm" onClick={async () => {
               const { exportToPDF } = await import("@/lib/export-utils");
               exportToPDF(
-                `Lista de contagem ${locFilter !== "TODAS" ? `- ${locFilter}` : ""}`,
+                `Lista de contagem${getLocTitle()}`,
                 ["COD. REFERENCIA", "COD. AUXILIAR", "FABRICANTE", "LOCALIZAÇÃO", "NOME", "FÍSICO"],
                 filtered.map((p: any) => [p.codigo ?? "", p.cod_auxiliar ?? "", p.fabricante ?? "", p.localizacao ?? "", p.descricao, ""]),
                 "lista-contagem", "landscape",
@@ -263,11 +276,20 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
         <CardContent>
           <div className="flex flex-wrap gap-3 mb-3">
             <Input placeholder="Buscar produto..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-md" />
-            <div className="w-64">
-              <Select value={locFilter} onValueChange={setLocFilter}>
-                <SelectTrigger><SelectValue placeholder="Filtrar por localização" /></SelectTrigger>
+            <div className="w-48">
+              <Select value={locStart} onValueChange={setLocStart}>
+                <SelectTrigger><SelectValue placeholder="Loc. Inicial" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="TODAS">Todas as localizações</SelectItem>
+                  <SelectItem value="TODAS">Loc. Inicial (Todas)</SelectItem>
+                  {locations.map((loc: any) => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-48">
+              <Select value={locEnd} onValueChange={setLocEnd}>
+                <SelectTrigger><SelectValue placeholder="Loc. Final" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="TODAS">Loc. Final (Todas)</SelectItem>
                   {locations.map((loc: any) => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
                 </SelectContent>
               </Select>
