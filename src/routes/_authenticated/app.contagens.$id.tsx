@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { ChevronLeft, Camera, Save, CheckCircle2, Loader2, FileDown } from "lucide-react";
+import { ChevronLeft, Camera, Save, CheckCircle2, Loader2, FileDown, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { runOcrOnPhoto } from "@/lib/ocr.functions";
 
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/app/contagens/$id")({
 function Page() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
+  const nav = useNavigate();
   const { hasRole, hasAnyRole } = useAuth();
   const blind = hasRole("contador") && !hasAnyRole(["admin", "gestor", "conferente"]);
 
@@ -35,13 +37,27 @@ function Page() {
     queryKey: ["products-all"], queryFn: async () => (await supabase.from("products").select("id, codigo, descricao, unidade, cod_auxiliar, fabricante, localizacao").order("codigo").limit(5000)).data ?? [],
   });
 
-
   const finalize = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("counts").update({ status: "finalizada", finalizado_em: new Date().toISOString() }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Contagem finalizada"); qc.invalidateQueries({ queryKey: ["count", id] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteCount = useMutation({
+    mutationFn: async () => {
+      const roundIds = (count?.count_rounds ?? []).map((r: any) => r.id);
+      if (roundIds.length > 0) {
+        await supabase.from("count_items").delete().in("round_id", roundIds);
+        await supabase.from("count_photos").delete().in("round_id", roundIds);
+        await supabase.from("count_rounds").delete().in("count_id", [id]);
+      }
+      const { error } = await supabase.from("counts").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { toast.success("Contagem excluída"); qc.invalidateQueries({ queryKey: ["counts"] }); nav({ to: "/app/contagens" }); },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -60,9 +76,28 @@ function Page() {
             {blind && <Badge variant="secondary">Modo cego</Badge>}
           </div>
         </div>
-        {count.status !== "finalizada" && !blind && (
-          <Button onClick={() => finalize.mutate()}><CheckCircle2 className="h-4 w-4 mr-2" />Finalizar contagem</Button>
-        )}
+        <div className="flex gap-2">
+          {!blind && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive"><Trash2 className="h-4 w-4 mr-2" />Excluir</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir contagem?</AlertDialogTitle>
+                  <AlertDialogDescription>Essa ação não pode ser desfeita. Todos os dados desta contagem serão apagados.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => deleteCount.mutate()} className="bg-destructive hover:bg-destructive/90">Excluir</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {count.status !== "finalizada" && !blind && (
+            <Button onClick={() => finalize.mutate()}><CheckCircle2 className="h-4 w-4 mr-2" />Finalizar contagem</Button>
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue={`r${rounds[0]?.rodada ?? 1}`}>
