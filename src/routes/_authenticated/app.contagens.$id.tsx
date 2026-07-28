@@ -152,8 +152,10 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
   const filtered = (products ?? []).filter((p) => {
     if (locStart !== "TODAS" || locEnd !== "TODAS") {
       if (!p.localizacao) return false;
-      if (locStart !== "TODAS" && p.localizacao < locStart) return false;
-      if (locEnd !== "TODAS" && p.localizacao > locEnd) return false;
+      const pIdx = locations.indexOf(p.localizacao);
+      if (pIdx === -1) return false;
+      if (locStart !== "TODAS" && pIdx < locations.indexOf(locStart)) return false;
+      if (locEnd !== "TODAS" && pIdx > locations.indexOf(locEnd)) return false;
     }
     if (!search) return true;
     const s = search.toLowerCase();
