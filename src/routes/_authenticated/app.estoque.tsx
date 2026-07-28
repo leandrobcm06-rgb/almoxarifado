@@ -36,7 +36,7 @@ function Page() {
   const [activeCnpj, setActiveCnpj] = useState<string>("");
 
   const { data: companies } = useQuery({
-    queryKey: ["companies"], queryFn: async () => (await supabase.from("companies").select("*").eq("ativo", true).order("nome")).data ?? [],
+    queryKey: ["active-companies"], queryFn: async () => (await supabase.from("companies").select("*").eq("ativo", true).order("nome")).data ?? [],
   });
   const { data: snapshots } = useQuery({
     queryKey: ["snapshots"], queryFn: async () => (await supabase.from("stock_snapshots").select("*, profiles(nome)").order("snapshot_date", { ascending: false }).limit(50)).data ?? [],
