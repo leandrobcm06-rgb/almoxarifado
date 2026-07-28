@@ -44,6 +44,7 @@ const COBRE_NAV = [
 const FERRAMENTAS_NAV = [
   { to: "/app/ferramentas", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "gestor", "conferente"] },
   { to: "/app/ferramentas/lista", label: "Ferramentas", icon: Wrench, roles: ["admin", "gestor", "conferente"] },
+  { to: "/app/ferramentas/localizacoes", label: "Localizações", icon: Building2, roles: ["admin", "gestor", "conferente"] },
   { to: "/app/ferramentas/emprestimos", label: "Empréstimos", icon: HardHat, roles: ["admin", "gestor", "conferente"] },
   { to: "/app/ferramentas/historico", label: "Histórico", icon: ClipboardList, roles: ["admin", "gestor", "conferente"] },
   { to: "/app/ferramentas/relatorios", label: "Relatórios", icon: FileSpreadsheet, roles: ["admin", "gestor", "conferente"] },

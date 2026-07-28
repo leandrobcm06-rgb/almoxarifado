@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,14 +39,20 @@ function ToolsList() {
   const [acquisitionDate, setAcquisitionDate] = useState("");
   const [value, setValue] = useState("");
   const [notes, setNotes] = useState("");
+  const [locationId, setLocationId] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+
+  const { data: locations } = useQuery({
+    queryKey: ["tool-locations"],
+    queryFn: async () => (await supabase.from("tool_locations").select("*").order("name")).data ?? [],
+  });
 
   async function loadTools() {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from("tools")
-        .select("*")
+        .select("*, tool_locations(name)")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -64,7 +71,7 @@ function ToolsList() {
   const resetForm = () => {
     setName(""); setCategory(""); setBrand(""); setModel(""); setSpecifications("");
     setPatrimonyNumber(""); setSerialNumber(""); setCondition("nova");
-    setAcquisitionDate(""); setValue(""); setNotes(""); setPhotoFile(null);
+    setAcquisitionDate(""); setValue(""); setNotes(""); setLocationId(""); setPhotoFile(null);
     setEditingTool(null);
   };
 
@@ -74,7 +81,7 @@ function ToolsList() {
     setSpecifications(tool.specifications || ""); setPatrimonyNumber(tool.patrimony_number || "");
     setSerialNumber(tool.serial_number || ""); setCondition(tool.condition);
     setAcquisitionDate(tool.acquisition_date || ""); setValue(tool.value?.toString() || "");
-    setNotes(tool.notes || "");
+    setNotes(tool.notes || ""); setLocationId(tool.location_id || "");
     setIsAddOpen(true);
   };
 
@@ -129,6 +136,7 @@ function ToolsList() {
         acquisition_date: acquisitionDate || null,
         value: value ? Number(value) : null,
         notes,
+        location_id: locationId || null,
         photo_url,
         // Ao cadastrar, o status inicial é sempre disponivel, a menos que esteja editando
         ...(editingTool ? {} : { status: condition === 'danificada' ? 'danificada' : condition === 'manutencao' ? 'manutencao' : 'disponivel' })
@@ -224,6 +232,15 @@ function ToolsList() {
                   </Select>
                 </div>
                 <div className="space-y-2">
+                  <Label>Localização (obrigatório)</Label>
+                  <Select value={locationId} onValueChange={setLocationId} required>
+                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>
+                      {locations?.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label>Data de Aquisição (obrigatório)</Label>
                   <Input type="date" required value={acquisitionDate} onChange={e => setAcquisitionDate(e.target.value)} />
                 </div>
@@ -247,7 +264,7 @@ function ToolsList() {
               
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={submitting}>{submitting ? "Salvando..." : "Salvar Ferramenta"}</Button>
+                <Button type="submit" disabled={submitting || !locationId}>{submitting ? "Salvando..." : "Salvar Ferramenta"}</Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -344,6 +361,7 @@ function ToolsList() {
                 <div><strong className="block text-muted-foreground">Nº Patrimônio</strong> {viewingTool.patrimony_number || '-'}</div>
                 <div><strong className="block text-muted-foreground">Nº Série</strong> {viewingTool.serial_number || '-'}</div>
                 <div><strong className="block text-muted-foreground">Situação</strong> <Badge>{viewingTool.status}</Badge></div>
+                <div><strong className="block text-muted-foreground">Localização</strong> {viewingTool.tool_locations?.name || '-'}</div>
                 <div><strong className="block text-muted-foreground">Estado Físico</strong> <span className="capitalize">{viewingTool.condition}</span></div>
                 <div><strong className="block text-muted-foreground">Data Aquisição</strong> {viewingTool.acquisition_date || '-'}</div>
                 <div><strong className="block text-muted-foreground">Valor Estimado</strong> {viewingTool.value ? `R$ ${viewingTool.value}` : '-'}</div>
