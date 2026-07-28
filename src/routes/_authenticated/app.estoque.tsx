@@ -203,7 +203,13 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl font-semibold">Importação do estoque diário</h1><p className="text-sm text-muted-foreground">Uma planilha por CNPJ. O sistema reconhece colunas: <code>COD. REFERENCIA</code>, <code>NOME</code>, <code>SISTEMA</code> (saldo) e, opcionalmente, <code>COD. AUXILIAR</code>, <code>FABRICANTE</code>, <code>LOCALIZAÇÃO</code>.</p></div>
+      <div>
+        <h1 className="text-2xl font-semibold">Importação do estoque diário</h1>
+        <p className="text-sm text-muted-foreground">
+          Uma planilha por CNPJ. Para juntar o estoque de todas as empresas num único Snapshot, <b>carregue todas as planilhas uma por vez ANTES de clicar em Confirmar</b>.<br/>
+          O sistema reconhece colunas: <code>COD. REFERENCIA</code>, <code>NOME</code>, <code>SISTEMA</code> (saldo) e, opcionalmente, <code>COD. AUXILIAR</code>, <code>FABRICANTE</code>, <code>LOCALIZAÇÃO</code>.
+        </p>
+      </div>
 
       <Card>
         <CardHeader><CardTitle>Nova importação</CardTitle></CardHeader>
