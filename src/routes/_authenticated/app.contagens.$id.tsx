@@ -34,7 +34,18 @@ function Page() {
     queryFn: async () => (await supabase.from("counts").select("*, count_rounds(*)").eq("id", id).single()).data,
   });
   const { data: products } = useQuery({
-    queryKey: ["products-all"], queryFn: async () => (await supabase.from("products").select("id, codigo, descricao, unidade, cod_auxiliar, fabricante, localizacao").order("codigo").limit(5000)).data ?? [],
+    queryKey: ["products-all"], queryFn: async () => {
+      const all: any[] = [];
+      let page = 0;
+      while (true) {
+        const { data } = await supabase.from("products").select("id, codigo, descricao, unidade, cod_auxiliar, fabricante, localizacao").order("codigo").range(page * 1000, (page + 1) * 1000 - 1);
+        if (!data || data.length === 0) break;
+        all.push(...data);
+        if (data.length < 1000) break;
+        page++;
+      }
+      return all;
+    },
   });
 
   const finalize = useMutation({
@@ -135,7 +146,7 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
   
   const locations = useMemo(() => {
     const locs = new Set((products ?? []).map((p: any) => p.localizacao).filter(Boolean));
-    return Array.from(locs).sort();
+    return Array.from(locs).sort((a: any, b: any) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }));
   }, [products]);
 
   const filtered = (products ?? []).filter((p) => {
