@@ -32,7 +32,7 @@ function Page() {
   });
   const { data: snapshots } = useQuery({
     queryKey: ["snapshots-confirmed"],
-    queryFn: async () => (await supabase.from("stock_snapshots").select("id, snapshot_date").eq("status", "confirmado").order("snapshot_date", { ascending: false }).limit(20)).data ?? [],
+    queryFn: async () => (await supabase.from("stock_snapshots").select("id, snapshot_date, created_at, observacao").eq("status", "confirmado").order("created_at", { ascending: false }).limit(20)).data ?? [],
   });
   const [snapshotId, setSnapshotId] = useState("");
 
@@ -74,7 +74,7 @@ function Page() {
               <div><Label>Snapshot de estoque (referência)</Label>
                 <Select value={snapshotId} onValueChange={setSnapshotId}>
                   <SelectTrigger><SelectValue placeholder="Selecione um snapshot confirmado" /></SelectTrigger>
-                  <SelectContent>{snapshots?.map((s) => <SelectItem key={s.id} value={s.id}>{format(new Date(s.snapshot_date + "T00:00"), "dd/MM/yyyy")}</SelectItem>)}</SelectContent>
+                  <SelectContent>{snapshots?.map((s) => <SelectItem key={s.id} value={s.id}>{format(new Date(s.snapshot_date + "T00:00"), "dd/MM/yyyy")} ({format(new Date(s.created_at), "HH:mm")}) {s.observacao ? `- ${s.observacao}` : ""}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <Button onClick={() => create.mutate()} disabled={!nome || !snapshotId || create.isPending} className="w-full">Criar e abrir</Button>
