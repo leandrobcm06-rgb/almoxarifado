@@ -67,7 +67,7 @@ function Page() {
         const cnpjMap = perProductCnpjSaldos.get(pid) ?? new Map();
         const totalSistema = Array.from(cnpjMap.values()).reduce((a, b) => a + b, 0);
         const diferenca = contado - totalSistema;
-        if (diferenca === 0 && contado === 0) continue;
+        if (diferenca === 0) continue;
         // ajuste sugerido proporcional ao saldo de cada CNPJ
         if (cnpjMap.size === 0) {
           divItems.push({ report_id: rep.id, product_id: pid, company_id: null, saldo_sistema: 0, qty_contada: contado, diferenca, ajuste_sugerido: diferenca });
@@ -140,6 +140,15 @@ function ReportSection({ report }: { report: any }) {
     return items.filter((i: any) => i.status === filter);
   }, [items, filter]);
 
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string, status: string }) => {
+      const { error } = await supabase.from("divergence_items").update({ status }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["div-items"] }); },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return (
     <div className="border-b last:border-b-0">
       <div className="p-3 flex items-center justify-between hover:bg-accent cursor-pointer" onClick={() => setOpen((v) => !v)}>
@@ -189,7 +198,19 @@ function ReportSection({ report }: { report: any }) {
                     <TableCell className="text-right">{Number(i.qty_contada).toFixed(2)}</TableCell>
                     <TableCell className={`text-right font-medium ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</TableCell>
                     <TableCell className="text-right">{Number(i.ajuste_sugerido).toFixed(2)}</TableCell>
-                    <TableCell><Badge variant="outline" className="text-xs">{i.status}</Badge></TableCell>
+                    <TableCell>
+                      <Select value={i.status} onValueChange={(val) => updateStatus.mutate({ id: i.id, status: val })}>
+                        <SelectTrigger className="h-8 text-xs w-[110px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pendente">Pendente</SelectItem>
+                          <SelectItem value="em_andamento">Em andam.</SelectItem>
+                          <SelectItem value="ajustado">Ajustado</SelectItem>
+                          <SelectItem value="ignorado">Ignorado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -200,7 +221,17 @@ function ReportSection({ report }: { report: any }) {
               <div key={i.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-2">
                 <div className="flex justify-between items-start">
                   <span className="font-mono text-xs text-muted-foreground">{i.products?.codigo}</span>
-                  <Badge variant="outline" className="text-xs">{i.status}</Badge>
+                  <Select value={i.status} onValueChange={(val) => updateStatus.mutate({ id: i.id, status: val })}>
+                    <SelectTrigger className="h-8 text-xs w-[110px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="em_andamento">Em andam.</SelectItem>
+                      <SelectItem value="ajustado">Ajustado</SelectItem>
+                      <SelectItem value="ignorado">Ignorado</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="text-sm font-medium leading-snug">{i.products?.descricao}</div>
                 <div className="text-xs text-muted-foreground mb-2">Empresa: {i.companies?.nome}</div>
