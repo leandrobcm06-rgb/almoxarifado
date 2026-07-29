@@ -121,6 +121,13 @@ function Page() {
           {count.status !== "finalizada" && !blind && (
             <Button onClick={() => finalize.mutate()}><CheckCircle2 className="h-4 w-4 mr-2" />Finalizar contagem</Button>
           )}
+          {count.status === "finalizada" && !blind && (
+            <Link to="/app/divergencias">
+              <Button variant="default" className="bg-orange-500 hover:bg-orange-600 text-white">
+                Ver Divergências
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 

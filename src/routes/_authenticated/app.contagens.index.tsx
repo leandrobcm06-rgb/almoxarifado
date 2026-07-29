@@ -74,23 +74,47 @@ function Page() {
         </div>
       </div>
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Mês</TableHead><TableHead>Locais</TableHead><TableHead>Tipo</TableHead><TableHead>Status</TableHead><TableHead>Rodadas</TableHead><TableHead>Criada em</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {filteredData.map((c: any) => (
-                <TableRow key={c.id} className="cursor-pointer hover:bg-accent" onClick={() => nav({ to: "/app/contagens/$id", params: { id: c.id } })}>
-                  <TableCell className="font-medium"><Link to="/app/contagens/$id" params={{ id: c.id }}>{c.nome}</Link></TableCell>
-                  <TableCell className="text-sm">{c.mes || "-"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{(c.loc_start || c.loc_end) ? `${c.loc_start || "*"} até ${c.loc_end || "*"}` : "Todas"}</TableCell>
-                  <TableCell><Badge variant="outline">{c.tipo}</Badge></TableCell>
-                  <TableCell><Badge>{c.status}</Badge></TableCell>
-                  <TableCell className="text-sm">{c.count_rounds?.length ?? 0}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{format(new Date(c.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0 md:p-0">
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Mês</TableHead><TableHead>Locais</TableHead><TableHead>Tipo</TableHead><TableHead>Status</TableHead><TableHead>Rodadas</TableHead><TableHead>Criada em</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {filteredData.map((c: any) => (
+                  <TableRow key={c.id} className="cursor-pointer hover:bg-accent" onClick={() => nav({ to: "/app/contagens/$id", params: { id: c.id } })}>
+                    <TableCell className="font-medium"><Link to="/app/contagens/$id" params={{ id: c.id }}>{c.nome}</Link></TableCell>
+                    <TableCell className="text-sm">{c.mes || "-"}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{(c.loc_start || c.loc_end) ? `${c.loc_start || "*"} até ${c.loc_end || "*"}` : "Todas"}</TableCell>
+                    <TableCell><Badge variant="outline">{c.tipo}</Badge></TableCell>
+                    <TableCell><Badge>{c.status}</Badge></TableCell>
+                    <TableCell className="text-sm">{c.count_rounds?.length ?? 0}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{format(new Date(c.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="md:hidden space-y-4 p-4">
+            {filteredData.map((c: any) => (
+              <div key={c.id} className="border rounded-md p-4 bg-card shadow-sm cursor-pointer hover:border-primary transition-colors" onClick={() => nav({ to: "/app/contagens/$id", params: { id: c.id } })}>
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-semibold text-lg text-primary">{c.nome}</div>
+                  <Badge>{c.status}</Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                  <div><span className="text-muted-foreground block text-xs">Mês</span>{c.mes || "-"}</div>
+                  <div><span className="text-muted-foreground block text-xs">Tipo</span><Badge variant="outline" className="text-xs">{c.tipo}</Badge></div>
+                  <div className="col-span-2"><span className="text-muted-foreground block text-xs">Localização</span>{(c.loc_start || c.loc_end) ? `${c.loc_start || "*"} até ${c.loc_end || "*"}` : "Todas"}</div>
+                </div>
+                <div className="flex justify-between items-center text-xs text-muted-foreground pt-2 border-t mt-2">
+                  <span>{c.count_rounds?.length ?? 0} Rodadas</span>
+                  <span>{format(new Date(c.created_at), "dd/MM/yyyy HH:mm")}</span>
+                </div>
+              </div>
+            ))}
+            {filteredData.length === 0 && (
+              <div className="text-center text-muted-foreground py-6">Nenhuma contagem encontrada.</div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -355,20 +355,37 @@ function Page() {
               </div>
             </div>
             <div className="max-h-[400px] overflow-y-auto mt-4">
-              <Table>
-                <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Loc</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {filteredPending.slice(0, 300).map((r, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="text-xs">{companies?.find((c) => c.id === r.company_id)?.nome}</TableCell>
-                      <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
-                      <TableCell className="text-sm">{r.descricao}</TableCell>
-                      <TableCell className="text-xs">{r.localizacao}</TableCell>
-                      <TableCell className="text-right">{r.qty}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Loc</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {filteredPending.slice(0, 300).map((r, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="text-xs">{companies?.find((c) => c.id === r.company_id)?.nome}</TableCell>
+                        <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
+                        <TableCell className="text-sm">{r.descricao}</TableCell>
+                        <TableCell className="text-xs">{r.localizacao}</TableCell>
+                        <TableCell className="text-right">{r.qty}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="md:hidden space-y-3">
+                {filteredPending.slice(0, 300).map((r, i) => (
+                  <div key={i} className="border rounded-md p-3 bg-card shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-start">
+                      <span className="font-mono text-xs text-muted-foreground">{r.codigo}</span>
+                      <Badge variant="outline" className="text-[10px]">{companies?.find((c) => c.id === r.company_id)?.nome}</Badge>
+                    </div>
+                    <div className="text-sm font-medium leading-snug">{r.descricao}</div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground">Loc: {r.localizacao || "-"}</span>
+                      <span className="font-semibold text-sm">Qtd: {r.qty}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

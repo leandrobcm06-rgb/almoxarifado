@@ -176,23 +176,43 @@ function ReportSection({ report }: { report: any }) {
               `divergencias-${report.id.slice(0, 6)}`, "landscape");
             }}><FileText className="h-4 w-4 mr-2" />PDF</Button>
           </div>
-          <Table>
-            <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Empresa</TableHead><TableHead className="text-right">Sistema</TableHead><TableHead className="text-right">Contado</TableHead><TableHead className="text-right">Diferença</TableHead><TableHead className="text-right">Ajuste</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {filtered.map((i: any) => (
-                <TableRow key={i.id}>
-                  <TableCell className="font-mono text-xs">{i.products?.codigo}</TableCell>
-                  <TableCell className="text-sm">{i.products?.descricao}</TableCell>
-                  <TableCell className="text-sm">{i.companies?.nome}</TableCell>
-                  <TableCell className="text-right">{Number(i.saldo_sistema).toFixed(2)}</TableCell>
-                  <TableCell className="text-right">{Number(i.qty_contada).toFixed(2)}</TableCell>
-                  <TableCell className={`text-right font-medium ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</TableCell>
-                  <TableCell className="text-right">{Number(i.ajuste_sugerido).toFixed(2)}</TableCell>
-                  <TableCell><Badge variant="outline" className="text-xs">{i.status}</Badge></TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Empresa</TableHead><TableHead className="text-right">Sistema</TableHead><TableHead className="text-right">Contado</TableHead><TableHead className="text-right">Diferença</TableHead><TableHead className="text-right">Ajuste</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {filtered.map((i: any) => (
+                  <TableRow key={i.id}>
+                    <TableCell className="font-mono text-xs">{i.products?.codigo}</TableCell>
+                    <TableCell className="text-sm">{i.products?.descricao}</TableCell>
+                    <TableCell className="text-sm">{i.companies?.nome}</TableCell>
+                    <TableCell className="text-right">{Number(i.saldo_sistema).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{Number(i.qty_contada).toFixed(2)}</TableCell>
+                    <TableCell className={`text-right font-medium ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{Number(i.ajuste_sugerido).toFixed(2)}</TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs">{i.status}</Badge></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="md:hidden space-y-4">
+            {filtered.map((i: any) => (
+              <div key={i.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-2">
+                <div className="flex justify-between items-start">
+                  <span className="font-mono text-xs text-muted-foreground">{i.products?.codigo}</span>
+                  <Badge variant="outline" className="text-xs">{i.status}</Badge>
+                </div>
+                <div className="text-sm font-medium leading-snug">{i.products?.descricao}</div>
+                <div className="text-xs text-muted-foreground mb-2">Empresa: {i.companies?.nome}</div>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-3 bg-muted/50 p-2 rounded-md">
+                  <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Sistema</span><span className="font-semibold">{Number(i.saldo_sistema).toFixed(2)}</span></div>
+                  <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Contado</span><span className="font-semibold">{Number(i.qty_contada).toFixed(2)}</span></div>
+                  <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Diferença</span><span className={`font-semibold ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</span></div>
+                  <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Ajuste</span><span className="font-semibold">{Number(i.ajuste_sugerido).toFixed(2)}</span></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

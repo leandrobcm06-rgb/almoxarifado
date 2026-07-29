@@ -115,47 +115,85 @@ function CopperHistory() {
             </div>
           ) : (
             <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data/Hora</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Barra Original</TableHead>
-                    <TableHead className="text-right">Movimentação</TableHead>
-                    <TableHead>Cliente / PCO</TableHead>
-                    <TableHead>Responsável</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {movements.map((mov) => {
-                    const isSaida = mov.type === 'saida';
-                    return (
-                      <TableRow key={mov.id}>
-                        <TableCell className="whitespace-nowrap">
-                          {format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={isSaida ? "destructive" : "default"} className="flex w-fit items-center gap-1">
-                            {isSaida ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
-                            {isSaida ? "Saída" : "Devolução"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {mov.bar?.name} <span className="text-muted-foreground font-normal text-xs">({mov.bar?.auxiliary_code})</span>
-                        </TableCell>
-                        <TableCell className={`text-right font-bold ${isSaida ? "text-red-500" : "text-green-500"}`}>
-                          {isSaida ? "-" : "+"}{(mov.length_mm / 1000).toFixed(2)} m
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm font-medium">{mov.client || "-"}</div>
-                          <div className="text-xs text-muted-foreground">PCO: {mov.pco || "-"}</div>
-                        </TableCell>
-                        <TableCell>{mov.responsible || "-"}</TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data/Hora</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Barra Original</TableHead>
+                      <TableHead className="text-right">Movimentação</TableHead>
+                      <TableHead>Cliente / PCO</TableHead>
+                      <TableHead>Responsável</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {movements.map((mov) => {
+                      const isSaida = mov.type === 'saida';
+                      return (
+                        <TableRow key={mov.id}>
+                          <TableCell className="whitespace-nowrap">
+                            {format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={isSaida ? "destructive" : "default"} className="flex w-fit items-center gap-1">
+                              {isSaida ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
+                              {isSaida ? "Saída" : "Devolução"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {mov.bar?.name} <span className="text-muted-foreground font-normal text-xs">({mov.bar?.auxiliary_code})</span>
+                          </TableCell>
+                          <TableCell className={`text-right font-bold ${isSaida ? "text-red-500" : "text-green-500"}`}>
+                            {isSaida ? "-" : "+"}{(mov.length_mm / 1000).toFixed(2)} m
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm font-medium">{mov.client || "-"}</div>
+                            <div className="text-xs text-muted-foreground">PCO: {mov.pco || "-"}</div>
+                          </TableCell>
+                          <TableCell>{mov.responsible || "-"}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+                {movements.map((mov) => {
+                  const isSaida = mov.type === 'saida';
+                  return (
+                    <div key={mov.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                        <Badge variant={isSaida ? "destructive" : "default"} className="flex w-fit items-center gap-1">
+                          {isSaida ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
+                          {isSaida ? "Saída" : "Devolução"}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</span>
+                      </div>
+                      <div>
+                        <div className="font-semibold">{mov.bar?.name}</div>
+                        <div className="text-xs font-mono text-muted-foreground">{mov.bar?.auxiliary_code}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                        <div>
+                          <span className="block text-xs text-muted-foreground">Movimentação</span>
+                          <span className={`font-bold ${isSaida ? "text-red-500" : "text-green-500"}`}>
+                            {isSaida ? "-" : "+"}{(mov.length_mm / 1000).toFixed(2)} m
+                          </span>
+                        </div>
+                        <div>
+                          <span className="block text-xs text-muted-foreground">Responsável</span>
+                          <span>{mov.responsible || "-"}</span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="block text-xs text-muted-foreground">Cliente / PCO</span>
+                          <span>{mov.client || "-"} {mov.pco ? `(PCO: ${mov.pco})` : ""}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </CardContent>

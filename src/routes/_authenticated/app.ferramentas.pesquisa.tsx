@@ -124,71 +124,130 @@ function ToolsSearch() {
               </div>
             ) : (
               <div className="border rounded-md overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome / Patrimônio</TableHead>
-                      <TableHead>Categoria / Marca</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Situação</TableHead>
-                      <TableHead>Último Empréstimo (Atual)</TableHead>
-                      <TableHead className="text-right">Ações Rápidas</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {results.map((tool) => {
-                      const loan = tool.active_loan;
-                      return (
-                        <TableRow key={tool.id}>
-                          <TableCell className="font-medium">
-                            <div className="text-base">{tool.name}</div>
-                            <div className="text-xs text-muted-foreground font-mono">{tool.patrimony_number || "S/N"}</div>
-                          </TableCell>
-                          <TableCell>
-                            <div>{tool.category}</div>
-                            <div className="text-xs text-muted-foreground">{tool.brand}</div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="capitalize">{tool.condition}</span>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              tool.status === 'disponivel' ? 'default' :
-                              tool.status === 'emprestada' ? 'secondary' : 'destructive'
-                            }>
-                              {tool.status.toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {loan ? (
-                              <div className="text-sm">
-                                <span className="font-medium">{loan.employee}</span>
-                                {loan.client && <span className="text-muted-foreground block text-xs">{loan.client} {loan.pco ? `(PCO: ${loan.pco})` : ''}</span>}
-                                <span className="text-xs text-muted-foreground block mt-1">Desde: {format(new Date(loan.loan_date), "dd/MM/yy")}</span>
+                <div className="hidden md:block">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome / Patrimônio</TableHead>
+                        <TableHead>Categoria / Marca</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Situação</TableHead>
+                        <TableHead>Último Empréstimo (Atual)</TableHead>
+                        <TableHead className="text-right">Ações Rápidas</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {results.map((tool) => {
+                        const loan = tool.active_loan;
+                        return (
+                          <TableRow key={tool.id}>
+                            <TableCell className="font-medium">
+                              <div className="text-base">{tool.name}</div>
+                              <div className="text-xs text-muted-foreground font-mono">{tool.patrimony_number || "S/N"}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div>{tool.category}</div>
+                              <div className="text-xs text-muted-foreground">{tool.brand}</div>
+                            </TableCell>
+                            <TableCell>
+                              <span className="capitalize">{tool.condition}</span>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                tool.status === 'disponivel' ? 'default' :
+                                tool.status === 'emprestada' ? 'secondary' : 'destructive'
+                              }>
+                                {tool.status.toUpperCase()}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {loan ? (
+                                <div className="text-sm">
+                                  <span className="font-medium">{loan.employee}</span>
+                                  {loan.client && <span className="text-muted-foreground block text-xs">{loan.client} {loan.pco ? `(PCO: ${loan.pco})` : ''}</span>}
+                                  <span className="text-xs text-muted-foreground block mt-1">Desde: {format(new Date(loan.loan_date), "dd/MM/yy")}</span>
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground text-sm">-</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Link to={`/app/ferramentas/lista`} search={{ q: tool.name }} title="Abrir no Cadastro">
+                                  <Button variant="outline" size="sm">
+                                    <ExternalLink className="h-4 w-4" />
+                                  </Button>
+                                </Link>
+                                <Link to={`/app/ferramentas/historico`} search={{ q: tool.name }} title="Ver Histórico">
+                                  <Button variant="outline" size="sm">
+                                    <FileText className="h-4 w-4" />
+                                  </Button>
+                                </Link>
                               </div>
-                            ) : (
-                              <span className="text-muted-foreground text-sm">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Link to={`/app/ferramentas/lista`} search={{ q: tool.name }} title="Abrir no Cadastro">
-                                <Button variant="outline" size="sm">
-                                  <ExternalLink className="h-4 w-4" />
-                                </Button>
-                              </Link>
-                              <Link to={`/app/ferramentas/historico`} search={{ q: tool.name }} title="Ver Histórico">
-                                <Button variant="outline" size="sm">
-                                  <FileText className="h-4 w-4" />
-                                </Button>
-                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+                  {results.map((tool) => {
+                    const loan = tool.active_loan;
+                    return (
+                      <div key={tool.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="text-base font-semibold">{tool.name}</div>
+                            <div className="text-xs text-muted-foreground font-mono">{tool.patrimony_number || "S/N"}</div>
+                          </div>
+                          <Badge variant={
+                            tool.status === 'disponivel' ? 'default' :
+                            tool.status === 'emprestada' ? 'secondary' : 'destructive'
+                          }>
+                            {tool.status.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                          <div>
+                            <span className="block text-xs text-muted-foreground">Categoria</span>
+                            <span className="font-medium">{tool.category || "-"}</span>
+                          </div>
+                          <div>
+                            <span className="block text-xs text-muted-foreground">Marca</span>
+                            <span className="font-medium">{tool.brand || "-"}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="block text-xs text-muted-foreground">Estado</span>
+                            <span className="capitalize">{tool.condition}</span>
+                          </div>
+                          {loan && (
+                            <div className="col-span-2 pt-2 border-t border-muted-foreground/20 mt-1">
+                              <span className="block text-xs text-muted-foreground mb-1">Último Empréstimo (Atual)</span>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-medium text-sm">{loan.employee}</span>
+                                {loan.client && <span className="text-muted-foreground text-xs">{loan.client} {loan.pco ? `(PCO: ${loan.pco})` : ''}</span>}
+                                <span className="text-xs text-muted-foreground">Desde: {format(new Date(loan.loan_date), "dd/MM/yy")}</span>
+                              </div>
                             </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                          )}
+                        </div>
+                        <div className="flex justify-end gap-2 pt-1 border-t">
+                          <Link to={`/app/ferramentas/lista`} search={{ q: tool.name }} title="Abrir no Cadastro">
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link to={`/app/ferramentas/historico`} search={{ q: tool.name }} title="Ver Histórico">
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                              <FileText className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </CardContent>

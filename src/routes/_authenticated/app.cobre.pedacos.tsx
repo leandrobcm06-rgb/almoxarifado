@@ -74,37 +74,70 @@ function CopperPieces() {
             <div className="text-center p-8 text-muted-foreground">Nenhum pedaço encontrado.</div>
           ) : (
             <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Barra Origem</TableHead>
-                    <TableHead>Comprimento Atual (m)</TableHead>
-                    <TableHead>Situação</TableHead>
-                    <TableHead>Data de Cadastro</TableHead>
-                    <TableHead>Observações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPieces.map((piece) => (
-                    <TableRow key={piece.id}>
-                      <TableCell className="font-medium">
-                        {piece.bar?.name} 
-                        <span className="text-muted-foreground ml-2 text-xs">({piece.bar?.auxiliary_code})</span>
-                      </TableCell>
-                      <TableCell>{(piece.current_length_mm / 1000).toFixed(2)} m</TableCell>
-                      <TableCell>
-                        <Badge variant={piece.status === 'disponivel' ? 'default' : 'secondary'}>
-                          {piece.status === 'disponivel' ? 'Disponível' : 'Encerrado'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{format(new Date(piece.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
-                      <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                        {piece.notes || "-"}
-                      </TableCell>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Barra Origem</TableHead>
+                      <TableHead>Comprimento Atual (m)</TableHead>
+                      <TableHead>Situação</TableHead>
+                      <TableHead>Data de Cadastro</TableHead>
+                      <TableHead>Observações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPieces.map((piece) => (
+                      <TableRow key={piece.id}>
+                        <TableCell className="font-medium">
+                          {piece.bar?.name} 
+                          <span className="text-muted-foreground ml-2 text-xs">({piece.bar?.auxiliary_code})</span>
+                        </TableCell>
+                        <TableCell>{(piece.current_length_mm / 1000).toFixed(2)} m</TableCell>
+                        <TableCell>
+                          <Badge variant={piece.status === 'disponivel' ? 'default' : 'secondary'}>
+                            {piece.status === 'disponivel' ? 'Disponível' : 'Encerrado'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{format(new Date(piece.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
+                        <TableCell className="text-muted-foreground max-w-[200px] truncate">
+                          {piece.notes || "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+                {filteredPieces.map((piece) => (
+                  <div key={piece.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold text-primary">{piece.bar?.name}</div>
+                        <div className="text-xs font-mono text-muted-foreground">{piece.bar?.auxiliary_code}</div>
+                      </div>
+                      <Badge variant={piece.status === 'disponivel' ? 'default' : 'secondary'}>
+                        {piece.status === 'disponivel' ? 'Disponível' : 'Encerrado'}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                      <div>
+                        <span className="block text-xs text-muted-foreground">Comprimento</span>
+                        <span className="font-medium">{(piece.current_length_mm / 1000).toFixed(2)} m</span>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-muted-foreground">Cadastro</span>
+                        <span>{format(new Date(piece.created_at), "dd/MM/yy")}</span>
+                      </div>
+                      {piece.notes && (
+                        <div className="col-span-2 pt-2 border-t border-muted-foreground/20">
+                          <span className="block text-xs text-muted-foreground">Observações</span>
+                          <span className="text-xs italic">{piece.notes}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>

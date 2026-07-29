@@ -276,66 +276,119 @@ function FerramentasEmprestimos() {
             </div>
           ) : (
             <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Ferramenta</TableHead>
-                    <TableHead>Funcionário / Obra</TableHead>
-                    <TableHead>Previsão Volta</TableHead>
-                    <TableHead>Comprovante</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ação</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loans.map((loan) => (
-                    <TableRow key={loan.id}>
-                      <TableCell className="font-medium whitespace-nowrap">
-                        {format(new Date(loan.loan_date), "dd/MM/yyyy HH:mm")}
-                      </TableCell>
-                      <TableCell>
-                        {loan.tool?.name}
-                        {loan.tool?.patrimony_number && <span className="block text-xs text-muted-foreground">{loan.tool.patrimony_number}</span>}
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{loan.employee}</div>
-                        <div className="text-xs text-muted-foreground">{loan.client ? `${loan.client} (PCO: ${loan.pco || '-'})` : '-'}</div>
-                      </TableCell>
-                      <TableCell>
-                        {loan.expected_return_date ? format(new Date(loan.expected_return_date), "dd/MM/yyyy") : "-"}
-                      </TableCell>
-                      <TableCell>
-                        {loan.proof_image_url ? (
-                          <Button variant="ghost" size="sm" onClick={() => setViewReceipt(loan.proof_image_url)} title="Ver Comprovante">
-                            <Paperclip className="h-4 w-4 text-blue-500" />
-                          </Button>
-                        ) : "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={loan.status === 'ativo' ? "secondary" : "outline"}>
-                          {loan.status === 'ativo' ? 'Emprestada' : 'Devolvida'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {loan.status === 'ativo' && (
-                          <Button variant="outline" size="sm" onClick={() => {
-                            setSelectedLoanToReturn(loan);
-                            setIsReturnOpen(true);
-                          }}>
-                            <ArrowLeftRight className="h-4 w-4 mr-2" /> Devolver
-                          </Button>
-                        )}
-                        {loan.status === 'devolvido' && loan.actual_return_date && (
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            Voltou em {format(new Date(loan.actual_return_date), "dd/MM/yy")}
-                          </span>
-                        )}
-                      </TableCell>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Ferramenta</TableHead>
+                      <TableHead>Funcionário / Obra</TableHead>
+                      <TableHead>Previsão Volta</TableHead>
+                      <TableHead>Comprovante</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Ação</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {loans.map((loan) => (
+                      <TableRow key={loan.id}>
+                        <TableCell className="font-medium whitespace-nowrap">
+                          {format(new Date(loan.loan_date), "dd/MM/yyyy HH:mm")}
+                        </TableCell>
+                        <TableCell>
+                          {loan.tool?.name}
+                          {loan.tool?.patrimony_number && <span className="block text-xs text-muted-foreground">{loan.tool.patrimony_number}</span>}
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">{loan.employee}</div>
+                          <div className="text-xs text-muted-foreground">{loan.client ? `${loan.client} (PCO: ${loan.pco || '-'})` : '-'}</div>
+                        </TableCell>
+                        <TableCell>
+                          {loan.expected_return_date ? format(new Date(loan.expected_return_date), "dd/MM/yyyy") : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {loan.proof_image_url ? (
+                            <Button variant="ghost" size="sm" onClick={() => setViewReceipt(loan.proof_image_url)} title="Ver Comprovante">
+                              <Paperclip className="h-4 w-4 text-blue-500" />
+                            </Button>
+                          ) : "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={loan.status === 'ativo' ? "secondary" : "outline"}>
+                            {loan.status === 'ativo' ? 'Emprestada' : 'Devolvida'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {loan.status === 'ativo' && (
+                            <Button variant="outline" size="sm" onClick={() => {
+                              setSelectedLoanToReturn(loan);
+                              setIsReturnOpen(true);
+                            }}>
+                              <ArrowLeftRight className="h-4 w-4 mr-2" /> Devolver
+                            </Button>
+                          )}
+                          {loan.status === 'devolvido' && loan.actual_return_date && (
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              Voltou em {format(new Date(loan.actual_return_date), "dd/MM/yy")}
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+                {loans.map((loan) => (
+                  <div key={loan.id} className="border rounded-md p-4 bg-card shadow-sm space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold text-primary">{loan.tool?.name}</div>
+                        {loan.tool?.patrimony_number && <div className="text-xs font-mono text-muted-foreground">{loan.tool.patrimony_number}</div>}
+                      </div>
+                      <Badge variant={loan.status === 'ativo' ? "secondary" : "outline"}>{loan.status === 'ativo' ? 'Emprestada' : 'Devolvida'}</Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                      <div className="col-span-2">
+                        <span className="block text-xs text-muted-foreground">Funcionário</span>
+                        <span className="font-medium">{loan.employee}</span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="block text-xs text-muted-foreground">Obra / Cliente</span>
+                        <span>{loan.client ? `${loan.client} (PCO: ${loan.pco || '-'})` : '-'}</span>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-muted-foreground">Data Retirada</span>
+                        <span>{format(new Date(loan.loan_date), "dd/MM/yy HH:mm")}</span>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-muted-foreground">Previsão Volta</span>
+                        <span>{loan.expected_return_date ? format(new Date(loan.expected_return_date), "dd/MM/yy") : "-"}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2 border-t">
+                      {loan.proof_image_url ? (
+                        <Button variant="ghost" size="sm" onClick={() => setViewReceipt(loan.proof_image_url)} className="h-8 px-2 text-blue-500">
+                          <Paperclip className="h-4 w-4 mr-1" /> Ver Comprovante
+                        </Button>
+                      ) : <span className="text-xs text-muted-foreground italic">Sem comprovante</span>}
+                      
+                      {loan.status === 'ativo' ? (
+                        <Button variant="outline" size="sm" className="h-8" onClick={() => {
+                          setSelectedLoanToReturn(loan);
+                          setIsReturnOpen(true);
+                        }}>
+                          <ArrowLeftRight className="h-3 w-3 mr-1" /> Devolver
+                        </Button>
+                      ) : loan.actual_return_date ? (
+                        <span className="text-xs text-muted-foreground">Voltou em {format(new Date(loan.actual_return_date), "dd/MM/yy")}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>

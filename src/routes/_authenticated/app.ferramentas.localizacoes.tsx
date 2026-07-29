@@ -112,36 +112,59 @@ function Page() {
       </div>
 
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead className="w-24 text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-6">Carregando...</TableCell></TableRow>
-              ) : data?.length === 0 ? (
-                <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-6">Nenhuma localização cadastrada.</TableCell></TableRow>
-              ) : (
-                data?.map((loc) => (
-                  <TableRow key={loc.id}>
-                    <TableCell className="font-medium">{loc.name}</TableCell>
-                    <TableCell className="text-right flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(loc)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => { if (confirm("Excluir esta localização?")) deleteMutation.mutate(loc.id); }}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0 md:p-0">
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead className="w-24 text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-6">Carregando...</TableCell></TableRow>
+                ) : data?.length === 0 ? (
+                  <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-6">Nenhuma localização cadastrada.</TableCell></TableRow>
+                ) : (
+                  data?.map((loc) => (
+                    <TableRow key={loc.id}>
+                      <TableCell className="font-medium">{loc.name}</TableCell>
+                      <TableCell className="text-right flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(loc)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => { if (confirm("Excluir esta localização?")) deleteMutation.mutate(loc.id); }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="md:hidden space-y-4 p-4">
+            {isLoading ? (
+              <div className="text-center text-muted-foreground py-6">Carregando...</div>
+            ) : data?.length === 0 ? (
+              <div className="text-center text-muted-foreground py-6">Nenhuma localização cadastrada.</div>
+            ) : (
+              data?.map((loc) => (
+                <div key={loc.id} className="border rounded-md p-4 bg-card shadow-sm flex items-center justify-between">
+                  <div className="font-medium text-base">{loc.name}</div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(loc)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-red-500 border-red-200 hover:bg-red-50" onClick={() => { if (confirm("Excluir esta localização?")) deleteMutation.mutate(loc.id); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

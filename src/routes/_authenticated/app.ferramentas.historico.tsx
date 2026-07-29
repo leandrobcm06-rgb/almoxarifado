@@ -160,63 +160,106 @@ function ToolsHistory() {
             </div>
           ) : (
             <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data/Hora</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Ferramenta</TableHead>
-                    <TableHead>Funcionário</TableHead>
-                    <TableHead>Cliente / PCO</TableHead>
-                    <TableHead>Estado da Ferramenta</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {movements.map((mov) => {
-                    const isSaida = mov.type === 'emprestimo';
-                    const isCadastro = mov.type === 'cadastro';
-                    const isDevolucao = mov.type === 'devolucao';
-                    
-                    return (
-                      <TableRow key={mov.id}>
-                        <TableCell className="whitespace-nowrap">
-                          {format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={isSaida ? "destructive" : isDevolucao ? "default" : "secondary"} className="flex w-fit items-center gap-1">
-                            {isSaida && <ArrowUpRight className="h-3 w-3" />}
-                            {isDevolucao && <ArrowDownRight className="h-3 w-3" />}
-                            {isCadastro && <PackagePlus className="h-3 w-3" />}
-                            <span className="capitalize">{mov.type}</span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {mov.tool?.name} <span className="text-muted-foreground font-normal text-xs">({mov.tool?.patrimony_number || "S/N"})</span>
-                        </TableCell>
-                        <TableCell>{mov.employee || "-"}</TableCell>
-                        <TableCell>
-                          {mov.client || mov.pco ? (
-                            <>
-                              <div className="text-sm font-medium">{mov.client || "-"}</div>
-                              <div className="text-xs text-muted-foreground">PCO: {mov.pco || "-"}</div>
-                            </>
-                          ) : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {mov.condition ? (
-                            <span className={`capitalize font-medium ${
-                              mov.condition === 'danificada' || mov.condition === 'ruim' ? 'text-red-500' :
-                              mov.condition === 'manutencao' ? 'text-orange-500' : 'text-green-500'
-                            }`}>
-                              {mov.condition}
-                            </span>
-                          ) : "-"}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data/Hora</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Ferramenta</TableHead>
+                      <TableHead>Funcionário</TableHead>
+                      <TableHead>Cliente / PCO</TableHead>
+                      <TableHead>Estado da Ferramenta</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {movements.map((mov) => {
+                      const isSaida = mov.type === 'emprestimo';
+                      const isCadastro = mov.type === 'cadastro';
+                      const isDevolucao = mov.type === 'devolucao';
+                      
+                      return (
+                        <TableRow key={mov.id}>
+                          <TableCell className="whitespace-nowrap">
+                            {format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={isSaida ? "destructive" : isDevolucao ? "default" : "secondary"} className="flex w-fit items-center gap-1">
+                              {isSaida && <ArrowUpRight className="h-3 w-3" />}
+                              {isDevolucao && <ArrowDownRight className="h-3 w-3" />}
+                              {isCadastro && <PackagePlus className="h-3 w-3" />}
+                              <span className="capitalize">{mov.type}</span>
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {mov.tool?.name} <span className="text-muted-foreground font-normal text-xs">({mov.tool?.patrimony_number || "S/N"})</span>
+                          </TableCell>
+                          <TableCell>{mov.employee || "-"}</TableCell>
+                          <TableCell>
+                            {mov.client || mov.pco ? (
+                              <>
+                                <div className="text-sm font-medium">{mov.client || "-"}</div>
+                                <div className="text-xs text-muted-foreground">PCO: {mov.pco || "-"}</div>
+                              </>
+                            ) : "-"}
+                          </TableCell>
+                          <TableCell>
+                            {mov.condition ? (
+                              <span className={`capitalize font-medium ${
+                                mov.condition === 'danificada' || mov.condition === 'ruim' ? 'text-red-500' :
+                                mov.condition === 'manutencao' ? 'text-orange-500' : 'text-green-500'
+                              }`}>
+                                {mov.condition}
+                              </span>
+                            ) : "-"}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+                {movements.map((mov) => {
+                  const isSaida = mov.type === 'emprestimo';
+                  const isCadastro = mov.type === 'cadastro';
+                  const isDevolucao = mov.type === 'devolucao';
+                  return (
+                    <div key={mov.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
+                      <div className="flex justify-between items-start">
+                        <Badge variant={isSaida ? "destructive" : isDevolucao ? "default" : "secondary"} className="flex w-fit items-center gap-1">
+                          {isSaida && <ArrowUpRight className="h-3 w-3" />}
+                          {isDevolucao && <ArrowDownRight className="h-3 w-3" />}
+                          {isCadastro && <PackagePlus className="h-3 w-3" />}
+                          <span className="capitalize">{mov.type}</span>
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</span>
+                      </div>
+                      <div>
+                        <div className="font-semibold">{mov.tool?.name}</div>
+                        <div className="text-xs font-mono text-muted-foreground">{mov.tool?.patrimony_number || "S/N"}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                        <div>
+                          <span className="block text-xs text-muted-foreground">Funcionário</span>
+                          <span className="font-medium">{mov.employee || "-"}</span>
+                        </div>
+                        <div>
+                          <span className="block text-xs text-muted-foreground">Estado</span>
+                          <span className={`capitalize font-medium ${
+                            mov.condition === 'danificada' || mov.condition === 'ruim' ? 'text-red-500' :
+                            mov.condition === 'manutencao' ? 'text-orange-500' : 'text-green-500'
+                          }`}>{mov.condition || "-"}</span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="block text-xs text-muted-foreground">Cliente / PCO</span>
+                          <span>{mov.client || "-"} {mov.pco ? `(PCO: ${mov.pco})` : ""}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </CardContent>

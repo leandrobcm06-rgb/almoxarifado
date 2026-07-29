@@ -42,41 +42,66 @@ function Page() {
       </div>
 
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data / Hora</TableHead>
-                <TableHead>Usuário</TableHead>
-                <TableHead>Ação</TableHead>
-                <TableHead>Entidade</TableHead>
-                <TableHead>ID da Entidade</TableHead>
-                <TableHead className="w-24 text-center">Detalhes</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Carregando logs...</TableCell></TableRow>
-              ) : logs?.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Nenhum registro de auditoria encontrado.</TableCell></TableRow>
-              ) : (
-                logs?.map((log: any) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="whitespace-nowrap">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</TableCell>
-                    <TableCell className="font-medium">{log.profiles?.nome || "Desconhecido"}</TableCell>
-                    <TableCell><span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-semibold">{log.acao}</span></TableCell>
-                    <TableCell>{log.entidade}</TableCell>
-                    <TableCell className="font-mono text-xs">{log.entidade_id || "-"}</TableCell>
-                    <TableCell className="text-center">
-                      <Button variant="ghost" size="icon" onClick={() => setViewingData(log)} disabled={!log.dados}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0 md:p-0">
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data / Hora</TableHead>
+                  <TableHead>Usuário</TableHead>
+                  <TableHead>Ação</TableHead>
+                  <TableHead>Entidade</TableHead>
+                  <TableHead>ID da Entidade</TableHead>
+                  <TableHead className="w-24 text-center">Detalhes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Carregando logs...</TableCell></TableRow>
+                ) : logs?.length === 0 ? (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Nenhum registro de auditoria encontrado.</TableCell></TableRow>
+                ) : (
+                  logs?.map((log: any) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="whitespace-nowrap">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</TableCell>
+                      <TableCell className="font-medium">{log.profiles?.nome || "Desconhecido"}</TableCell>
+                      <TableCell><span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-semibold">{log.acao}</span></TableCell>
+                      <TableCell>{log.entidade}</TableCell>
+                      <TableCell className="font-mono text-xs">{log.entidade_id || "-"}</TableCell>
+                      <TableCell className="text-center">
+                        <Button variant="ghost" size="icon" onClick={() => setViewingData(log)} disabled={!log.dados}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="md:hidden space-y-4 p-4">
+            {isLoading ? (
+              <div className="text-center text-muted-foreground py-6">Carregando logs...</div>
+            ) : logs?.length === 0 ? (
+              <div className="text-center text-muted-foreground py-6">Nenhum registro de auditoria encontrado.</div>
+            ) : (
+              logs?.map((log: any) => (
+                <div key={log.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-2">
+                  <div className="flex justify-between items-start">
+                    <span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-semibold">{log.acao}</span>
+                    <span className="text-xs text-muted-foreground">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</span>
+                  </div>
+                  <div className="text-sm font-medium">{log.profiles?.nome || "Desconhecido"}</div>
+                  <div className="text-sm text-muted-foreground">{log.entidade} <span className="font-mono text-xs ml-1">{log.entidade_id || ""}</span></div>
+                  <div className="flex justify-end mt-2">
+                    <Button variant="outline" size="sm" onClick={() => setViewingData(log)} disabled={!log.dados}>
+                      <Eye className="h-4 w-4 mr-2" /> Detalhes
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
 

@@ -81,20 +81,36 @@ function Page() {
         </Dialog>
       </div>
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader><TableRow><TableHead>CNPJ</TableHead><TableHead>Nome</TableHead><TableHead className="text-right">Ativo</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {isLoading ? <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-6">Carregando...</TableCell></TableRow> :
-                data?.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-mono text-sm">{c.cnpj}</TableCell>
-                    <TableCell>{c.nome}</TableCell>
-                    <TableCell className="text-right"><Switch checked={c.ativo} onCheckedChange={(v) => toggle.mutate({ id: c.id, ativo: v })} /></TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
+        <CardContent className="p-0 md:p-0">
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader><TableRow><TableHead>CNPJ</TableHead><TableHead>Nome</TableHead><TableHead className="text-right">Ativo</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {isLoading ? <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-6">Carregando...</TableCell></TableRow> :
+                  data?.map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-mono text-sm">{c.cnpj}</TableCell>
+                      <TableCell>{c.nome}</TableCell>
+                      <TableCell className="text-right"><Switch checked={c.ativo} onCheckedChange={(v) => toggle.mutate({ id: c.id, ativo: v })} /></TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="md:hidden space-y-4 p-4">
+            {isLoading ? <div className="text-center text-muted-foreground py-6">Carregando...</div> :
+              data?.map((c) => (
+                <div key={c.id} className="border rounded-md p-4 bg-card shadow-sm flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-base">{c.nome}</div>
+                    <div className="font-mono text-xs text-muted-foreground mt-1">{c.cnpj}</div>
+                  </div>
+                  <div>
+                    <Switch checked={c.ativo} onCheckedChange={(v) => toggle.mutate({ id: c.id, ativo: v })} />
+                  </div>
+                </div>
+              ))}
+          </div>
         </CardContent>
       </Card>
     </div>

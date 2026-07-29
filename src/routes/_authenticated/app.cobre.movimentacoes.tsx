@@ -187,45 +187,72 @@ function CobreMovimentacoes() {
         <CardHeader>
           <CardTitle>Histórico de Cortes e Saídas</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Barra Origem</TableHead>
-                <TableHead>Tamanho Cortado</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>PCO</TableHead>
-                <TableHead>Solicitante</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+        <CardContent className="p-0 md:p-0">
+          <div className="hidden md:block">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando...</TableCell>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Barra Origem</TableHead>
+                  <TableHead>Tamanho Cortado</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>PCO</TableHead>
+                  <TableHead>Solicitante</TableHead>
                 </TableRow>
-              ) : movements.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma movimentação registrada.</TableCell>
-                </TableRow>
-              ) : (
-                movements.map((mov) => (
-                  <TableRow key={mov.id}>
-                    <TableCell className="whitespace-nowrap">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
-                    <TableCell className="font-medium">
-                      {mov.piece?.bar?.name} <span className="text-muted-foreground text-xs">({mov.piece?.bar?.auxiliary_code})</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="destructive">-{((mov.length_mm || 0) / 1000).toFixed(2)} m</Badge>
-                    </TableCell>
-                    <TableCell>{mov.client_name}</TableCell>
-                    <TableCell>{mov.pco || '-'}</TableCell>
-                    <TableCell>{mov.user_requesting}</TableCell>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando...</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : movements.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma movimentação registrada.</TableCell>
+                  </TableRow>
+                ) : (
+                  movements.map((mov) => (
+                    <TableRow key={mov.id}>
+                      <TableCell className="whitespace-nowrap">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
+                      <TableCell className="font-medium">
+                        {mov.piece?.bar?.name} <span className="text-muted-foreground text-xs">({mov.piece?.bar?.auxiliary_code})</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="destructive">-{((mov.length_mm || 0) / 1000).toFixed(2)} m</Badge>
+                      </TableCell>
+                      <TableCell>{mov.client_name}</TableCell>
+                      <TableCell>{mov.pco || '-'}</TableCell>
+                      <TableCell>{mov.user_requesting}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="md:hidden space-y-4 p-4">
+            {loading ? (
+              <div className="text-center text-muted-foreground py-6">Carregando...</div>
+            ) : movements.length === 0 ? (
+              <div className="text-center text-muted-foreground py-6">Nenhuma movimentação registrada.</div>
+            ) : (
+              movements.map((mov) => (
+                <div key={mov.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-2">
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs text-muted-foreground">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</span>
+                    <Badge variant="destructive">-{((mov.length_mm || 0) / 1000).toFixed(2)} m</Badge>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-sm">{mov.piece?.bar?.name}</div>
+                    <div className="text-xs text-muted-foreground font-mono">{mov.piece?.bar?.auxiliary_code}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md mt-1">
+                    <div><span className="block text-xs text-muted-foreground">Cliente</span>{mov.client_name}</div>
+                    <div><span className="block text-xs text-muted-foreground">PCO</span>{mov.pco || '-'}</div>
+                    <div className="col-span-2"><span className="block text-xs text-muted-foreground">Solicitante</span>{mov.user_requesting}</div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
