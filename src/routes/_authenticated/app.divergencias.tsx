@@ -58,6 +58,9 @@ function Page() {
         perProductCnpjSaldos.set(si.product_id, m);
       }
 
+      const { data: fallbackComp } = await supabase.from("companies").select("id").limit(1).single();
+      const fallbackCompanyId = fallbackComp?.id;
+
       const { data: rep, error } = await supabase.from("divergence_reports").insert({ count_id: count.id, snapshot_id: count.snapshot_id }).select().single();
       if (error) throw error;
 
@@ -70,10 +73,12 @@ function Page() {
         const diferenca = contado - totalSistema;
         if (diferenca === 0) continue;
         
+        const company_id = Array.from(cnpjMap.keys())[0] ?? fallbackCompanyId;
+
         divItems.push({
           report_id: rep.id, 
           product_id: pid, 
-          company_id: null, 
+          company_id: company_id, 
           saldo_sistema: totalSistema, 
           qty_contada: contado, 
           diferenca: diferenca, 
