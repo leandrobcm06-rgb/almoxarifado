@@ -34,7 +34,7 @@ function Page() {
     queryFn: async () => (await supabase.from("counts").select("*, count_rounds(*)").eq("id", id).single()).data,
   });
   const { data: snapshotItems } = useQuery({
-    queryKey: ["snapshot-items", count?.snapshot_id],
+    queryKey: ["snapshot-items-full", count?.snapshot_id],
     queryFn: async () => {
       const all: any[] = [];
       let page = 0;
