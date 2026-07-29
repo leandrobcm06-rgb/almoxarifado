@@ -123,7 +123,7 @@ function Page() {
         ))}
         {!blind && (
           <TabsContent value="produtos">
-            <StockPanel snapshotId={count.snapshot_id} />
+            <StockPanel snapshotId={count.snapshot_id} products={products ?? []} />
           </TabsContent>
         )}
       </Tabs>
@@ -131,27 +131,29 @@ function Page() {
   );
 }
 
-function StockPanel({ snapshotId }: { snapshotId: string }) {
+function StockPanel({ snapshotId, products }: { snapshotId: string; products: any[] }) {
   const [search, setSearch] = useState("");
   
   const { data: items } = useQuery({
     queryKey: ["snapshot-items", snapshotId],
-    queryFn: async () => (await supabase.from("stock_snapshot_items").select("qty, products(codigo, descricao)").eq("snapshot_id", snapshotId)).data ?? [],
+    queryFn: async () => (await supabase.from("stock_snapshot_items").select("qty, product_id").eq("snapshot_id", snapshotId)).data ?? [],
   });
 
   const grouped = useMemo(() => {
-    const map = new Map();
+    const qtyMap = new Map();
     for (const item of (items ?? [])) {
-      const key = item.products?.codigo;
-      if (!key) continue;
-      if (!map.has(key)) map.set(key, { ...item.products, qty: 0 });
-      map.get(key).qty += Number(item.qty);
+      qtyMap.set(item.product_id, (qtyMap.get(item.product_id) ?? 0) + Number(item.qty));
     }
-    const arr = Array.from(map.values()).sort((a: any, b: any) => a.codigo.localeCompare(b.codigo));
+    
+    const arr = products.map(p => ({
+      ...p,
+      qty: qtyMap.get(p.id) ?? 0
+    })).sort((a: any, b: any) => String(a.codigo).localeCompare(String(b.codigo)));
+
     if (!search) return arr;
     const s = search.toLowerCase();
-    return arr.filter(p => p.codigo.toLowerCase().includes(s) || p.descricao.toLowerCase().includes(s));
-  }, [items, search]);
+    return arr.filter(p => String(p.codigo).toLowerCase().includes(s) || String(p.descricao).toLowerCase().includes(s));
+  }, [items, products, search]);
 
   return (
     <div className="space-y-4">
@@ -168,7 +170,7 @@ function StockPanel({ snapshotId }: { snapshotId: string }) {
               <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
               <TableBody>
                 {grouped.length === 0 ? (
-                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhum produto encontrado nesta contagem.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhum produto cadastrado.</TableCell></TableRow>
                 ) : (
                   grouped.map((g: any, i) => (
                     <TableRow key={i}>
