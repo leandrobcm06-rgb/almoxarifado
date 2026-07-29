@@ -9,8 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { FileDown, FileText, RefreshCw } from "lucide-react";
+import { FileDown, FileText, RefreshCw, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/app/divergencias")({
   head: () => ({ meta: [{ title: "Divergências | Almoxarifado" }] }),
@@ -166,6 +167,19 @@ function ReportSection({ report }: { report: any }) {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const deleteReport = useMutation({
+    mutationFn: async () => {
+      await supabase.from("divergence_items").delete().eq("report_id", report.id);
+      const { error } = await supabase.from("divergence_reports").delete().eq("id", report.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { 
+      toast.success("Relatório excluído com sucesso"); 
+      qc.invalidateQueries({ queryKey: ["divergence-reports"] }); 
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   return (
     <div className="border-b last:border-b-0">
       <div className="p-3 flex items-center justify-between hover:bg-accent cursor-pointer" onClick={() => setOpen((v) => !v)}>
@@ -201,6 +215,23 @@ function ReportSection({ report }: { report: any }) {
               filtered.map((i: any) => [i.products?.codigo, i.products?.descricao, i.companies?.nome, i.saldo_sistema, i.qty_contada, i.diferenca, i.ajuste_sugerido, i.status]),
               `divergencias-${report.id.slice(0, 6)}`, "landscape");
             }}><FileText className="h-4 w-4 mr-2" />PDF</Button>
+            
+            <div className="flex-1" />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="destructive"><Trash2 className="h-4 w-4 mr-2" />Excluir Relatório</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Excluir relatório?</AlertDialogTitle>
+                  <AlertDialogDescription>Essa ação não pode ser desfeita. Todos os itens calculados neste relatório serão perdidos.</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => deleteReport.mutate()} className="bg-destructive hover:bg-destructive/90">Excluir</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <div className="hidden md:block">
             <Table>
