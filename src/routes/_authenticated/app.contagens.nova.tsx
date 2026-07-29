@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -10,11 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Upload, FileDown, Save, Trash2 } from "lucide-react";
+import { Upload, FileDown, Save, Trash2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 
-export const Route = createFileRoute("/_authenticated/app/estoque")({
-  head: () => ({ meta: [{ title: "Estoque | Almoxarifado" }] }),
+export const Route = createFileRoute("/_authenticated/app/contagens/nova")({
+  head: () => ({ meta: [{ title: "Nova Contagem | Almoxarifado" }] }),
   component: Page,
 });
 
@@ -28,18 +28,21 @@ function pick(row: any, keys: string[]): any {
   return undefined;
 }
 
-
 function Page() {
   const qc = useQueryClient();
+  const nav = useNavigate();
+  
+  // Contagem states
+  const [nome, setNome] = useState("");
+  const [tipo, setTipo] = useState<"geral" | "diaria">("diaria");
+  
+  // Estoque states
   const [snapshotDate, setSnapshotDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [pending, setPending] = useState<Row[]>([]);
   const [activeCnpj, setActiveCnpj] = useState<string>("");
 
   const { data: companies } = useQuery({
     queryKey: ["active-companies"], queryFn: async () => (await supabase.from("companies").select("*").eq("ativo", true).order("nome")).data ?? [],
-  });
-  const { data: snapshots } = useQuery({
-    queryKey: ["snapshots"], queryFn: async () => (await supabase.from("stock_snapshots").select("*, profiles(nome)").order("snapshot_date", { ascending: false }).limit(50)).data ?? [],
   });
 
   const handleFile = async (file: File, companyId: string) => {
@@ -122,8 +125,10 @@ function Page() {
 
   const confirm = useMutation({
     mutationFn: async () => {
-      if (pending.length === 0) throw new Error("Nada para confirmar");
-      toast.info("Iniciando processamento...");
+      if (!nome) throw new Error("Informe o nome da contagem");
+      if (pending.length === 0) throw new Error("Carregue o estoque de pelo menos uma empresa antes de criar a contagem");
+      
+      toast.info("Iniciando processamento do estoque...");
       
       const codes = Array.from(new Set(pending.map((r) => r.codigo.toUpperCase())));
       
@@ -168,12 +173,11 @@ function Page() {
 
       toast.info("Criando registro de snapshot...");
       const { data: snap, error: snapErr } = await supabase.from("stock_snapshots")
-        .insert({ snapshot_date: snapshotDate, status: "confirmado", confirmed_at: new Date().toISOString() })
+        .insert({ snapshot_date: snapshotDate, status: "confirmado", confirmed_at: new Date().toISOString(), observacao: nome })
         .select().single();
       if (snapErr) throw new Error("Erro ao criar snapshot: " + snapErr.message);
 
-      toast.info("Processando itens...");
-      // Consolida por (empresa, produto) somando qty — protege contra códigos auxiliares duplicados
+      toast.info("Processando itens do estoque...");
       const itemsMap = new Map<string, { snapshot_id: string; product_id: string; company_id: string; qty: number }>();
       for (const r of pending) {
         const pid = productMap.get(r.codigo.toUpperCase());
@@ -191,9 +195,27 @@ function Page() {
         const { error } = await supabase.from("stock_snapshot_items").insert(chunk);
         if (error) throw new Error("Erro ao salvar itens: " + error.message);
       }
-      return snap.id;
+      
+      toast.info("Criando a Contagem...");
+      const { data: c, error: cErr } = await supabase.from("counts").insert({
+        nome, tipo, status: "em_contagem",
+        snapshot_id: snap.id,
+      }).select().single();
+      if (cErr) throw cErr;
+      
+      const rounds = tipo === "geral" ? [1, 2] : [1];
+      const { error: rErr } = await supabase.from("count_rounds").insert(rounds.map((r) => ({ count_id: c.id, rodada: r })));
+      if (rErr) throw rErr;
+
+      return c.id;
     },
-    onSuccess: () => { toast.success("Estoque confirmado com sucesso!"); setPending([]); qc.invalidateQueries({ queryKey: ["snapshots"] }); },
+    onSuccess: (id) => { 
+      toast.success("Contagem e estoque confirmados com sucesso!"); 
+      setPending([]); 
+      qc.invalidateQueries({ queryKey: ["snapshots"] });
+      qc.invalidateQueries({ queryKey: ["counts"] });
+      nav({ to: "/app/contagens/$id", params: { id } });
+    },
     onError: (e: any) => { console.error(e); toast.error(e?.message || "Erro desconhecido ao confirmar"); },
   });
 
@@ -203,19 +225,49 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Importação do estoque diário</h1>
-        <p className="text-sm text-muted-foreground">
-          Uma planilha por CNPJ. Para juntar o estoque de todas as empresas num único Snapshot, <b>carregue todas as planilhas uma por vez ANTES de clicar em Confirmar</b>.<br/>
-          O sistema reconhece colunas: <code>COD. REFERENCIA</code>, <code>NOME</code>, <code>SISTEMA</code> (saldo) e, opcionalmente, <code>COD. AUXILIAR</code>, <code>FABRICANTE</code>, <code>LOCALIZAÇÃO</code>.
-        </p>
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" onClick={() => nav({ to: "/app/contagens" })}><ArrowLeft className="h-4 w-4" /></Button>
+        <div>
+          <h1 className="text-2xl font-semibold">Nova Contagem Unificada</h1>
+          <p className="text-sm text-muted-foreground">
+            Crie a contagem e importe o estoque diário de uma vez só.
+          </p>
+        </div>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Nova importação</CardTitle></CardHeader>
+        <CardHeader><CardTitle>1. Dados da Contagem</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Nome</Label>
+              <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Inventário Anual 2026" />
+            </div>
+            <div>
+              <Label>Tipo</Label>
+              <Select value={tipo} onValueChange={(v: any) => setTipo(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="geral">Geral (2 rodadas cegas)</SelectItem>
+                  <SelectItem value="diaria">Diária (rotativa, 1 rodada)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>2. Importação do Estoque Base (Snapshots)</CardTitle>
+          <p className="text-sm text-muted-foreground font-normal">
+            Para juntar o estoque de várias empresas nesta contagem, <b>carregue todas as planilhas uma por vez ANTES de clicar em Confirmar</b>.<br/>
+            O sistema reconhece as colunas: <code>COD. REFERENCIA</code>, <code>NOME</code>, <code>SISTEMA</code> (saldo) e, opcionalmente, <code>COD. AUXILIAR</code>.
+          </p>
+        </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div><Label>Data do snapshot</Label><Input type="date" value={snapshotDate} onChange={(e) => setSnapshotDate(e.target.value)} /></div>
+            <div><Label>Data de Referência do Estoque</Label><Input type="date" value={snapshotDate} onChange={(e) => setSnapshotDate(e.target.value)} /></div>
             <div className="md:col-span-2">
               <Label>Empresa (selecione, depois carregue o arquivo)</Label>
               <div className="flex gap-2">
@@ -228,11 +280,10 @@ function Page() {
                     onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f, activeCnpj); e.currentTarget.value = ""; }} />
                   <Upload className="h-4 w-4" />Carregar planilha
                 </label>
-
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 text-sm">
+          <div className="flex flex-wrap gap-2 text-sm pt-2">
             {groupedByCompany.map((g) => (
               <Badge key={g.company.id} variant={g.count > 0 ? "default" : "outline"}>
                 {g.company.nome}: {g.count} itens
@@ -245,20 +296,19 @@ function Page() {
       {pending.length > 0 && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Revisão ({pending.length} linhas)</CardTitle>
+            <CardTitle>Revisão do Estoque ({pending.length} linhas)</CardTitle>
             <div className="flex gap-2">
               <Button variant="outline" onClick={async () => {
                 const { exportToExcel } = await import("@/lib/export-utils");
                 exportToExcel(pending, "estoque-revisao");
               }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
               <Button variant="outline" onClick={() => setPending([])}><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
-              <Button onClick={() => confirm.mutate()} disabled={confirm.isPending}><Save className="h-4 w-4 mr-2" />Confirmar</Button>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             <div className="max-h-[400px] overflow-y-auto">
               <Table>
-                <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Qtd</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
                 <TableBody>
                   {pending.slice(0, 300).map((r, i) => (
                     <TableRow key={i}>
@@ -275,24 +325,13 @@ function Page() {
         </Card>
       )}
 
-      <Card>
-        <CardHeader><CardTitle>Histórico de snapshots</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader><TableRow><TableHead>Data</TableHead><TableHead>Status</TableHead><TableHead>Criado por</TableHead><TableHead>Confirmado em</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {snapshots?.map((s: any) => (
-                <TableRow key={s.id}>
-                  <TableCell>{format(new Date(s.snapshot_date + "T00:00"), "dd/MM/yyyy")}</TableCell>
-                  <TableCell><Badge variant={s.status === "confirmado" ? "default" : "secondary"}>{s.status}</Badge></TableCell>
-                  <TableCell className="text-sm">{s.profiles?.nome ?? "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{s.confirmed_at ? format(new Date(s.confirmed_at), "dd/MM/yyyy HH:mm") : "—"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="flex justify-end pt-4">
+        <Button size="lg" onClick={() => confirm.mutate()} disabled={confirm.isPending || pending.length === 0 || !nome} className="w-full md:w-auto px-12">
+          <Save className="h-5 w-5 mr-2" />
+          Confirmar Estoque e Criar Contagem
+        </Button>
+      </div>
+
     </div>
   );
 }

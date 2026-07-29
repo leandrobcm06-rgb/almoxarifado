@@ -56,31 +56,7 @@ function Page() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div><h1 className="text-2xl font-semibold">Contagens</h1><p className="text-sm text-muted-foreground">Contagem geral (2 rodadas cegas) ou diária (1 rodada).</p></div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Nova contagem</Button></DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>Nova contagem</DialogTitle></DialogHeader>
-            <div className="space-y-3">
-              <div><Label>Nome</Label><Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Inventário Anual 2026" /></div>
-              <div><Label>Tipo</Label>
-                <Select value={tipo} onValueChange={(v: any) => setTipo(v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="geral">Geral (2 rodadas cegas)</SelectItem>
-                    <SelectItem value="diaria">Diária (rotativa, 1 rodada)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>Snapshot de estoque (referência)</Label>
-                <Select value={snapshotId} onValueChange={setSnapshotId}>
-                  <SelectTrigger><SelectValue placeholder="Selecione um snapshot confirmado" /></SelectTrigger>
-                  <SelectContent>{snapshots?.map((s) => <SelectItem key={s.id} value={s.id}>{format(new Date(s.snapshot_date + "T00:00"), "dd/MM/yyyy")} ({format(new Date(s.created_at), "HH:mm")}) {s.observacao ? `- ${s.observacao}` : ""}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <Button onClick={() => create.mutate()} disabled={!nome || !snapshotId || create.isPending} className="w-full">Criar e abrir</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => nav({ to: "/app/contagens/nova" })}><Plus className="h-4 w-4 mr-2" />Nova contagem</Button>
       </div>
       <Card>
         <CardContent className="p-0">

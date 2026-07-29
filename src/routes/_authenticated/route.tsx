@@ -22,10 +22,11 @@ export const Route = createFileRoute("/_authenticated")({
 
 import { NotificationsBadge } from "@/components/notifications-badge";
 
+import { ShieldAlert } from "lucide-react";
+
 const CONTAGENS_NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "gestor", "conferente", "contador"] },
   { to: "/app/contagens", label: "Nova Contagem", icon: ClipboardList, roles: ["admin", "gestor", "conferente", "contador"] },
-  { to: "/app/estoque", label: "Estoque (Importar)", icon: FileSpreadsheet, roles: ["admin", "gestor", "conferente"] },
   { to: "/app/divergencias", label: "Divergências", icon: AlertTriangle, roles: ["admin", "gestor", "conferente"] },
   { to: "/app/produtos", label: "Produtos", icon: Package2, roles: ["admin", "gestor", "conferente"] },
 ] as const;
@@ -54,6 +55,7 @@ const FERRAMENTAS_NAV = [
 const MAIN_NAV = [
   { to: "/app/empresas", label: "Empresas (CNPJ)", icon: Building2, roles: ["admin"] },
   { to: "/app/usuarios", label: "Usuários", icon: Users, roles: ["admin"] },
+  { to: "/app/auditoria", label: "Auditoria", icon: ShieldAlert, roles: ["admin"] },
 ] as const;
 
 function AuthedLayout() {
