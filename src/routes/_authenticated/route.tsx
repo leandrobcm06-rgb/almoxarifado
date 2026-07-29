@@ -28,7 +28,6 @@ const CONTAGENS_NAV = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "gestor", "conferente", "contador"] },
   { to: "/app/contagens", label: "Nova Contagem", icon: ClipboardList, roles: ["admin", "gestor", "conferente", "contador"] },
   { to: "/app/divergencias", label: "Divergências", icon: AlertTriangle, roles: ["admin", "gestor", "conferente"] },
-  { to: "/app/produtos", label: "Produtos", icon: Package2, roles: ["admin", "gestor", "conferente"] },
 ] as const;
 
 const COBRE_NAV = [

@@ -114,13 +114,75 @@ function Page() {
       <Tabs defaultValue={`r${rounds[0]?.rodada ?? 1}`}>
         <TabsList>
           {rounds.map((r: any) => <TabsTrigger key={r.id} value={`r${r.rodada}`}>Rodada {r.rodada}</TabsTrigger>)}
+          {!blind && <TabsTrigger value="produtos">Produtos no Sistema</TabsTrigger>}
         </TabsList>
         {rounds.map((r: any) => (
           <TabsContent key={r.id} value={`r${r.rodada}`}>
             <RoundPanel roundId={r.id} countId={id} products={products ?? []} blind={blind} disabled={count.status === "finalizada"} />
           </TabsContent>
         ))}
+        {!blind && (
+          <TabsContent value="produtos">
+            <StockPanel snapshotId={count.snapshot_id} />
+          </TabsContent>
+        )}
       </Tabs>
+    </div>
+  );
+}
+
+function StockPanel({ snapshotId }: { snapshotId: string }) {
+  const [search, setSearch] = useState("");
+  
+  const { data: items } = useQuery({
+    queryKey: ["snapshot-items", snapshotId],
+    queryFn: async () => (await supabase.from("stock_snapshot_items").select("qty, products(codigo, descricao)").eq("snapshot_id", snapshotId)).data ?? [],
+  });
+
+  const grouped = useMemo(() => {
+    const map = new Map();
+    for (const item of (items ?? [])) {
+      const key = item.products?.codigo;
+      if (!key) continue;
+      if (!map.has(key)) map.set(key, { ...item.products, qty: 0 });
+      map.get(key).qty += Number(item.qty);
+    }
+    const arr = Array.from(map.values()).sort((a: any, b: any) => a.codigo.localeCompare(b.codigo));
+    if (!search) return arr;
+    const s = search.toLowerCase();
+    return arr.filter(p => p.codigo.toLowerCase().includes(s) || p.descricao.toLowerCase().includes(s));
+  }, [items, search]);
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Catálogo de Produtos da Contagem ({grouped.length} itens)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <Input placeholder="Buscar por código ou descrição..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-md" />
+          </div>
+          <div className="max-h-[600px] overflow-y-auto">
+            <Table>
+              <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {grouped.length === 0 ? (
+                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhum produto encontrado nesta contagem.</TableCell></TableRow>
+                ) : (
+                  grouped.map((g: any, i) => (
+                    <TableRow key={i}>
+                      <TableCell className="font-mono text-xs">{g.codigo}</TableCell>
+                      <TableCell className="text-sm">{g.descricao}</TableCell>
+                      <TableCell className="text-right">{g.qty}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

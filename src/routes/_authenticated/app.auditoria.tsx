@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/app/auditoria")({
   head: () => ({ meta: [{ title: "Auditoria | Almoxarifado" }] }),
@@ -32,9 +34,46 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Auditoria</h1>
-        <p className="text-muted-foreground">Rastreamento de ações e alterações realizadas no sistema.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Auditoria</h1>
+          <p className="text-muted-foreground">Rastreamento de ações e alterações realizadas no sistema.</p>
+        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive"><Trash2 className="h-4 w-4 mr-2" />Limpar Banco de Dados</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza absoluta?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Isso irá apagar <b>TODOS</b> os produtos, empresas, fotos e contagens do banco de dados. 
+                Use isso apenas se quiser recomeçar o sistema do zero para uma nova implantação.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={async () => {
+                try {
+                  await supabase.from("count_items").delete().not("id", "is", null);
+                  await supabase.from("count_photos").delete().not("id", "is", null);
+                  await supabase.from("count_rounds").delete().not("id", "is", null);
+                  await supabase.from("divergence_items").delete().not("id", "is", null);
+                  await supabase.from("divergence_reports").delete().not("id", "is", null);
+                  await supabase.from("counts").delete().not("id", "is", null);
+                  await supabase.from("stock_snapshot_items").delete().not("id", "is", null);
+                  await supabase.from("stock_snapshots").delete().not("id", "is", null);
+                  await supabase.from("products").delete().not("id", "is", null);
+                  await supabase.from("companies").delete().not("id", "is", null);
+                  toast.success("Banco de dados limpo com sucesso!");
+                  window.location.reload();
+                } catch (e: any) {
+                  toast.error("Erro ao limpar: " + e.message);
+                }
+              }} className="bg-destructive hover:bg-destructive/90">Sim, apagar tudo</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <Card>
