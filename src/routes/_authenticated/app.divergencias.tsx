@@ -68,18 +68,34 @@ function Page() {
         const totalSistema = Array.from(cnpjMap.values()).reduce((a, b) => a + b, 0);
         const diferenca = contado - totalSistema;
         if (diferenca === 0) continue;
-        // ajuste sugerido proporcional ao saldo de cada CNPJ
         if (cnpjMap.size === 0) {
           divItems.push({ report_id: rep.id, product_id: pid, company_id: null, saldo_sistema: 0, qty_contada: contado, diferenca, ajuste_sugerido: diferenca });
         } else {
-          for (const [cnpjId, saldo] of cnpjMap.entries()) {
-            const proporcao = totalSistema === 0 ? (1 / cnpjMap.size) : (saldo / totalSistema);
-            const ajusteCnpj = Number((diferenca * proporcao).toFixed(3));
-            divItems.push({
-              report_id: rep.id, product_id: pid, company_id: cnpjId,
-              saldo_sistema: saldo, qty_contada: contado * proporcao,
-              diferenca: ajusteCnpj, ajuste_sugerido: ajusteCnpj,
-            });
+          let remainingDiferenca = diferenca;
+          let remainingContado = contado;
+          const cnpjs = Array.from(cnpjMap.entries());
+          
+          for (let i = 0; i < cnpjs.length; i++) {
+            const [cnpjId, saldo] = cnpjs[i];
+            const isLast = i === cnpjs.length - 1;
+            
+            let proporcao = 0;
+            if (totalSistema > 0) proporcao = saldo / totalSistema;
+            else if (i === 0) proporcao = 1;
+            
+            const ajusteCnpj = isLast ? remainingDiferenca : Number((diferenca * proporcao).toFixed(3));
+            const contadoCnpj = isLast ? remainingContado : Number((contado * proporcao).toFixed(3));
+            
+            remainingDiferenca -= ajusteCnpj;
+            remainingContado -= contadoCnpj;
+            
+            if (ajusteCnpj !== 0 || saldo !== 0 || contadoCnpj !== 0) {
+              divItems.push({
+                report_id: rep.id, product_id: pid, company_id: cnpjId,
+                saldo_sistema: saldo, qty_contada: contadoCnpj,
+                diferenca: ajusteCnpj, ajuste_sugerido: ajusteCnpj,
+              });
+            }
           }
         }
       }
@@ -127,6 +143,7 @@ function Page() {
 }
 
 function ReportSection({ report }: { report: any }) {
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const { data: items } = useQuery({
     queryKey: ["div-items", report.id],
