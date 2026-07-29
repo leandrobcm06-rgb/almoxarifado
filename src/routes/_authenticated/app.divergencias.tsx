@@ -69,36 +69,16 @@ function Page() {
         const totalSistema = Array.from(cnpjMap.values()).reduce((a, b) => a + b, 0);
         const diferenca = contado - totalSistema;
         if (diferenca === 0) continue;
-        if (cnpjMap.size === 0) {
-          divItems.push({ report_id: rep.id, product_id: pid, company_id: null, saldo_sistema: 0, qty_contada: contado, diferenca, ajuste_sugerido: diferenca });
-        } else {
-          let remainingDiferenca = diferenca;
-          let remainingContado = contado;
-          const cnpjs = Array.from(cnpjMap.entries());
-          
-          for (let i = 0; i < cnpjs.length; i++) {
-            const [cnpjId, saldo] = cnpjs[i];
-            const isLast = i === cnpjs.length - 1;
-            
-            let proporcao = 0;
-            if (totalSistema > 0) proporcao = saldo / totalSistema;
-            else if (i === 0) proporcao = 1;
-            
-            const ajusteCnpj = isLast ? remainingDiferenca : Number((diferenca * proporcao).toFixed(3));
-            const contadoCnpj = isLast ? remainingContado : Number((contado * proporcao).toFixed(3));
-            
-            remainingDiferenca -= ajusteCnpj;
-            remainingContado -= contadoCnpj;
-            
-            if (ajusteCnpj !== 0 || saldo !== 0 || contadoCnpj !== 0) {
-              divItems.push({
-                report_id: rep.id, product_id: pid, company_id: cnpjId,
-                saldo_sistema: saldo, qty_contada: contadoCnpj,
-                diferenca: ajusteCnpj, ajuste_sugerido: ajusteCnpj,
-              });
-            }
-          }
-        }
+        
+        divItems.push({
+          report_id: rep.id, 
+          product_id: pid, 
+          company_id: null, 
+          saldo_sistema: totalSistema, 
+          qty_contada: contado, 
+          diferenca: diferenca, 
+          ajuste_sugerido: diferenca 
+        });
       }
       // filter company_id null rows (no company found)
       const valid = divItems.filter((d) => d.company_id);
@@ -205,15 +185,15 @@ function ReportSection({ report }: { report: any }) {
             <Button size="sm" variant="outline" onClick={async () => {
               const { exportToExcel } = await import("@/lib/export-utils");
               exportToExcel(filtered.map((i: any) => ({
-                codigo: i.products?.codigo, descricao: i.products?.descricao, empresa: i.companies?.nome,
-                saldo_sistema: i.saldo_sistema, qtd_contada: i.qty_contada, diferenca: i.diferenca, ajuste_sugerido: i.ajuste_sugerido, status: i.status,
+                codigo: i.products?.codigo, descricao: i.products?.descricao,
+                saldo_sistema: i.saldo_sistema, qtd_contada: i.qty_contada, diferenca: i.diferenca, status: i.status,
               })), `divergencias-${report.id.slice(0, 6)}`);
             }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
             <Button size="sm" variant="outline" onClick={async () => {
               const { exportToPDF } = await import("@/lib/export-utils");
-              exportToPDF("Divergências", ["Código", "Descrição", "Empresa", "Sistema", "Contado", "Dif.", "Ajuste", "Status"],
-              filtered.map((i: any) => [i.products?.codigo, i.products?.descricao, i.companies?.nome, i.saldo_sistema, i.qty_contada, i.diferenca, i.ajuste_sugerido, i.status]),
-              `divergencias-${report.id.slice(0, 6)}`, "landscape");
+              exportToPDF("Divergências", ["Código", "Descrição", "Sistema", "Contado", "Diferença", "Status"],
+              filtered.map((i: any) => [i.products?.codigo, i.products?.descricao, i.saldo_sistema, i.qty_contada, i.diferenca, i.status]),
+              `divergencias-${report.id.slice(0, 6)}`, "portrait");
             }}><FileText className="h-4 w-4 mr-2" />PDF</Button>
             
             <div className="flex-1" />
@@ -235,17 +215,15 @@ function ReportSection({ report }: { report: any }) {
           </div>
           <div className="hidden md:block">
             <Table>
-              <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Empresa</TableHead><TableHead className="text-right">Sistema</TableHead><TableHead className="text-right">Contado</TableHead><TableHead className="text-right">Diferença</TableHead><TableHead className="text-right">Ajuste</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Sistema</TableHead><TableHead className="text-right">Contado</TableHead><TableHead className="text-right">Diferença</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
               <TableBody>
                 {filtered.map((i: any) => (
                   <TableRow key={i.id}>
                     <TableCell className="font-mono text-xs">{i.products?.codigo}</TableCell>
                     <TableCell className="text-sm">{i.products?.descricao}</TableCell>
-                    <TableCell className="text-sm">{i.companies?.nome}</TableCell>
                     <TableCell className="text-right">{Number(i.saldo_sistema).toFixed(2)}</TableCell>
                     <TableCell className="text-right">{Number(i.qty_contada).toFixed(2)}</TableCell>
                     <TableCell className={`text-right font-medium ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</TableCell>
-                    <TableCell className="text-right">{Number(i.ajuste_sugerido).toFixed(2)}</TableCell>
                     <TableCell>
                       <Select value={i.status} onValueChange={(val) => updateStatus.mutate({ id: i.id, status: val })}>
                         <SelectTrigger className="h-8 text-xs w-[110px]">
@@ -282,12 +260,10 @@ function ReportSection({ report }: { report: any }) {
                   </Select>
                 </div>
                 <div className="text-sm font-medium leading-snug">{i.products?.descricao}</div>
-                <div className="text-xs text-muted-foreground mb-2">Empresa: {i.companies?.nome}</div>
                 <div className="grid grid-cols-2 gap-x-2 gap-y-3 bg-muted/50 p-2 rounded-md">
                   <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Sistema</span><span className="font-semibold">{Number(i.saldo_sistema).toFixed(2)}</span></div>
                   <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Contado</span><span className="font-semibold">{Number(i.qty_contada).toFixed(2)}</span></div>
-                  <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Diferença</span><span className={`font-semibold ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</span></div>
-                  <div className="text-xs"><span className="block text-muted-foreground mb-0.5">Ajuste</span><span className="font-semibold">{Number(i.ajuste_sugerido).toFixed(2)}</span></div>
+                  <div className="text-xs col-span-2"><span className="block text-muted-foreground mb-0.5">Diferença</span><span className={`font-semibold ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</span></div>
                 </div>
               </div>
             ))}
