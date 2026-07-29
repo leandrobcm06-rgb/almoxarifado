@@ -33,12 +33,16 @@ function Page() {
     queryKey: ["count", id],
     queryFn: async () => (await supabase.from("counts").select("*, count_rounds(*)").eq("id", id).single()).data,
   });
-  const { data: products } = useQuery({
-    queryKey: ["products-all"], queryFn: async () => {
+  const { data: snapshotItems } = useQuery({
+    queryKey: ["snapshot-items", count?.snapshot_id],
+    queryFn: async () => {
       const all: any[] = [];
       let page = 0;
       while (true) {
-        const { data } = await supabase.from("products").select("id, codigo, descricao, unidade, cod_auxiliar, fabricante, localizacao").order("codigo").range(page * 1000, (page + 1) * 1000 - 1);
+        const { data } = await supabase.from("stock_snapshot_items")
+          .select("*, products(id, codigo, descricao, unidade, cod_auxiliar, fabricante, localizacao)")
+          .eq("snapshot_id", count?.snapshot_id)
+          .range(page * 1000, (page + 1) * 1000 - 1);
         if (!data || data.length === 0) break;
         all.push(...data);
         if (data.length < 1000) break;
@@ -46,7 +50,16 @@ function Page() {
       }
       return all;
     },
+    enabled: !!count?.snapshot_id,
   });
+
+  const products = useMemo(() => {
+    const map = new Map();
+    for (const item of (snapshotItems ?? [])) {
+      if (item.products) map.set(item.products.id, item.products);
+    }
+    return Array.from(map.values());
+  }, [snapshotItems]);
 
   const finalize = useMutation({
     mutationFn: async () => {
