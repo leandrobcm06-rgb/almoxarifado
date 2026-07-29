@@ -214,22 +214,39 @@ function StockPanel({ snapshotId, products }: { snapshotId: string; products: an
             <Input placeholder="Buscar por código ou descrição..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-md" />
           </div>
           <div className="max-h-[600px] overflow-y-auto">
-            <Table>
-              <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {grouped.length === 0 ? (
-                  <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhum produto cadastrado.</TableCell></TableRow>
-                ) : (
-                  grouped.map((g: any, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-mono text-xs">{g.codigo}</TableCell>
-                      <TableCell className="text-sm">{g.descricao}</TableCell>
-                      <TableCell className="text-right">{g.qty}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {grouped.length === 0 ? (
+                    <TableRow><TableCell colSpan={3} className="text-center py-8 text-muted-foreground">Nenhum produto cadastrado.</TableCell></TableRow>
+                  ) : (
+                    grouped.map((g: any, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="font-mono text-xs">{g.codigo}</TableCell>
+                        <TableCell className="text-sm">{g.descricao}</TableCell>
+                        <TableCell className="text-right">{g.qty}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="md:hidden space-y-3">
+              {grouped.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground text-sm">Nenhum produto cadastrado.</div>
+              ) : (
+                grouped.map((g: any, i) => (
+                  <div key={i} className="border rounded-md p-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-mono text-xs">{g.codigo}</div>
+                      <div className="font-semibold text-sm">Qtd: {g.qty}</div>
+                    </div>
+                    <div className="text-sm">{g.descricao}</div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -421,27 +438,51 @@ function RoundPanel({ roundId, countId, products, blind, disabled }: { roundId: 
             </div>
           </div>
           <div className="max-h-[500px] overflow-y-auto">
-            <Table>
-              <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="w-32 text-right">Contado</TableHead><TableHead>Origem</TableHead></TableRow></TableHeader>
-              <TableBody>
-                {displayFiltered.map((p) => {
-                  const item = itemMap.get(p.id);
-                  return (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-mono text-xs">{p.codigo}</TableCell>
-                      <TableCell className="text-sm">{p.descricao}</TableCell>
-                      <TableCell>
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="w-32 text-right">Contado</TableHead><TableHead>Origem</TableHead></TableRow></TableHeader>
+                <TableBody>
+                  {displayFiltered.map((p) => {
+                    const item = itemMap.get(p.id);
+                    return (
+                      <TableRow key={p.id}>
+                        <TableCell className="font-mono text-xs">{p.codigo}</TableCell>
+                        <TableCell className="text-sm">{p.descricao}</TableCell>
+                        <TableCell>
+                          <Input type="number" step="0.001" disabled={disabled}
+                            defaultValue={item?.qty_contada ?? ""}
+                            onBlur={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v) && v !== (item?.qty_contada ?? null)) upsertItem.mutate({ productId: p.id, qty: v }); }}
+                            className="h-8 text-right" />
+                        </TableCell>
+                        <TableCell>{item ? <Badge variant="outline" className="text-xs">{item.origem}</Badge> : null}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="md:hidden space-y-3 mt-4">
+              {displayFiltered.map((p) => {
+                const item = itemMap.get(p.id);
+                return (
+                  <div key={p.id} className="border rounded-md p-3 relative bg-card">
+                    <div className="font-mono text-xs text-muted-foreground">{p.codigo}</div>
+                    <div className="text-sm font-medium leading-snug mt-1 mb-3">{p.descricao}</div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
                         <Input type="number" step="0.001" disabled={disabled}
                           defaultValue={item?.qty_contada ?? ""}
                           onBlur={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v) && v !== (item?.qty_contada ?? null)) upsertItem.mutate({ productId: p.id, qty: v }); }}
-                          className="h-8 text-right" />
-                      </TableCell>
-                      <TableCell>{item ? <Badge variant="outline" className="text-xs">{item.origem}</Badge> : null}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                          className="h-10 text-lg" placeholder="Qtd..." />
+                      </div>
+                      <div className="w-20 text-right">
+                        {item ? <Badge variant="outline" className="text-xs">{item.origem}</Badge> : null}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
           {filtered.length > 200 && <p className="text-xs text-muted-foreground mt-2">Mostrando 200 de {filtered.length} — use a busca.</p>}
         </CardContent>
