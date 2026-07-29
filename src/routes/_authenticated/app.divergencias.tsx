@@ -80,10 +80,8 @@ function Page() {
           ajuste_sugerido: diferenca 
         });
       }
-      // filter company_id null rows (no company found)
-      const valid = divItems.filter((d) => d.company_id);
-      for (let i = 0; i < valid.length; i += 500) {
-        const chunk = valid.slice(i, i + 500);
+      for (let i = 0; i < divItems.length; i += 500) {
+        const chunk = divItems.slice(i, i + 500);
         const { error: ie } = await supabase.from("divergence_items").insert(chunk);
         if (ie) throw ie;
       }
