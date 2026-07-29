@@ -52,20 +52,37 @@ function Page() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const [mesFiltro, setMesFiltro] = useState<string>("TODOS");
+
+  const filteredData = data?.filter((c: any) => mesFiltro === "TODOS" || c.mes === mesFiltro) ?? [];
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div><h1 className="text-2xl font-semibold">Contagens</h1><p className="text-sm text-muted-foreground">Contagem geral (2 rodadas cegas) ou diária (1 rodada).</p></div>
-        <Button onClick={() => nav({ to: "/app/contagens/nova" })}><Plus className="h-4 w-4 mr-2" />Nova contagem</Button>
+        <div className="flex gap-4 items-center">
+          <Select value={mesFiltro} onValueChange={setMesFiltro}>
+            <SelectTrigger className="w-[180px]"><SelectValue placeholder="Filtrar por Mês" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="TODOS">Todos os Meses</SelectItem>
+              {["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].map(m => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={() => nav({ to: "/app/contagens/nova" })}><Plus className="h-4 w-4 mr-2" />Nova contagem</Button>
+        </div>
       </div>
       <Card>
         <CardContent className="p-0">
           <Table>
-            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Tipo</TableHead><TableHead>Status</TableHead><TableHead>Rodadas</TableHead><TableHead>Criada em</TableHead></TableRow></TableHeader>
+            <TableHeader><TableRow><TableHead>Nome</TableHead><TableHead>Mês</TableHead><TableHead>Locais</TableHead><TableHead>Tipo</TableHead><TableHead>Status</TableHead><TableHead>Rodadas</TableHead><TableHead>Criada em</TableHead></TableRow></TableHeader>
             <TableBody>
-              {data?.map((c: any) => (
+              {filteredData.map((c: any) => (
                 <TableRow key={c.id} className="cursor-pointer hover:bg-accent" onClick={() => nav({ to: "/app/contagens/$id", params: { id: c.id } })}>
                   <TableCell className="font-medium"><Link to="/app/contagens/$id" params={{ id: c.id }}>{c.nome}</Link></TableCell>
+                  <TableCell className="text-sm">{c.mes || "-"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{(c.loc_start || c.loc_end) ? `${c.loc_start || "*"} até ${c.loc_end || "*"}` : "Todas"}</TableCell>
                   <TableCell><Badge variant="outline">{c.tipo}</Badge></TableCell>
                   <TableCell><Badge>{c.status}</Badge></TableCell>
                   <TableCell className="text-sm">{c.count_rounds?.length ?? 0}</TableCell>

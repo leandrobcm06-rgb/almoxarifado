@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,11 +35,32 @@ function Page() {
   // Contagem states
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<"geral" | "diaria">("diaria");
+  const [mes, setMes] = useState("");
   
   // Estoque states
   const [snapshotDate, setSnapshotDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [pending, setPending] = useState<Row[]>([]);
+  const [locStart, setLocStart] = useState("TODAS");
+  const [locEnd, setLocEnd] = useState("TODAS");
   const [activeCnpj, setActiveCnpj] = useState<string>("");
+
+  const locations = useMemo(() => {
+    const locs = new Set(pending.map(r => r.localizacao).filter(Boolean));
+    return Array.from(locs).sort((a: any, b: any) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }));
+  }, [pending]);
+
+  const filteredPending = useMemo(() => {
+    return pending.filter(r => {
+      if (locStart !== "TODAS" || locEnd !== "TODAS") {
+        if (!r.localizacao) return false;
+        const pIdx = locations.indexOf(r.localizacao);
+        if (pIdx === -1) return false;
+        if (locStart !== "TODAS" && pIdx < locations.indexOf(locStart)) return false;
+        if (locEnd !== "TODAS" && pIdx > locations.indexOf(locEnd)) return false;
+      }
+      return true;
+    });
+  }, [pending, locStart, locEnd, locations]);
 
   const { data: companies } = useQuery({
     queryKey: ["active-companies"], queryFn: async () => (await supabase.from("companies").select("*").eq("ativo", true).order("nome")).data ?? [],
@@ -130,16 +151,17 @@ function Page() {
   const confirm = useMutation({
     mutationFn: async () => {
       if (!nome) throw new Error("Informe o nome da contagem");
-      if (pending.length === 0) throw new Error("Carregue o estoque de pelo menos uma empresa antes de criar a contagem");
+      if (!mes) throw new Error("Selecione o mês da contagem");
+      if (filteredPending.length === 0) throw new Error("Carregue o estoque e ajuste o filtro para ter itens antes de criar a contagem");
       
       toast.info("Iniciando processamento do estoque...");
       
-      const codes = Array.from(new Set(pending.map((r) => r.codigo.toUpperCase())));
+      const codes = Array.from(new Set(filteredPending.map((r) => r.codigo.toUpperCase())));
       
       // Upsert ALL products from the spreadsheet to ensure descriptions and locations are up-to-date
       toast.info("Atualizando cadastro de produtos...");
       const toUpsert = codes.map((c) => {
-        const sample = pending.find((p) => p.codigo.toUpperCase() === c);
+        const sample = filteredPending.find((p) => p.codigo.toUpperCase() === c);
         return {
           codigo: c,
           descricao: sample?.descricao || c,
@@ -166,7 +188,7 @@ function Page() {
 
       toast.info("Processando itens do estoque...");
       const itemsMap = new Map<string, { snapshot_id: string; product_id: string; company_id: string; qty: number }>();
-      for (const r of pending) {
+      for (const r of filteredPending) {
         const pid = productMap.get(r.codigo.toUpperCase());
         if (!pid) throw new Error(`Produto não encontrado após criação: ${r.codigo}`);
         const key = `${r.company_id}|${pid}`;
@@ -187,6 +209,7 @@ function Page() {
       const { data: c, error: cErr } = await supabase.from("counts").insert({
         nome, tipo, status: "em_contagem",
         snapshot_id: snap.id,
+        mes, loc_start: locStart === "TODAS" ? null : locStart, loc_end: locEnd === "TODAS" ? null : locEnd
       }).select().single();
       if (cErr) throw cErr;
       
@@ -207,7 +230,7 @@ function Page() {
   });
 
   const groupedByCompany = (companies ?? []).map((c) => ({
-    company: c, count: pending.filter((r) => r.company_id === c.id).length,
+    company: c, count: filteredPending.filter((r) => r.company_id === c.id).length,
   }));
 
   return (
@@ -225,10 +248,21 @@ function Page() {
       <Card>
         <CardHeader><CardTitle>1. Dados da Contagem</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Nome</Label>
               <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Inventário Anual 2026" />
+            </div>
+            <div>
+              <Label>Mês</Label>
+              <Select value={mes} onValueChange={setMes}>
+                <SelectTrigger><SelectValue placeholder="Selecione o mês" /></SelectTrigger>
+                <SelectContent>
+                  {["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].map(m => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Tipo</Label>
@@ -283,25 +317,53 @@ function Page() {
       {pending.length > 0 && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Revisão do Estoque ({pending.length} linhas)</CardTitle>
+            <div>
+              <CardTitle>3. Revisão do Estoque ({filteredPending.length} linhas filtradas)</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Filtre de qual a qual localização será essa contagem. Só as que aparecem aqui vão pro snapshot!
+              </p>
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={async () => {
                 const { exportToExcel } = await import("@/lib/export-utils");
-                exportToExcel(pending, "estoque-revisao");
+                exportToExcel(filteredPending, "estoque-revisao");
               }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
               <Button variant="outline" onClick={() => setPending([])}><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
             </div>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[400px] overflow-y-auto">
+          <CardContent className="space-y-4">
+            <div className="flex gap-4">
+              <div className="w-64">
+                <Label>Localização Inicial</Label>
+                <Select value={locStart} onValueChange={setLocStart}>
+                  <SelectTrigger><SelectValue placeholder="Início" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TODAS">TODAS</SelectItem>
+                    {locations.map((loc: any) => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-64">
+                <Label>Localização Final</Label>
+                <Select value={locEnd} onValueChange={setLocEnd}>
+                  <SelectTrigger><SelectValue placeholder="Fim" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TODAS">TODAS</SelectItem>
+                    {locations.map((loc: any) => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="max-h-[400px] overflow-y-auto mt-4">
               <Table>
-                <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Loc</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
                 <TableBody>
-                  {pending.slice(0, 300).map((r, i) => (
+                  {filteredPending.slice(0, 300).map((r, i) => (
                     <TableRow key={i}>
                       <TableCell className="text-xs">{companies?.find((c) => c.id === r.company_id)?.nome}</TableCell>
                       <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
                       <TableCell className="text-sm">{r.descricao}</TableCell>
+                      <TableCell className="text-xs">{r.localizacao}</TableCell>
                       <TableCell className="text-right">{r.qty}</TableCell>
                     </TableRow>
                   ))}
@@ -313,7 +375,7 @@ function Page() {
       )}
 
       <div className="flex justify-end pt-4">
-        <Button size="lg" onClick={() => confirm.mutate()} disabled={confirm.isPending || pending.length === 0 || !nome} className="w-full md:w-auto px-12">
+        <Button size="lg" onClick={() => confirm.mutate()} disabled={confirm.isPending || pending.length === 0 || !nome || !mes} className="w-full md:w-auto px-12">
           <Save className="h-5 w-5 mr-2" />
           Confirmar Estoque e Criar Contagem
         </Button>
