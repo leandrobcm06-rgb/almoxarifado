@@ -74,11 +74,8 @@ function Page() {
         }
         
         let loc = pick(r, ["localizacao", "local", "endereco"]) ? String(pick(r, ["localizacao", "local", "endereco"])).trim().toUpperCase() : undefined;
-        if (loc) {
-          const letterCount = (loc.match(/[A-Z]/g) || []).length;
-          if (letterCount > 1 || loc === "UNICA") {
-            loc = undefined;
-          }
+        if (loc === "UNICA" || loc === "ÚNICA") {
+          loc = undefined;
         }
 
         parsed.push({
@@ -132,43 +129,26 @@ function Page() {
       
       const codes = Array.from(new Set(pending.map((r) => r.codigo.toUpperCase())));
       
-      // Fetch ALL products to ensure we don't miss any due to case sensitivity or 1000 row limits
-      toast.info("Buscando produtos no banco...");
-      let prods: any[] = [];
-      let page = 0;
-      while (true) {
-        const { data, error } = await supabase.from("products").select("id, codigo").range(page * 1000, (page + 1) * 1000 - 1);
-        if (error) throw new Error("Erro ao buscar produtos: " + error.message);
-        if (!data || data.length === 0) break;
-        prods.push(...data);
-        if (data.length < 1000) break;
-        page++;
-      }
-      
-      const productMap = new Map(prods.map((p) => [p.codigo.toUpperCase(), p.id]));
+      // Upsert ALL products from the spreadsheet to ensure descriptions and locations are up-to-date
+      toast.info("Atualizando cadastro de produtos...");
+      const toUpsert = codes.map((c) => {
+        const sample = pending.find((p) => p.codigo.toUpperCase() === c);
+        return {
+          codigo: c,
+          descricao: sample?.descricao || c,
+          unidade: "UN",
+          cod_auxiliar: sample?.cod_auxiliar ?? null,
+          fabricante: sample?.fabricante ?? null,
+          localizacao: sample?.localizacao ?? null,
+        };
+      });
 
-      // create missing products
-      const missing = codes.filter((c) => !productMap.has(c));
-      if (missing.length > 0) {
-        toast.info(`Cadastrando ${missing.length} novos produtos...`);
-        const toCreate = missing.map((c) => {
-          const sample = pending.find((p) => p.codigo.toUpperCase() === c);
-          return {
-            codigo: c,
-            descricao: sample?.descricao || c,
-            unidade: "UN",
-            cod_auxiliar: sample?.cod_auxiliar ?? null,
-            fabricante: sample?.fabricante ?? null,
-            localizacao: sample?.localizacao ?? null,
-          };
-        });
-
-        for (let i = 0; i < toCreate.length; i += 200) {
-          const chunkCreate = toCreate.slice(i, i + 200);
-          const { data: created, error } = await supabase.from("products").insert(chunkCreate).select("id, codigo");
-          if (error) throw new Error("Erro ao criar produto: " + error.message);
-          for (const p of created ?? []) productMap.set(p.codigo.toUpperCase(), p.id);
-        }
+      const productMap = new Map<string, string>();
+      for (let i = 0; i < toUpsert.length; i += 200) {
+        const chunk = toUpsert.slice(i, i + 200);
+        const { data: upserted, error } = await supabase.from("products").upsert(chunk, { onConflict: "codigo" }).select("id, codigo");
+        if (error) throw new Error("Erro ao atualizar produtos: " + error.message);
+        for (const p of upserted ?? []) productMap.set(p.codigo.toUpperCase(), p.id);
       }
 
       toast.info("Criando registro de snapshot...");
