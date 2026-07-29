@@ -74,8 +74,15 @@ function Page() {
         }
         
         let loc = pick(r, ["localizacao", "local", "endereco"]) ? String(pick(r, ["localizacao", "local", "endereco"])).trim().toUpperCase() : undefined;
-        if (loc === "UNICA" || loc === "ÚNICA") {
-          loc = undefined;
+        if (loc) {
+          if (loc === "UNICA" || loc === "ÚNICA") {
+            loc = undefined;
+          } else {
+            const letterCount = (loc.match(/[A-Z]/g) || []).length;
+            if (letterCount > 1 && !loc.includes("/")) {
+              loc = undefined;
+            }
+          }
         }
 
         parsed.push({
