@@ -26,7 +26,8 @@ function PatrimoniosInativos() {
         .from("assets")
         .select("*")
         .eq("is_active", false)
-        .order("deactivation_date", { ascending: false });
+        .order("deactivation_date", { ascending: false })
+        .order("asset_number", { ascending: true });
 
       if (error) throw error;
       setAssets(data || []);
