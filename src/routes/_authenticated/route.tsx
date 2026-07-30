@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Monitor, Archive, ArrowRightLeft } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated")({
@@ -57,6 +58,14 @@ const MAIN_NAV = [
   { to: "/app/auditoria", label: "Auditoria", icon: ShieldAlert, roles: ["admin"] },
 ] as const;
 
+const PATRIMONIOS_NAV = [
+  { to: "/app/patrimonios", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "gestor"] },
+  { to: "/app/patrimonios/lista", label: "Patrimônios", icon: Monitor, roles: ["admin", "gestor"] },
+  { to: "/app/patrimonios/emprestimos", label: "Empréstimos", icon: ArrowRightLeft, roles: ["admin", "gestor"] },
+  { to: "/app/patrimonios/inativos", label: "Inativos", icon: Archive, roles: ["admin", "gestor"] },
+  { to: "/app/patrimonios/relatorios", label: "Relatórios", icon: FileSpreadsheet, roles: ["admin", "gestor"] },
+] as const;
+
 function AuthedLayout() {
   const { user, roles, hasAnyRole, signOut, loading } = useAuth();
   const navigate = useNavigate();
@@ -66,15 +75,18 @@ function AuthedLayout() {
   const contagensItems = CONTAGENS_NAV.filter((n) => hasAnyRole(n.roles as any));
   const cobreItems = COBRE_NAV.filter((n) => hasAnyRole(n.roles as any));
   const ferramentasItems = FERRAMENTAS_NAV.filter((n) => hasAnyRole(n.roles as any));
+  const patrimoniosItems = PATRIMONIOS_NAV.filter((n) => hasAnyRole(n.roles as any));
   const mainItems = MAIN_NAV.filter((n) => hasAnyRole(n.roles as any));
 
   const isContagensActive = contagensItems.some(item => path === item.to || (item.to !== "/app" && path.startsWith(item.to)));
   const isCobreActive = path.startsWith("/app/cobre");
   const isFerramentasActive = path.startsWith("/app/ferramentas");
+  const isPatrimoniosActive = path.startsWith("/app/patrimonios");
   
   const [contagensOpen, setContagensOpen] = useState(isContagensActive);
   const [cobreOpen, setCobreOpen] = useState(isCobreActive);
   const [ferramentasOpen, setFerramentasOpen] = useState(isFerramentasActive);
+  const [patrimoniosOpen, setPatrimoniosOpen] = useState(isPatrimoniosActive);
 
   useEffect(() => {
     if (isContagensActive) setContagensOpen(true);
@@ -87,6 +99,10 @@ function AuthedLayout() {
   useEffect(() => {
     if (isFerramentasActive) setFerramentasOpen(true);
   }, [isFerramentasActive]);
+
+  useEffect(() => {
+    if (isPatrimoniosActive) setPatrimoniosOpen(true);
+  }, [isPatrimoniosActive]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Carregando...</div>;
 
@@ -203,6 +219,44 @@ function AuthedLayout() {
                 <div className="pl-9 space-y-1 pt-1">
                   {ferramentasItems.map((item) => {
                     const active = path === item.to || (item.to !== "/app/ferramentas" && path.startsWith(item.to));
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                          active ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {patrimoniosItems.length > 0 && (
+            <div className="space-y-1 mb-2">
+              <button
+                onClick={() => setPatrimoniosOpen(!patrimoniosOpen)}
+                className={cn(
+                  "w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  isPatrimoniosActive ? "text-sidebar-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Monitor className={cn("h-4 w-4", isPatrimoniosActive && "text-primary")} /> Patrimônios
+                </div>
+                {patrimoniosOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </button>
+              
+              <div className={cn("overflow-hidden transition-all duration-200 ease-in-out", patrimoniosOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0")}>
+                <div className="pl-9 space-y-1 pt-1">
+                  {patrimoniosItems.map((item) => {
+                    const active = path === item.to || (item.to !== "/app/patrimonios" && path.startsWith(item.to));
                     return (
                       <Link
                         key={item.to}
