@@ -59,7 +59,7 @@ function AuthPage() {
     <div className="min-h-screen bg-muted/40 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <img src="/logo.jpg" alt="BCM Eletricidade e Automação" className="mx-auto mb-2 h-16 w-auto object-contain" />
+          <img src="/Logo.jpeg" alt="BCM Eletricidade e Automação" className="mx-auto mb-2 h-16 w-auto object-contain" />
           <CardTitle>BCM Stock</CardTitle>
           <CardDescription>Controle de estoque e contagens</CardDescription>
         </CardHeader>

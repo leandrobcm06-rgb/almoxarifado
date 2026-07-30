@@ -54,7 +54,7 @@ function WelcomePage() {
       {/* Welcome Section */}
       <div className="flex flex-col items-center justify-center text-center space-y-4 py-10 bg-card rounded-xl border shadow-sm relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-        <img src="/logo.jpg" alt="BCM Stock Logo" className="h-32 md:h-40 object-contain rounded-xl shadow-lg border bg-white relative z-10" />
+        <img src="/Logo.jpeg" alt="BCM Stock Logo" className="h-32 md:h-40 object-contain rounded-xl shadow-lg border bg-white relative z-10" />
         <div className="relative z-10">
           <h1 className="text-4xl font-bold tracking-tight text-primary mt-4">Bem-vindo ao BCM Stock</h1>
           <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">

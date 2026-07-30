@@ -113,7 +113,7 @@ function AuthedLayout() {
       )}>
         <div className="p-4 border-b flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <img src="/logo.jpg" alt="BCM" className="h-9 w-9 rounded object-contain bg-white/5 p-1 shrink-0" />
+            <img src="/Logo.jpeg" alt="BCM" className="h-9 w-9 rounded object-contain bg-white/5 p-1 shrink-0" />
             <div className="min-w-0">
               <div className="font-semibold truncate">BCM Stock</div>
               <div className="text-xs text-muted-foreground truncate">BCM · Controle de estoque</div>
