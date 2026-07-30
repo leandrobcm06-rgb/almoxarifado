@@ -26,7 +26,6 @@ import { NotificationsBadge } from "@/components/notifications-badge";
 import { ShieldAlert } from "lucide-react";
 
 const CONTAGENS_NAV = [
-  { to: "/app", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "gestor", "conferente", "contador"] },
   { to: "/app/contagens", label: "Nova Contagem", icon: ClipboardList, roles: ["admin", "gestor", "conferente", "contador"] },
   { to: "/app/divergencias", label: "Divergências", icon: AlertTriangle, roles: ["admin", "gestor", "conferente"] },
 ] as const;
@@ -124,6 +123,17 @@ function AuthedLayout() {
         </div>
 
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+          <Link
+            to="/app"
+            onClick={() => setOpen(false)}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors mb-4",
+              path === "/app" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+            )}
+          >
+            <LayoutDashboard className={cn("h-4 w-4", path === "/app" && "text-primary")} /> Boas Vindas
+          </Link>
+
           {contagensItems.length > 0 && (
             <div className="space-y-1 mb-2">
               <button
