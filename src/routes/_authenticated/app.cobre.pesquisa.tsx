@@ -11,7 +11,7 @@ import { ArrowDownRight, ArrowUpRight, Search } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/pesquisa")({
-  head: () => ({ meta: [{ title: "Pesquisa Rápida Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Pesquisa Rápida Cobre | BCM Stock" }] }),
   component: CopperSearch,
 });
 

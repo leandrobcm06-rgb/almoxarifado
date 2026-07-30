@@ -14,7 +14,7 @@ import { Upload, FileDown, Save, Trash2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/app/contagens/nova")({
-  head: () => ({ meta: [{ title: "Nova Contagem | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Nova Contagem | BCM Stock" }] }),
   component: Page,
 });
 

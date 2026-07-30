@@ -9,7 +9,7 @@ import { Search, Power, Eye, ArchiveRestore } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/inativos")({
-  head: () => ({ meta: [{ title: "Patrimônios Inativos | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Patrimônios Inativos | BCM Stock" }] }),
   component: PatrimoniosInativos,
 });
 

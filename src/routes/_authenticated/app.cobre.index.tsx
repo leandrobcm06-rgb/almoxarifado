@@ -11,7 +11,7 @@ import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/")({
-  head: () => ({ meta: [{ title: "Dashboard Barras de Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Dashboard Barras de Cobre | BCM Stock" }] }),
   component: CobreDashboard,
 });
 

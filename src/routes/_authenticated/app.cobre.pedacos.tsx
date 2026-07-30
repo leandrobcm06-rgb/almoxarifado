@@ -9,7 +9,7 @@ import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/pedacos")({
-  head: () => ({ meta: [{ title: "Pedaços de Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Pedaços de Cobre | BCM Stock" }] }),
   component: CopperPieces,
 });
 

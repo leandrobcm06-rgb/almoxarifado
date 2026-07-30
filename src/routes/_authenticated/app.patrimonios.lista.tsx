@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/lista")({
-  head: () => ({ meta: [{ title: "Lista de Patrimônios | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Lista de Patrimônios | BCM Stock" }] }),
   component: PatrimoniosList,
 });
 

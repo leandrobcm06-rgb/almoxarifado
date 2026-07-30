@@ -63,8 +63,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Almoxarifado | Controle de Estoque" },
-      { name: "description", content: "Sistema de controle de contagens de estoque e ajustes de divergências para almoxarifado multiempresa." },
+      { title: "BCM Stock | Controle de Estoque" },
+      { name: "description", content: "Sistema de controle de contagens de estoque e ajustes de divergências para BCM Stock multiempresa." },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

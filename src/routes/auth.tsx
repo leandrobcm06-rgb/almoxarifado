@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Package } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Entrar | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Entrar | BCM Stock" }] }),
   component: AuthPage,
 });
 
@@ -60,7 +60,7 @@ function AuthPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <img src="/logo.jpg" alt="BCM Eletricidade e Automação" className="mx-auto mb-2 h-16 w-auto object-contain" />
-          <CardTitle>Almoxarifado</CardTitle>
+          <CardTitle>BCM Stock</CardTitle>
           <CardDescription>Controle de estoque e contagens</CardDescription>
         </CardHeader>
         <CardContent>

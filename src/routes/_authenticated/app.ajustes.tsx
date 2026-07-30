@@ -16,7 +16,7 @@ import { FileDown, FileText, Wrench } from "lucide-react";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/app/ajustes")({
-  head: () => ({ meta: [{ title: "Ajustes | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Ajustes | BCM Stock" }] }),
   component: Page,
 });
 

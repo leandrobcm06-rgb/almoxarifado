@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/app/")({
-  head: () => ({ meta: [{ title: "Dashboard | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Dashboard | BCM Stock" }] }),
   component: Dashboard,
 });
 
@@ -32,17 +32,28 @@ function Dashboard() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Welcome Section with Logo */}
+      <div className="flex flex-col items-center justify-center text-center space-y-4 py-8 bg-card rounded-xl border shadow-sm">
+        <img src="/logo.jpg" alt="BCM Stock Logo" className="h-40 md:h-48 object-contain rounded-xl shadow-lg border" />
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight text-primary mt-4">Bem-vindo ao BCM Stock</h1>
+          <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+            Seu sistema completo de gestão de estoque, controle de ferramentas e patrimônios.
+          </p>
+        </div>
+      </div>
+
       <div>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Visão geral do almoxarifado</p>
+        <h2 className="text-2xl font-semibold mb-4">Visão Geral</h2>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat icon={<ClipboardList />} label="Contagens em aberto" value={data?.contagensAbertas ?? "-"} />
+          <Stat icon={<AlertTriangle />} label="Divergências pendentes" value={data?.divergenciasPendentes ?? "-"} />
+          <Stat icon={<Wrench />} label="Ajustes em andamento" value={data?.ajustesEmAndamento ?? "-"} />
+          <Stat icon={<FileSpreadsheet />} label="Último estoque" value={data?.ultimoSnapshot ? format(new Date(data.ultimoSnapshot + "T00:00"), "dd/MM/yyyy") : "—"} />
+        </div>
       </div>
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat icon={<ClipboardList />} label="Contagens em aberto" value={data?.contagensAbertas ?? "-"} />
-        <Stat icon={<AlertTriangle />} label="Divergências pendentes" value={data?.divergenciasPendentes ?? "-"} />
-        <Stat icon={<Wrench />} label="Ajustes em andamento" value={data?.ajustesEmAndamento ?? "-"} />
-        <Stat icon={<FileSpreadsheet />} label="Último estoque" value={data?.ultimoSnapshot ? format(new Date(data.ultimoSnapshot + "T00:00"), "dd/MM/yyyy") : "—"} />
-      </div>
+
       <Card>
         <CardHeader><CardTitle>Suas funções</CardTitle></CardHeader>
         <CardContent>

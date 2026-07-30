@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/lista")({
-  head: () => ({ meta: [{ title: "Cadastro de Ferramentas | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Cadastro de Ferramentas | BCM Stock" }] }),
   component: ToolsList,
 });
 

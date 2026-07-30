@@ -12,7 +12,7 @@ import { Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/app/auditoria")({
-  head: () => ({ meta: [{ title: "Auditoria | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Auditoria | BCM Stock" }] }),
   component: Page,
 });
 

@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/movimentacoes")({
-  head: () => ({ meta: [{ title: "Movimentações de Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Movimentações de Cobre | BCM Stock" }] }),
   component: CobreMovimentacoes,
 });
 

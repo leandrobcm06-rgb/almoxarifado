@@ -11,7 +11,7 @@ import autoTable from "jspdf-autotable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/relatorios")({
-  head: () => ({ meta: [{ title: "Relatórios de Patrimônios | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Relatórios de Patrimônios | BCM Stock" }] }),
   component: PatrimoniosRelatorios,
 });
 

@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { runOcrOnPhoto } from "@/lib/ocr.functions";
 
 export const Route = createFileRoute("/_authenticated/app/contagens/$id")({
-  head: () => ({ meta: [{ title: "Contagem | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Contagem | BCM Stock" }] }),
   component: Page,
   errorComponent: ({ error }) => <div className="p-4 text-red-500">Erro na rota: {error.message} <pre>{error.stack}</pre></div>,
 });

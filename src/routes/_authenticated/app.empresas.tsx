@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/empresas")({
-  head: () => ({ meta: [{ title: "Empresas | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Empresas | BCM Stock" }] }),
   component: Page,
 });
 import { useEffect } from "react";
@@ -67,7 +67,7 @@ function Page() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-semibold">Empresas (CNPJs)</h1><p className="text-sm text-muted-foreground">Os 4 estabelecimentos do almoxarifado.</p></div>
+        <div><h1 className="text-2xl font-semibold">Empresas (CNPJs)</h1><p className="text-sm text-muted-foreground">Os 4 estabelecimentos do BCM Stock.</p></div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Nova empresa</Button></DialogTrigger>
           <DialogContent>

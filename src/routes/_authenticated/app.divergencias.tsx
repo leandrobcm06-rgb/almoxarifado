@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/app/divergencias")({
-  head: () => ({ meta: [{ title: "Divergências | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Divergências | BCM Stock" }] }),
   component: Page,
 });
 

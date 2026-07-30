@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/devolucao")({
-  head: () => ({ meta: [{ title: "Devolução de Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Devolução de Cobre | BCM Stock" }] }),
   component: CopperReturn,
 });
 

@@ -116,7 +116,7 @@ function AuthedLayout() {
           <div className="flex items-center gap-2 min-w-0">
             <img src="/logo.jpg" alt="BCM" className="h-9 w-9 rounded object-contain bg-white/5 p-1 shrink-0" />
             <div className="min-w-0">
-              <div className="font-semibold truncate">Almoxarifado</div>
+              <div className="font-semibold truncate">BCM Stock</div>
               <div className="text-xs text-muted-foreground truncate">BCM · Controle de estoque</div>
             </div>
           </div>
@@ -313,7 +313,7 @@ function AuthedLayout() {
         <header className="lg:hidden border-b bg-background p-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button>
-            <div className="font-medium">Almoxarifado</div>
+            <div className="font-medium">BCM Stock</div>
           </div>
           <NotificationsBadge />
         </header>

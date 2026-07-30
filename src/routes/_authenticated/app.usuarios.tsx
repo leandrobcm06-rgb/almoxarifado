@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/app/usuarios")({
-  head: () => ({ meta: [{ title: "Usuários | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Usuários | BCM Stock" }] }),
   component: Page,
 });
 

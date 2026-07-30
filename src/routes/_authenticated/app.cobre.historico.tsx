@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowDownRight, ArrowUpRight, FilterX } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/historico")({
-  head: () => ({ meta: [{ title: "Histórico de Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Histórico de Cobre | BCM Stock" }] }),
   component: CopperHistory,
 });
 

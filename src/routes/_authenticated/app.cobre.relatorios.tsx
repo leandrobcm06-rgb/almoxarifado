@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/relatorios")({
-  head: () => ({ meta: [{ title: "Relatórios de Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Relatórios de Cobre | BCM Stock" }] }),
   component: ReportsView,
 });
 

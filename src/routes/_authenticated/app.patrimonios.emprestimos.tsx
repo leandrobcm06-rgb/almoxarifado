@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/app/patrimonios/emprestimo
   validateSearch: (search: Record<string, unknown>): EmprestimosSearch => {
     return { assetId: search.assetId as string | undefined };
   },
-  head: () => ({ meta: [{ title: "Empréstimos de Patrimônios | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Empréstimos de Patrimônios | BCM Stock" }] }),
   component: EmprestimosList,
 });
 

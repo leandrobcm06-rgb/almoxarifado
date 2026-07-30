@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/$id")({
-  head: () => ({ meta: [{ title: "Detalhes do Patrimônio | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Detalhes do Patrimônio | BCM Stock" }] }),
   component: PatrimoniosDetails,
 });
 

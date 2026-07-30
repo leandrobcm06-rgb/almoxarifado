@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/barras")({
-  head: () => ({ meta: [{ title: "Barras de Cobre | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Barras de Cobre | BCM Stock" }] }),
   component: CopperBars,
 });
 

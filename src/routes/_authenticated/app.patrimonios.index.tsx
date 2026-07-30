@@ -21,7 +21,7 @@ import { format, subMonths, startOfMonth, endOfMonth, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/")({
-  head: () => ({ meta: [{ title: "Dashboard Patrimônios | Almoxarifado" }] }),
+  head: () => ({ meta: [{ title: "Dashboard Patrimônios | BCM Stock" }] }),
   component: Dashboard,
 });
 
