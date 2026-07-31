@@ -22,13 +22,33 @@ function Page() {
   const { data: logs, isLoading } = useQuery({
     queryKey: ["audit_logs"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: auditData, error } = await supabase
         .from("audit_log")
-        .select("*, profiles(nome)")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
-      return data ?? [];
+      if (!auditData || auditData.length === 0) return [];
+
+      const userIds = [...new Set(auditData.map(log => log.user_id).filter(Boolean))];
+      
+      let profilesMap: Record<string, any> = {};
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, nome")
+          .in("id", userIds);
+          
+        profilesMap = (profilesData || []).reduce((acc, profile) => {
+          acc[profile.id] = profile;
+          return acc;
+        }, {});
+      }
+
+      return auditData.map(log => ({
+        ...log,
+        profiles: profilesMap[log.user_id] || null
+      }));
     },
   });
 
