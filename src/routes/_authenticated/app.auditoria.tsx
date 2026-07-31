@@ -16,6 +16,34 @@ export const Route = createFileRoute("/_authenticated/app/auditoria")({
   component: Page,
 });
 
+const getEntityName = (log: any) => {
+  if (!log.dados) return log.entidade_id || "-";
+  
+  const data = log.acao === "Edição" ? log.dados.depois || log.dados : log.dados;
+  if (!data) return log.entidade_id || "-";
+
+  let nameStr = data.name || data.nome || data.description || data.descricao || data.codigo;
+  
+  if (log.entidade === "assets" && data.asset_number) {
+    nameStr = `${data.asset_number} - ${data.description || ''}`;
+  } else if (log.entidade === "tools" && data.patrimony_number) {
+    nameStr = `${data.patrimony_number} - ${data.name || ''}`;
+  }
+
+  return nameStr || log.entidade_id || "-";
+};
+
+const translateEntity = (entity: string) => {
+  const map: Record<string, string> = {
+    assets: "Patrimônio", asset_loans: "Empréstimo (Patr.)",
+    tools: "Ferramenta", tool_loans: "Empréstimo (Ferr.)", tool_locations: "Local (Ferr.)",
+    copper_bars: "Barra de Cobre", copper_pieces: "Peça de Cobre", copper_movements: "Movimentação (Cobre)",
+    counts: "Contagem", count_items: "Item de Contagem", divergence_items: "Divergência",
+    profiles: "Usuário", user_roles: "Permissão"
+  };
+  return map[entity] || entity;
+};
+
 function Page() {
   const [viewingData, setViewingData] = useState<any>(null);
 
@@ -70,8 +98,8 @@ function Page() {
                   <TableHead>Data / Hora</TableHead>
                   <TableHead>Usuário</TableHead>
                   <TableHead>Ação</TableHead>
-                  <TableHead>Entidade</TableHead>
-                  <TableHead>ID da Entidade</TableHead>
+                  <TableHead>Módulo</TableHead>
+                  <TableHead>Registro Afetado</TableHead>
                   <TableHead className="w-24 text-center">Detalhes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -84,10 +112,10 @@ function Page() {
                   logs?.map((log: any) => (
                     <TableRow key={log.id}>
                       <TableCell className="whitespace-nowrap">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</TableCell>
-                      <TableCell className="font-medium">{log.profiles?.nome || "Desconhecido"}</TableCell>
+                      <TableCell className="font-medium">{log.profiles?.nome || "Sistema"}</TableCell>
                       <TableCell><span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-semibold">{log.acao}</span></TableCell>
-                      <TableCell>{log.entidade}</TableCell>
-                      <TableCell className="font-mono text-xs">{log.entidade_id || "-"}</TableCell>
+                      <TableCell>{translateEntity(log.entidade)}</TableCell>
+                      <TableCell className="font-medium max-w-[250px] truncate" title={getEntityName(log)}>{getEntityName(log)}</TableCell>
                       <TableCell className="text-center">
                         <Button variant="ghost" size="icon" onClick={() => setViewingData(log)} disabled={!log.dados}>
                           <Eye className="h-4 w-4" />
@@ -111,8 +139,10 @@ function Page() {
                     <span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-semibold">{log.acao}</span>
                     <span className="text-xs text-muted-foreground">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</span>
                   </div>
-                  <div className="text-sm font-medium">{log.profiles?.nome || "Desconhecido"}</div>
-                  <div className="text-sm text-muted-foreground">{log.entidade} <span className="font-mono text-xs ml-1">{log.entidade_id || ""}</span></div>
+                  <div className="text-sm font-medium">{log.profiles?.nome || "Sistema"}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {translateEntity(log.entidade)} <span className="font-medium ml-1 block truncate mt-1">{getEntityName(log)}</span>
+                  </div>
                   <div className="flex justify-end mt-2">
                     <Button variant="outline" size="sm" onClick={() => setViewingData(log)} disabled={!log.dados}>
                       <Eye className="h-4 w-4 mr-2" /> Detalhes
@@ -124,6 +154,7 @@ function Page() {
           </div>
         </CardContent>
       </Card>
+
 
       <Dialog open={!!viewingData} onOpenChange={() => setViewingData(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
