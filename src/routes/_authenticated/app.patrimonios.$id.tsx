@@ -14,6 +14,42 @@ export const Route = createFileRoute("/_authenticated/app/patrimonios/$id")({
   component: PatrimoniosDetails,
 });
 
+const calculateDepreciation = (asset: any) => {
+  if (!asset.acquisition_date || !asset.initial_value || !asset.category) return null;
+  
+  const start = new Date(asset.acquisition_date);
+  const now = new Date();
+  const years = (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+  
+  if (years < 0) return { depreciatedValue: asset.initial_value, percentage: 0, initialValue: asset.initial_value };
+  
+  let rate = 0;
+  switch (asset.category) {
+    case "Eletrônicos": rate = 0.20; break;
+    case "Ferramentas elétricas": rate = 0.20; break;
+    case "Ferramentas hidráulicas portáteis": rate = 0.20; break;
+    case "Ferramentas manuais": rate = 0.10; break;
+    case "Equipamentos hidráulicos industriais": rate = 0.10; break;
+    case "Móveis": rate = 0.10; break;
+    default: rate = 0;
+  }
+  
+  let depreciationPercentage = years * rate;
+  if (depreciationPercentage > 1) depreciationPercentage = 1;
+  
+  const depreciatedValue = asset.initial_value * (1 - depreciationPercentage);
+  return {
+    depreciatedValue,
+    percentage: depreciationPercentage,
+    initialValue: asset.initial_value
+  };
+};
+
+const formatCurrency = (val: number) => {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+};
+
+
 function PatrimoniosDetails() {
   const { id } = Route.useParams();
   const [asset, setAsset] = useState<any>(null);
@@ -98,6 +134,27 @@ function PatrimoniosDetails() {
               <div>
                 <div className="text-muted-foreground flex items-center gap-2 mb-1"><MapPin className="h-3.5 w-3.5"/> Localização</div>
                 <div className="font-medium">{asset.location || "-"}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground flex items-center gap-2 mb-1"><Tag className="h-3.5 w-3.5"/> Categoria</div>
+                <div className="font-medium">{asset.category || "-"}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground flex items-center gap-2 mb-1"><Tag className="h-3.5 w-3.5"/> Valor Atual</div>
+                <div className="font-medium">
+                  {(() => {
+                    if (!asset.initial_value) return "-";
+                    const dep = calculateDepreciation(asset);
+                    if (!dep) return formatCurrency(asset.initial_value);
+                    if (dep.percentage === 0) return formatCurrency(asset.initial_value);
+                    return (
+                      <div className="flex flex-col">
+                        <span className="text-emerald-600 font-semibold">{formatCurrency(dep.depreciatedValue)}</span>
+                        <span className="text-xs text-muted-foreground line-through">Inicial: {formatCurrency(dep.initialValue)}</span>
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
 

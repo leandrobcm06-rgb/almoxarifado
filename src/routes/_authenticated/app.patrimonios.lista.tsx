@@ -17,6 +17,41 @@ export const Route = createFileRoute("/_authenticated/app/patrimonios/lista")({
   component: PatrimoniosList,
 });
 
+const calculateDepreciation = (asset: any) => {
+  if (!asset.acquisition_date || !asset.initial_value || !asset.category) return null;
+  
+  const start = new Date(asset.acquisition_date);
+  const now = new Date();
+  const years = (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+  
+  if (years < 0) return { depreciatedValue: asset.initial_value, percentage: 0, initialValue: asset.initial_value };
+  
+  let rate = 0;
+  switch (asset.category) {
+    case "Eletrônicos": rate = 0.20; break;
+    case "Ferramentas elétricas": rate = 0.20; break;
+    case "Ferramentas hidráulicas portáteis": rate = 0.20; break;
+    case "Ferramentas manuais": rate = 0.10; break;
+    case "Equipamentos hidráulicos industriais": rate = 0.10; break;
+    case "Móveis": rate = 0.10; break;
+    default: rate = 0;
+  }
+  
+  let depreciationPercentage = years * rate;
+  if (depreciationPercentage > 1) depreciationPercentage = 1;
+  
+  const depreciatedValue = asset.initial_value * (1 - depreciationPercentage);
+  return {
+    depreciatedValue,
+    percentage: depreciationPercentage,
+    initialValue: asset.initial_value
+  };
+};
+
+const formatCurrency = (val: number) => {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+};
+
 function PatrimoniosList() {
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +71,8 @@ function PatrimoniosList() {
   const [condition, setCondition] = useState("Bom");
   const [acquisitionDate, setAcquisitionDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [category, setCategory] = useState("");
+  const [initialValue, setInitialValue] = useState("");
 
   // Deactivation State
   const [deactivateOpen, setDeactivateOpen] = useState(false);
@@ -70,6 +107,7 @@ function PatrimoniosList() {
     setDescription(""); setModel(""); setBrand(""); setAssetNumber("");
     setSerialNumber(""); setResponsible(""); setLocation("");
     setCondition("Bom"); setAcquisitionDate(""); setNotes("");
+    setCategory(""); setInitialValue("");
     setEditingAsset(null);
   };
 
@@ -80,6 +118,7 @@ function PatrimoniosList() {
     setResponsible(asset.responsible || ""); setLocation(asset.location || "");
     setCondition(asset.condition); setAcquisitionDate(asset.acquisition_date || "");
     setNotes(asset.notes || "");
+    setCategory(asset.category || ""); setInitialValue(asset.initial_value ? String(asset.initial_value) : "");
     setIsAddOpen(true);
   };
 
@@ -102,6 +141,7 @@ function PatrimoniosList() {
       const payload = {
         description, model, brand, asset_number: assetNumber, serial_number: serialNumber,
         responsible, location, condition, acquisition_date: acquisitionDate || null, notes,
+        category: category || null, initial_value: initialValue ? parseFloat(initialValue) : null,
       };
 
       if (editingAsset) {
@@ -184,7 +224,8 @@ function PatrimoniosList() {
       (a.serial_number && a.serial_number.toLowerCase().includes(lower)) ||
       (a.brand && a.brand.toLowerCase().includes(lower)) ||
       (a.responsible && a.responsible.toLowerCase().includes(lower)) ||
-      (a.location && a.location.toLowerCase().includes(lower))
+      (a.location && a.location.toLowerCase().includes(lower)) ||
+      (a.category && a.category.toLowerCase().includes(lower))
     );
   }, [assets, search]);
 
@@ -250,6 +291,24 @@ function PatrimoniosList() {
                 <Label htmlFor="acquisitionDate">Data de aquisição</Label>
                 <Input id="acquisitionDate" type="date" value={acquisitionDate} onChange={(e) => setAcquisitionDate(e.target.value)} />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="category">Categoria</Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Eletrônicos">Eletrônicos</SelectItem>
+                    <SelectItem value="Ferramentas manuais">Ferramentas manuais</SelectItem>
+                    <SelectItem value="Ferramentas elétricas">Ferramentas elétricas</SelectItem>
+                    <SelectItem value="Ferramentas hidráulicas portáteis">Ferramentas hidráulicas portáteis</SelectItem>
+                    <SelectItem value="Equipamentos hidráulicos industriais">Equipamentos hidráulicos industriais</SelectItem>
+                    <SelectItem value="Móveis">Móveis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="initialValue">Valor inicial (R$)</Label>
+                <Input id="initialValue" type="number" step="0.01" value={initialValue} onChange={(e) => setInitialValue(e.target.value)} placeholder="0.00" />
+              </div>
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="notes">Observações</Label>
                 <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="resize-none" rows={3} />
@@ -286,8 +345,8 @@ function PatrimoniosList() {
                     <th className="px-4 py-3 font-medium whitespace-nowrap">Nº Patrimônio</th>
                     <th className="px-4 py-3 font-medium">Descrição</th>
                     <th className="px-4 py-3 font-medium hidden md:table-cell">Marca/Modelo</th>
-                    <th className="px-4 py-3 font-medium hidden lg:table-cell">Responsável</th>
-                    <th className="px-4 py-3 font-medium hidden lg:table-cell">Localização</th>
+                    <th className="px-4 py-3 font-medium hidden lg:table-cell">Responsável/Local</th>
+                    <th className="px-4 py-3 font-medium">Categoria/Valor</th>
                     <th className="px-4 py-3 font-medium">Estado</th>
                     <th className="px-4 py-3 font-medium">Status</th>
                     <th className="px-4 py-3 font-medium text-right">Ações</th>
@@ -305,8 +364,35 @@ function PatrimoniosList() {
                         <div>{a.brand || "-"}</div>
                         <div className="text-xs text-muted-foreground">{a.model || "-"}</div>
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell">{a.responsible || "-"}</td>
-                      <td className="px-4 py-3 hidden lg:table-cell">{a.location || "-"}</td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        <div>{a.responsible || "-"}</div>
+                        <div className="text-xs text-muted-foreground">{a.location || "-"}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-xs">{a.category || "-"}</div>
+                        {a.initial_value ? (
+                          <div className="text-xs">
+                            {(() => {
+                              const dep = calculateDepreciation(a);
+                              if (!dep) return formatCurrency(a.initial_value);
+                              return (
+                                <div className="flex flex-col">
+                                  <span className={dep.percentage > 0 ? "line-through text-muted-foreground text-[10px]" : ""}>
+                                    {formatCurrency(dep.initialValue)}
+                                  </span>
+                                  {dep.percentage > 0 && (
+                                    <span className="text-emerald-600 font-semibold">
+                                      {formatCurrency(dep.depreciatedValue)} <span className="text-[10px] text-muted-foreground">(-{(dep.percentage * 100).toFixed(0)}%)</span>
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">-</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3">
                         <Badge variant={conditionColors[a.condition] as any || "outline"}>{a.condition}</Badge>
                       </td>
