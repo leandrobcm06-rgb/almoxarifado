@@ -88,7 +88,7 @@ function PatrimoniosList() {
         .from("assets")
         .select("*")
         .eq("is_active", true)
-        .order("created_at", { ascending: false });
+        .order("asset_number", { ascending: true });
 
       if (error) throw error;
       setAssets(data || []);
