@@ -1,9 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, getSecondarySupabaseClient } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/app/usuarios")({
@@ -15,6 +21,36 @@ const ROLES = ["admin", "gestor", "conferente", "contador"] as const;
 
 function Page() {
   const qc = useQueryClient();
+  const [openNewUser, setOpenNewUser] = useState(false);
+  const [newNome, setNewNome] = useState("");
+  const [newUser, setNewUser] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [loadingNew, setLoadingNew] = useState(false);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingNew(true);
+    const secClient = getSecondarySupabaseClient();
+    const loginEmail = newUser.includes('@') ? newUser : `${newUser}@bcmstock.local`;
+    
+    const { error } = await secClient.auth.signUp({
+      email: loginEmail,
+      password: newPass,
+      options: { data: { nome: newNome } }
+    });
+    
+    setLoadingNew(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Usuário criado com sucesso!");
+      setOpenNewUser(false);
+      setNewNome("");
+      setNewUser("");
+      setNewPass("");
+      qc.invalidateQueries({ queryKey: ["profiles"] });
+    }
+  };
 
   const { data: profiles } = useQuery({
     queryKey: ["profiles"],
@@ -43,7 +79,21 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <div><h1 className="text-2xl font-semibold">Usuários e funções</h1><p className="text-sm text-muted-foreground">Marque as funções de cada usuário.</p></div>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div><h1 className="text-2xl font-semibold">Usuários e funções</h1><p className="text-sm text-muted-foreground">Marque as funções de cada usuário.</p></div>
+        <Dialog open={openNewUser} onOpenChange={setOpenNewUser}>
+          <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Novo Usuário</Button></DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Criar Novo Usuário</DialogTitle></DialogHeader>
+            <form onSubmit={handleCreateUser} className="space-y-4 mt-2">
+              <div className="space-y-2"><Label>Nome Completo</Label><Input required value={newNome} onChange={e => setNewNome(e.target.value)} /></div>
+              <div className="space-y-2"><Label>Nome de Usuário (Login)</Label><Input required value={newUser} onChange={e => setNewUser(e.target.value.toLowerCase().replace(/\s/g, ''))} /></div>
+              <div className="space-y-2"><Label>Senha</Label><Input required minLength={6} type="password" value={newPass} onChange={e => setNewPass(e.target.value)} /></div>
+              <Button type="submit" disabled={loadingNew} className="w-full">{loadingNew ? "Criando..." : "Criar Usuário"}</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
       <Card>
         <CardContent className="p-0 md:p-0">
           <div className="hidden md:block">

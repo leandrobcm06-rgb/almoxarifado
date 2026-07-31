@@ -27,10 +27,13 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  const getLoginEmail = (val: string) => val.includes('@') ? val : `${val}@bcmstock.local`;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const loginEmail = getLoginEmail(email);
+    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
     setLoading(false);
     if (error) toast.error(error.message);
     else {
@@ -42,15 +45,16 @@ function AuthPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const loginEmail = getLoginEmail(email);
     const { error } = await supabase.auth.signUp({
-      email,
+      email: loginEmail,
       password,
       options: { data: { nome }, emailRedirectTo: `${window.location.origin}/app` },
     });
     setLoading(false);
     if (error) toast.error(error.message);
     else {
-      toast.success("Conta criada! Verifique seu email se necessário.");
+      toast.success("Conta criada! Você já pode acessar o sistema.");
       navigate({ to: "/app" });
     }
   };
@@ -71,15 +75,15 @@ function AuthPage() {
             </TabsList>
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4 mt-4">
-                <div className="space-y-2"><Label>Email</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Usuário (ou Email)</Label><Input type="text" required value={email} onChange={(e) => setEmail(e.target.value.toLowerCase().replace(/\s/g, ''))} /></div>
                 <div className="space-y-2"><Label>Senha</Label><Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
                 <Button type="submit" disabled={loading} className="w-full">{loading ? "Entrando..." : "Entrar"}</Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4 mt-4">
-                <div className="space-y-2"><Label>Nome</Label><Input required value={nome} onChange={(e) => setNome(e.target.value)} /></div>
-                <div className="space-y-2"><Label>Email</Label><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Nome Completo</Label><Input required value={nome} onChange={(e) => setNome(e.target.value)} /></div>
+                <div className="space-y-2"><Label>Nome de Usuário (para login)</Label><Input type="text" required value={email} onChange={(e) => setEmail(e.target.value.toLowerCase().replace(/\s/g, ''))} /></div>
                 <div className="space-y-2"><Label>Senha</Label><Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} /></div>
                 <Button type="submit" disabled={loading} className="w-full">{loading ? "Criando..." : "Criar conta"}</Button>
                 <p className="text-xs text-muted-foreground text-center">O primeiro usuário cadastrado é admin. Os demais começam como contador e devem ser promovidos por um admin.</p>
