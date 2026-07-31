@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Monitor, Archive, AlertTriangle, ArrowRightLeft, CheckCircle2 } from "lucide-react";
+import { Monitor, Archive, AlertTriangle, ArrowRightLeft, CheckCircle2, DollarSign } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -25,6 +25,41 @@ export const Route = createFileRoute("/_authenticated/app/patrimonios/")({
   component: Dashboard,
 });
 
+const calculateDepreciation = (asset: any) => {
+  if (!asset.acquisition_date || !asset.initial_value || !asset.category) return null;
+  
+  const start = new Date(asset.acquisition_date);
+  const now = new Date();
+  const years = (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+  
+  if (years < 0) return { depreciatedValue: asset.initial_value, percentage: 0, initialValue: asset.initial_value };
+  
+  let rate = 0;
+  switch (asset.category) {
+    case "Eletrônicos": rate = 0.20; break;
+    case "Ferramentas elétricas": rate = 0.20; break;
+    case "Ferramentas hidráulicas portáteis": rate = 0.20; break;
+    case "Ferramentas manuais": rate = 0.10; break;
+    case "Equipamentos hidráulicos industriais": rate = 0.10; break;
+    case "Móveis": rate = 0.10; break;
+    default: rate = 0;
+  }
+  
+  let depreciationPercentage = years * rate;
+  if (depreciationPercentage > 1) depreciationPercentage = 1;
+  
+  const depreciatedValue = asset.initial_value * (1 - depreciationPercentage);
+  return {
+    depreciatedValue,
+    percentage: depreciationPercentage,
+    initialValue: asset.initial_value
+  };
+};
+
+const formatCurrency = (val: number) => {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+};
+
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#6366f1'];
 
 function Dashboard() {
@@ -39,6 +74,9 @@ function Dashboard() {
   
   const [emprestimosAbertos, setEmprestimosAbertos] = useState(0);
   const [emprestimosAtrasados, setEmprestimosAtrasados] = useState(0);
+  
+  const [totalInitialValue, setTotalInitialValue] = useState(0);
+  const [totalDepreciatedValue, setTotalDepreciatedValue] = useState(0);
   
   const [recentAssets, setRecentAssets] = useState<any[]>([]);
   const [recentLoans, setRecentLoans] = useState<any[]>([]);
@@ -59,6 +97,22 @@ function Dashboard() {
           setDisponiveis(assets.filter(a => a.is_active && a.status === 'disponivel').length);
           setEmprestados(assets.filter(a => a.is_active && a.status === 'emprestado').length);
           setEstadoRuim(assets.filter(a => a.condition === 'Ruim').length);
+          
+          let initVal = 0;
+          let depVal = 0;
+          assets.forEach(a => {
+            if (a.is_active && a.initial_value) {
+              initVal += Number(a.initial_value);
+              const dep = calculateDepreciation(a);
+              if (dep) {
+                depVal += dep.depreciatedValue;
+              } else {
+                depVal += Number(a.initial_value);
+              }
+            }
+          });
+          setTotalInitialValue(initVal);
+          setTotalDepreciatedValue(depVal);
           
           setRecentAssets([...assets].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5));
 
@@ -109,7 +163,17 @@ function Dashboard() {
         <p className="text-sm text-muted-foreground">Visão geral e indicadores dos bens patrimoniais.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Valor Total (Ativos)</CardTitle>
+            <DollarSign className="w-4 h-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(totalDepreciatedValue)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Inicial: <span className="line-through">{formatCurrency(totalInitialValue)}</span></p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-sm font-medium">Total Cadastrado</CardTitle>
