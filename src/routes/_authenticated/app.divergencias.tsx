@@ -9,9 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { FileDown, FileText, RefreshCw, Trash2 } from "lucide-react";
+import { FileDown, FileText, RefreshCw, Trash2, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_authenticated/app/divergencias")({
   head: () => ({ meta: [{ title: "Divergências | BCM Stock" }] }),
@@ -129,6 +131,10 @@ function Page() {
 function ReportSection({ report }: { report: any }) {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [obsDialogOpen, setObsDialogOpen] = useState(false);
+  const [obsItem, setObsItem] = useState<any>(null);
+  const [obsText, setObsText] = useState("");
+
   const { data: items } = useQuery({
     queryKey: ["div-items", report.id],
     enabled: open,
@@ -142,13 +148,32 @@ function ReportSection({ report }: { report: any }) {
   }, [items, filter]);
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: string }) => {
-      const { error } = await supabase.from("divergence_items").update({ status }).eq("id", id);
+    mutationFn: async ({ id, status, observacao }: { id: string, status: string, observacao?: string }) => {
+      const payload: any = { status };
+      if (observacao !== undefined) payload.observacao = observacao;
+      const { error } = await supabase.from("divergence_items").update(payload).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["div-items"] }); },
     onError: (e: any) => toast.error(e.message),
   });
+
+  const handleStatusChange = (i: any, val: string) => {
+    if (val === "ajustado") {
+      setObsItem(i);
+      setObsText(i.observacao || "");
+      setObsDialogOpen(true);
+    } else {
+      updateStatus.mutate({ id: i.id, status: val });
+    }
+  };
+
+  const saveAjustado = () => {
+    if (obsItem) {
+      updateStatus.mutate({ id: obsItem.id, status: "ajustado", observacao: obsText });
+      setObsDialogOpen(false);
+    }
+  };
 
   const deleteReport = useMutation({
     mutationFn: async () => {
@@ -227,8 +252,8 @@ function ReportSection({ report }: { report: any }) {
                     <TableCell className="text-right">{Number(i.saldo_sistema).toFixed(2)}</TableCell>
                     <TableCell className="text-right">{Number(i.qty_contada).toFixed(2)}</TableCell>
                     <TableCell className={`text-right font-medium ${Number(i.diferenca) < 0 ? "text-destructive" : Number(i.diferenca) > 0 ? "text-green-600" : ""}`}>{Number(i.diferenca).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Select value={i.status} onValueChange={(val) => updateStatus.mutate({ id: i.id, status: val })}>
+                    <TableCell className="flex items-center gap-2 border-0 border-b">
+                      <Select value={i.status} onValueChange={(val) => handleStatusChange(i, val)}>
                         <SelectTrigger className="h-8 text-xs w-[110px]">
                           <SelectValue />
                         </SelectTrigger>
@@ -239,6 +264,11 @@ function ReportSection({ report }: { report: any }) {
                           <SelectItem value="ignorado">Ignorado</SelectItem>
                         </SelectContent>
                       </Select>
+                      {(i.status === "ajustado" || i.observacao) && (
+                        <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => { setObsItem(i); setObsText(i.observacao || ""); setObsDialogOpen(true); }}>
+                          <MessageSquare className="h-3 w-3" />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -250,17 +280,24 @@ function ReportSection({ report }: { report: any }) {
               <div key={i.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-2">
                 <div className="flex justify-between items-start">
                   <span className="font-mono text-xs text-muted-foreground">{i.products?.codigo}</span>
-                  <Select value={i.status} onValueChange={(val) => updateStatus.mutate({ id: i.id, status: val })}>
-                    <SelectTrigger className="h-8 text-xs w-[110px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pendente">Pendente</SelectItem>
-                      <SelectItem value="em_andamento">Em andam.</SelectItem>
-                      <SelectItem value="ajustado">Ajustado</SelectItem>
-                      <SelectItem value="ignorado">Ignorado</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-2">
+                    <Select value={i.status} onValueChange={(val) => handleStatusChange(i, val)}>
+                      <SelectTrigger className="h-8 text-xs w-[110px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                        <SelectItem value="em_andamento">Em andam.</SelectItem>
+                        <SelectItem value="ajustado">Ajustado</SelectItem>
+                        <SelectItem value="ignorado">Ignorado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {(i.status === "ajustado" || i.observacao) && (
+                      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => { setObsItem(i); setObsText(i.observacao || ""); setObsDialogOpen(true); }}>
+                        <MessageSquare className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <div className="text-sm font-medium leading-snug">{i.products?.descricao}</div>
                 <div className="grid grid-cols-2 gap-x-2 gap-y-3 bg-muted/50 p-2 rounded-md">
@@ -273,6 +310,27 @@ function ReportSection({ report }: { report: any }) {
           </div>
         </div>
       )}
+
+      <Dialog open={obsDialogOpen} onOpenChange={setObsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Observação de Ajuste</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="text-sm font-medium">{obsItem?.products?.codigo} - {obsItem?.products?.descricao}</div>
+            <Textarea
+              placeholder="Descreva o que foi feito..."
+              value={obsText}
+              onChange={(e) => setObsText(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setObsDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={saveAjustado}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

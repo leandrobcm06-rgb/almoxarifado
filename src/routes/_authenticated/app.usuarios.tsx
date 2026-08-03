@@ -88,7 +88,7 @@ function Page() {
             <form onSubmit={handleCreateUser} className="space-y-4 mt-2">
               <div className="space-y-2"><Label>Nome Completo</Label><Input required value={newNome} onChange={e => setNewNome(e.target.value)} /></div>
               <div className="space-y-2"><Label>Nome de Usuário (Login)</Label><Input required value={newUser} onChange={e => setNewUser(e.target.value.toLowerCase().replace(/\s/g, ''))} /></div>
-              <div className="space-y-2"><Label>Senha</Label><Input required minLength={6} type="password" value={newPass} onChange={e => setNewPass(e.target.value)} /></div>
+              <div className="space-y-2"><Label>Senha (4 dígitos)</Label><Input required minLength={4} maxLength={4} pattern="\d{4}" title="A senha deve conter exatamente 4 dígitos numéricos" type="password" value={newPass} onChange={e => setNewPass(e.target.value.replace(/\D/g, ''))} /></div>
               <Button type="submit" disabled={loadingNew} className="w-full">{loadingNew ? "Criando..." : "Criar Usuário"}</Button>
             </form>
           </DialogContent>
