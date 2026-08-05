@@ -5,8 +5,8 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { Eye, ShieldAlert, FileClock } from "lucide-react";
 import Modal from "@/components/Modal/Modal";
-import Skeleton from "@/components/UI/Skeleton";
-import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/auditoria")({

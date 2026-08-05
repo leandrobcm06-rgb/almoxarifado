@@ -8,7 +8,7 @@ import { FileDown, FileText, RefreshCw, Trash2, MessageSquare, ChevronDown, Chev
 import { format } from "date-fns";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Modal from "@/components/Modal/Modal";
-import EmptyState from "@/components/UI/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
 
 export const Route = createFileRoute("/_authenticated/app/divergencias")({
   head: () => ({ meta: [{ title: "Divergências | BCM Stock" }] }),

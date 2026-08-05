@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { Search, Plus, Edit, Eye, ArrowRightLeft, PowerOff, Monitor, ArchiveX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Modal from "@/components/Modal/Modal";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/lista")({
   head: () => ({ meta: [{ title: "Lista de Patrimônios | BCM Stock" }] }),

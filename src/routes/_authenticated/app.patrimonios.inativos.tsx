@@ -3,8 +3,8 @@ import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Search, Eye, ArchiveRestore, ArchiveX } from "lucide-react";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/inativos")({
   head: () => ({ meta: [{ title: "Patrimônios Inativos | BCM Stock" }] }),

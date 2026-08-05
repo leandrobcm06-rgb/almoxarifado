@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { Search, Plus, ArrowRightLeft, ArrowDownToLine, Monitor } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Modal from "@/components/Modal/Modal";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 // Search params for pre-selecting asset
 type EmprestimosSearch = { assetId?: string };

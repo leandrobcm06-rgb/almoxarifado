@@ -18,7 +18,7 @@ import {
 } from "recharts";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import Skeleton from "@/components/UI/Skeleton";
+import Skeleton from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/")({

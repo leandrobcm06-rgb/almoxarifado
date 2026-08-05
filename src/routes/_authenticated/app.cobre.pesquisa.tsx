@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ArrowDownRight, ArrowUpRight, Search, FileSearch } from "lucide-react";
 import { toast } from "sonner";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/pesquisa")({
   head: () => ({ meta: [{ title: "Pesquisa Rápida Cobre | BCM Stock" }] }),

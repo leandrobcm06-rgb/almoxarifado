@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { FileDown, FileText, Wrench, Search, Settings2, PackageX, ChevronRight, MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import Modal from "@/components/Modal/Modal";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ajustes")({
   head: () => ({ meta: [{ title: "Ajustes | BCM Stock" }] }),

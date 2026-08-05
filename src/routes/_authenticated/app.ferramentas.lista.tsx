@@ -7,8 +7,8 @@ import { Search, Plus, Edit, Trash2, Camera, Info, PackageX } from "lucide-react
 import Modal from "@/components/Modal/Modal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/lista")({
   head: () => ({ meta: [{ title: "Cadastro de Ferramentas | BCM Stock" }] }),

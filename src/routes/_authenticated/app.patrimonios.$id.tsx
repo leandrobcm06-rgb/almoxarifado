@@ -6,7 +6,7 @@ import { ArrowLeft, Monitor, Calendar, CheckCircle2, History, User, MapPin, Tag,
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import Skeleton from "@/components/UI/Skeleton";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/$id")({
   head: () => ({ meta: [{ title: "Detalhes do Patrimônio | BCM Stock" }] }),

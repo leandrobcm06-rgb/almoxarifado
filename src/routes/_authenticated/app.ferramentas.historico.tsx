@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { FilterX, ArrowUpRight, ArrowDownRight, PackagePlus, Search, History } from "lucide-react";
 import { toast } from "sonner";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/historico")({
   head: () => ({ meta: [{ title: "Histórico de Movimentações | Ferramentaria" }] }),

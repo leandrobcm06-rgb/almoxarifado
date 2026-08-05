@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ArrowDownRight, ArrowUpRight, FilterX, History } from "lucide-react";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/historico")({
   head: () => ({ meta: [{ title: "Histórico de Cobre | BCM Stock" }] }),

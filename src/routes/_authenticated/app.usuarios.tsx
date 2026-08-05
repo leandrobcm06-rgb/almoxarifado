@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase, getSecondarySupabaseClient } from "@/integrations/supabase/client";
 import Modal from "@/components/Modal/Modal";
-import Avatar from "@/components/UI/Avatar";
+import Avatar from "@/components/ui/avatar";
 import { Plus, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import Skeleton from "@/components/UI/Skeleton";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/usuarios")({
   head: () => ({ meta: [{ title: "Usuários | BCM Stock" }] }),

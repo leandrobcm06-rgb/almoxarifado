@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Search, PackageX } from "lucide-react";
 import { format } from "date-fns";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/pedacos")({
   head: () => ({ meta: [{ title: "Pedaços de Cobre | BCM Stock" }] }),

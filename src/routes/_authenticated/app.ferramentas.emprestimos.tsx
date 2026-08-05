@@ -7,8 +7,8 @@ import Modal from "@/components/Modal/Modal";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/emprestimos")({
   head: () => ({ meta: [{ title: "Empréstimos | Ferramentaria" }] }),

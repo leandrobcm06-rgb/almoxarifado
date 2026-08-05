@@ -5,8 +5,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Edit, MapPin } from "lucide-react";
 import Modal from "@/components/Modal/Modal";
-import EmptyState from "@/components/UI/EmptyState";
-import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/ui/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/localizacoes")({
   head: () => ({ meta: [{ title: "Localizações | Ferramentas" }] }),

@@ -6,8 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Building2 } from "lucide-react";
 import Modal from "@/components/Modal/Modal";
-import Skeleton from "@/components/UI/Skeleton";
-import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/empresas")({

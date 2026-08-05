@@ -6,8 +6,8 @@ import { toast } from "sonner";
 import { Plus, ClipboardList } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import Skeleton from "@/components/UI/Skeleton";
-import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/ui/skeleton";
+import EmptyState from "@/components/ui/EmptyState";
 
 export const Route = createFileRoute("/_authenticated/app/contagens/")({
   head: () => ({ meta: [{ title: "Contagens | BCM Stock" }] }),
