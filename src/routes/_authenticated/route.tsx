@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Monitor, Archive, ArrowRightLeft } from "lucide-react";
+import { Monitor, Archive, ArrowRightLeft, Truck } from "lucide-react";
 
 
 export const Route = createFileRoute("/_authenticated")({
@@ -65,6 +65,13 @@ const PATRIMONIOS_NAV = [
   { to: "/app/patrimonios/relatorios", label: "Relatórios", icon: FileSpreadsheet, roles: ["admin", "gestor"] },
 ] as const;
 
+const EMPILHADEIRAS_NAV = [
+  { to: "/app/empilhadeiras", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "gestor", "conferente"] },
+  { to: "/app/empilhadeiras/lancamentos", label: "Lançamentos", icon: ClipboardList, roles: ["admin", "gestor", "conferente"] },
+  { to: "/app/empilhadeiras/cadastros", label: "Cadastros Aux.", icon: Building2, roles: ["admin", "gestor"] },
+  { to: "/app/empilhadeiras/relatorios", label: "Relatórios", icon: FileSpreadsheet, roles: ["admin", "gestor", "conferente"] },
+] as const;
+
 function AuthedLayout() {
   const { user, roles, hasAnyRole, signOut, loading } = useAuth();
   const navigate = useNavigate();
@@ -75,18 +82,21 @@ function AuthedLayout() {
   const cobreItems = COBRE_NAV.filter((n) => hasAnyRole(n.roles as any));
   const ferramentasItems = FERRAMENTAS_NAV.filter((n) => hasAnyRole(n.roles as any));
   const patrimoniosItems = PATRIMONIOS_NAV.filter((n) => hasAnyRole(n.roles as any));
+  const empilhadeirasItems = EMPILHADEIRAS_NAV.filter((n) => hasAnyRole(n.roles as any));
   const mainItems = MAIN_NAV.filter((n) => hasAnyRole(n.roles as any));
 
   const isContagensActive = contagensItems.some(item => path === item.to || (item.to !== "/app" && path.startsWith(item.to)));
   const isCobreActive = path.startsWith("/app/cobre");
   const isFerramentasActive = path.startsWith("/app/ferramentas");
   const isPatrimoniosActive = path.startsWith("/app/patrimonios");
+  const isEmpilhadeirasActive = path.startsWith("/app/empilhadeiras");
   const isConfiguracoesActive = mainItems.some(item => path === item.to || path.startsWith(item.to));
   
   const [contagensOpen, setContagensOpen] = useState(isContagensActive);
   const [cobreOpen, setCobreOpen] = useState(isCobreActive);
   const [ferramentasOpen, setFerramentasOpen] = useState(isFerramentasActive);
   const [patrimoniosOpen, setPatrimoniosOpen] = useState(isPatrimoniosActive);
+  const [empilhadeirasOpen, setEmpilhadeirasOpen] = useState(isEmpilhadeirasActive);
   const [configuracoesOpen, setConfiguracoesOpen] = useState(isConfiguracoesActive);
 
   useEffect(() => {
@@ -104,6 +114,10 @@ function AuthedLayout() {
   useEffect(() => {
     if (isPatrimoniosActive) setPatrimoniosOpen(true);
   }, [isPatrimoniosActive]);
+
+  useEffect(() => {
+    if (isEmpilhadeirasActive) setEmpilhadeirasOpen(true);
+  }, [isEmpilhadeirasActive]);
 
   useEffect(() => {
     if (isConfiguracoesActive) setConfiguracoesOpen(true);
@@ -272,6 +286,44 @@ function AuthedLayout() {
                 <div className="pl-9 space-y-1 pt-1">
                   {patrimoniosItems.map((item) => {
                     const active = path === item.to || (item.to !== "/app/patrimonios" && path.startsWith(item.to));
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                          active ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {empilhadeirasItems.length > 0 && (
+            <div className="space-y-1 mb-2">
+              <button
+                onClick={() => setEmpilhadeirasOpen(!empilhadeirasOpen)}
+                className={cn(
+                  "w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  isEmpilhadeirasActive ? "text-sidebar-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Truck className={cn("h-4 w-4", isEmpilhadeirasActive && "text-primary")} /> Empilhadeiras
+                </div>
+                {empilhadeirasOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </button>
+              
+              <div className={cn("overflow-hidden transition-all duration-200 ease-in-out", empilhadeirasOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0")}>
+                <div className="pl-9 space-y-1 pt-1">
+                  {empilhadeirasItems.map((item) => {
+                    const active = path === item.to || (item.to !== "/app/empilhadeiras" && path.startsWith(item.to));
                     return (
                       <Link
                         key={item.to}
