@@ -15,6 +15,10 @@ import { Link } from "@tanstack/react-router";
 export function NotificationsBadge() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [readIds, setReadIds] = useState<string[]>(() => {
+    const stored = localStorage.getItem('read_notifications');
+    return stored ? JSON.parse(stored) : [];
+  });
 
   useEffect(() => {
     async function loadNotifications() {
@@ -80,7 +84,7 @@ export function NotificationsBadge() {
                 icon: Package2,
                 color: "text-red-500"
               });
-              } else if (totalMm < 1000) { // Configurable limit (1000mm)
+            } else if (totalMm < 1000) { // Configurable limit (1000mm)
                 newNotifications.push({
                   id: `bar-low-${bar.id}`,
                   type: "cobre-baixo",
@@ -95,6 +99,18 @@ export function NotificationsBadge() {
         }
 
         setNotifications(newNotifications);
+        
+        // Clean up readIds that are no longer active notifications
+        setReadIds(prev => {
+          const currentIds = newNotifications.map(n => n.id);
+          const filtered = prev.filter(id => currentIds.includes(id));
+          if (filtered.length !== prev.length) {
+            localStorage.setItem('read_notifications', JSON.stringify(filtered));
+            return filtered;
+          }
+          return prev;
+        });
+
       } catch (error) {
         console.error("Erro ao carregar notificações", error);
       } finally {
@@ -108,16 +124,29 @@ export function NotificationsBadge() {
     return () => clearInterval(interval);
   }, []);
 
+  const markAsRead = (id: string) => {
+    setReadIds(prev => {
+      if (!prev.includes(id)) {
+        const updated = [...prev, id];
+        localStorage.setItem('read_notifications', JSON.stringify(updated));
+        return updated;
+      }
+      return prev;
+    });
+  };
+
   if (loading) return <Button variant="ghost" size="icon" className="relative"><Bell className="h-5 w-5 opacity-50" /></Button>;
+
+  const unreadCount = notifications.filter(n => !readIds.includes(n.id)).length;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          {notifications.length > 0 && (
+          {unreadCount > 0 && (
             <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 rounded-full bg-red-500 text-white border-2 border-background">
-              {notifications.length > 9 ? "9+" : notifications.length}
+              {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
           )}
         </Button>
@@ -135,8 +164,14 @@ export function NotificationsBadge() {
           <div className="py-2">
             {notifications.map((notif) => {
               const Icon = notif.icon;
+              const isRead = readIds.includes(notif.id);
               return (
-                <DropdownMenuItem key={notif.id} asChild className="p-3 cursor-pointer items-start gap-3 border-b last:border-0">
+                <DropdownMenuItem 
+                  key={notif.id} 
+                  asChild 
+                  className={`p-3 cursor-pointer items-start gap-3 border-b last:border-0 ${isRead ? 'opacity-70' : ''}`}
+                  onClick={() => markAsRead(notif.id)}
+                >
                   <Link to={notif.link as any} className="flex w-full">
                     <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${notif.color}`} />
                     <div className="flex flex-col gap-1">
