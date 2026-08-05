@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Package2, Building2, Users, FileSpreadsheet,
-  ClipboardList, AlertTriangle, Wrench, LogOut, Menu, X, ChevronDown, ChevronRight, HardHat
+  ClipboardList, AlertTriangle, Wrench, LogOut, Menu, X, ChevronDown, ChevronRight, HardHat, Settings
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -81,11 +81,13 @@ function AuthedLayout() {
   const isCobreActive = path.startsWith("/app/cobre");
   const isFerramentasActive = path.startsWith("/app/ferramentas");
   const isPatrimoniosActive = path.startsWith("/app/patrimonios");
+  const isConfiguracoesActive = mainItems.some(item => path === item.to || path.startsWith(item.to));
   
   const [contagensOpen, setContagensOpen] = useState(isContagensActive);
   const [cobreOpen, setCobreOpen] = useState(isCobreActive);
   const [ferramentasOpen, setFerramentasOpen] = useState(isFerramentasActive);
   const [patrimoniosOpen, setPatrimoniosOpen] = useState(isPatrimoniosActive);
+  const [configuracoesOpen, setConfiguracoesOpen] = useState(isConfiguracoesActive);
 
   useEffect(() => {
     if (isContagensActive) setContagensOpen(true);
@@ -102,6 +104,10 @@ function AuthedLayout() {
   useEffect(() => {
     if (isPatrimoniosActive) setPatrimoniosOpen(true);
   }, [isPatrimoniosActive]);
+
+  useEffect(() => {
+    if (isConfiguracoesActive) setConfiguracoesOpen(true);
+  }, [isConfiguracoesActive]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Carregando...</div>;
 
@@ -286,23 +292,43 @@ function AuthedLayout() {
             </div>
           )}
 
-          {mainItems.map((item) => {
-            const Icon = item.icon;
-            const active = path === item.to || ((item.to as string) !== "/app" && path.startsWith(item.to));
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
+          {mainItems.length > 0 && (
+            <div className="space-y-1 mb-2">
+              <button
+                onClick={() => setConfiguracoesOpen(!configuracoesOpen)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-                  active ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                  "w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  isConfiguracoesActive ? "text-sidebar-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                 )}
               >
-                <Icon className={cn("h-4 w-4", active && "text-primary")} /> {item.label}
-              </Link>
-            );
-          })}
+                <div className="flex items-center gap-3">
+                  <Settings className={cn("h-4 w-4", isConfiguracoesActive && "text-primary")} /> Configurações
+                </div>
+                {configuracoesOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              </button>
+              
+              <div className={cn("overflow-hidden transition-all duration-200 ease-in-out", configuracoesOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0")}>
+                <div className="pl-9 space-y-1 pt-1">
+                  {mainItems.map((item) => {
+                    const active = path === item.to || path.startsWith(item.to);
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
+                          active ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
         </nav>
         <div className="p-3 border-t space-y-2">
           <div className="text-xs flex items-center justify-between">
