@@ -2,16 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Upload, FileDown, Save, Trash2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/contagens/nova")({
   head: () => ({ meta: [{ title: "Nova Contagem | BCM Stock" }] }),
@@ -234,170 +228,189 @@ function Page() {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => nav({ to: "/app/contagens" })}><ArrowLeft className="h-4 w-4" /></Button>
-        <div>
-          <h1 className="text-2xl font-semibold">Nova Contagem Unificada</h1>
-          <p className="text-sm text-muted-foreground">
-            Crie a contagem e importe o estoque diário de uma vez só.
-          </p>
+    <div className="page-container animate-fade-in max-w-5xl mx-auto">
+      <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <button className="btn-icon bg-muted/50 hover:bg-muted border border-border flex-shrink-0" onClick={() => nav({ to: "/app/contagens" })}>
+            <ArrowLeft size={18} />
+          </button>
+          <div>
+            <h1 className="page-title text-xl sm:text-2xl">Nova Contagem Unificada</h1>
+            <p className="page-subtitle mt-1">Crie a contagem e importe o estoque diário de uma vez só.</p>
+          </div>
         </div>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle>1. Dados da Contagem</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label>Nome</Label>
-              <Input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Inventário Anual 2026" />
-            </div>
-            <div>
-              <Label>Mês</Label>
-              <Select value={mes} onValueChange={setMes}>
-                <SelectTrigger><SelectValue placeholder="Selecione o mês" /></SelectTrigger>
-                <SelectContent>
-                  {["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].map(m => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Tipo</Label>
-              <Select value={tipo} onValueChange={(v: any) => setTipo(v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="geral">Geral (2 rodadas cegas)</SelectItem>
-                  <SelectItem value="diaria">Diária (rotativa, 1 rodada)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <div className="glass-panel p-6 rounded-xl border border-border mb-6 shadow-sm">
+        <h2 className="text-lg font-semibold font-display text-foreground border-b border-border pb-3 mb-5">1. Dados da Contagem</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="form-group">
+            <label className="form-label" htmlFor="nome">Nome *</label>
+            <input id="nome" className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex: Inventário Anual 2026" />
           </div>
-        </CardContent>
-      </Card>
+          <div className="form-group">
+            <label className="form-label" htmlFor="mes">Mês *</label>
+            <select id="mes" className="form-input" value={mes} onChange={(e) => setMes(e.target.value)}>
+              <option value="">Selecione o mês</option>
+              {["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"].map(m => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label" htmlFor="tipo">Tipo *</label>
+            <select id="tipo" className="form-input" value={tipo} onChange={(e: any) => setTipo(e.target.value)}>
+              <option value="geral">Geral (2 rodadas cegas)</option>
+              <option value="diaria">Diária (rotativa, 1 rodada)</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>2. Importação do Estoque Base (Snapshots)</CardTitle>
+      <div className="glass-panel p-6 rounded-xl border border-border mb-6 shadow-sm">
+        <div className="border-b border-border pb-4 mb-5">
+          <h2 className="text-lg font-semibold font-display text-foreground mb-1">2. Importação do Estoque Base (Snapshots)</h2>
           <p className="text-sm text-muted-foreground font-normal">
             Para juntar o estoque de várias empresas nesta contagem, <b>carregue todas as planilhas uma por vez ANTES de clicar em Confirmar</b>.<br/>
-            O sistema reconhece as colunas: <code>COD. REFERENCIA</code>, <code>NOME</code>, <code>SISTEMA</code> (saldo) e, opcionalmente, <code>COD. AUXILIAR</code>.
+            O sistema reconhece as colunas: <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">COD. REFERENCIA</code>, <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">NOME</code>, <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">SISTEMA</code> (saldo) e, opcionalmente, <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">COD. AUXILIAR</code>.
           </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div><Label>Data de Referência do Estoque</Label><Input type="date" value={snapshotDate} onChange={(e) => setSnapshotDate(e.target.value)} /></div>
-            <div className="md:col-span-2">
-              <Label>Empresa (selecione, depois carregue o arquivo)</Label>
-              <div className="flex gap-2">
-                <Select value={activeCnpj} onValueChange={setActiveCnpj}>
-                  <SelectTrigger><SelectValue placeholder="Escolha o CNPJ" /></SelectTrigger>
-                  <SelectContent>{companies?.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome} — {c.cnpj}</SelectItem>)}</SelectContent>
-                </Select>
-                <label className={`inline-flex items-center gap-2 px-4 h-9 rounded-md text-sm font-medium cursor-pointer ${activeCnpj ? "bg-primary text-primary-foreground hover:opacity-90" : "bg-muted text-muted-foreground cursor-not-allowed"}`}>
-                  <input type="file" className="hidden" accept=".xlsx,.xls" disabled={!activeCnpj}
-                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f, activeCnpj); e.currentTarget.value = ""; }} />
-                  <Upload className="h-4 w-4" />Carregar planilha
-                </label>
-              </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-5">
+          <div className="form-group">
+            <label className="form-label" htmlFor="snapshotDate">Data de Referência do Estoque</label>
+            <input id="snapshotDate" type="date" className="form-input" value={snapshotDate} onChange={(e) => setSnapshotDate(e.target.value)} />
+          </div>
+          <div className="form-group md:col-span-2">
+            <label className="form-label">Empresa (selecione, depois carregue o arquivo)</label>
+            <div className="flex gap-3">
+              <select className="form-input flex-1" value={activeCnpj} onChange={(e) => setActiveCnpj(e.target.value)}>
+                <option value="">Escolha o CNPJ</option>
+                {companies?.map((c) => <option key={c.id} value={c.id}>{c.nome} — {c.cnpj}</option>)}
+              </select>
+              <label className={`inline-flex items-center gap-2 px-4 h-10 rounded-md text-sm font-medium transition-colors border ${activeCnpj ? "bg-primary text-primary-foreground border-primary hover:opacity-90 cursor-pointer" : "bg-muted text-muted-foreground border-border cursor-not-allowed"}`}>
+                <input type="file" className="hidden" accept=".xlsx,.xls" disabled={!activeCnpj}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f, activeCnpj); e.currentTarget.value = ""; }} />
+                <Upload size={16} /> Carregar planilha
+              </label>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 text-sm pt-2">
+        </div>
+
+        {groupedByCompany.some(g => g.count > 0) && (
+          <div className="flex flex-wrap gap-2 text-sm pt-4 border-t border-border mt-2">
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider self-center mr-2">Status da Importação:</span>
             {groupedByCompany.map((g) => (
-              <Badge key={g.company.id} variant={g.count > 0 ? "default" : "outline"}>
+              <Badge key={g.company.id} variant={g.count > 0 ? "default" : "outline"} className={g.count > 0 ? 'bg-primary/20 text-primary border-primary/30' : ''}>
                 {g.company.nome}: {g.count} itens
               </Badge>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       {pending.length > 0 && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+        <div className="glass-panel p-0 rounded-xl border border-border mb-6 shadow-sm overflow-hidden animate-fade-in-up">
+          <div className="p-6 border-b border-border bg-muted/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <CardTitle>3. Revisão do Estoque ({filteredPending.length} linhas filtradas)</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <h2 className="text-lg font-semibold font-display text-foreground mb-1">3. Revisão do Estoque ({filteredPending.length} linhas filtradas)</h2>
+              <p className="text-sm text-muted-foreground">
                 Filtre de qual a qual localização será essa contagem. Só as que aparecem aqui vão pro snapshot!
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={async () => {
+              <button className="btn btn--outline" onClick={async () => {
                 const { exportToExcel } = await import("@/lib/export-utils");
                 exportToExcel(filteredPending, "estoque-revisao");
-              }}><FileDown className="h-4 w-4 mr-2" />Excel</Button>
-              <Button variant="outline" onClick={() => setPending([])}><Trash2 className="h-4 w-4 mr-2" />Limpar</Button>
+              }}><FileDown size={16} className="mr-2" /> Excel</button>
+              <button className="btn btn--outline text-danger border-danger-border hover:bg-danger-bg hover:border-danger" onClick={() => setPending([])}>
+                <Trash2 size={16} className="mr-2" /> Limpar
+              </button>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-4">
-              <div className="w-64">
-                <Label>Localização Inicial</Label>
-                <Select value={locStart} onValueChange={setLocStart}>
-                  <SelectTrigger><SelectValue placeholder="Início" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TODAS">TODAS</SelectItem>
-                    {locations.map((loc: any) => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+          </div>
+          
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6 p-4 bg-muted/20 border border-border rounded-lg">
+              <div className="form-group flex-1">
+                <label className="form-label text-xs uppercase tracking-wider" htmlFor="locStart">Localização Inicial</label>
+                <select id="locStart" className="form-input" value={locStart} onChange={(e) => setLocStart(e.target.value)}>
+                  <option value="TODAS">TODAS</option>
+                  {locations.map((loc: any) => <option key={loc} value={loc}>{loc}</option>)}
+                </select>
               </div>
-              <div className="w-64">
-                <Label>Localização Final</Label>
-                <Select value={locEnd} onValueChange={setLocEnd}>
-                  <SelectTrigger><SelectValue placeholder="Fim" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TODAS">TODAS</SelectItem>
-                    {locations.map((loc: any) => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+              <div className="form-group flex-1">
+                <label className="form-label text-xs uppercase tracking-wider" htmlFor="locEnd">Localização Final</label>
+                <select id="locEnd" className="form-input" value={locEnd} onChange={(e) => setLocEnd(e.target.value)}>
+                  <option value="TODAS">TODAS</option>
+                  {locations.map((loc: any) => <option key={loc} value={loc}>{loc}</option>)}
+                </select>
               </div>
             </div>
-            <div className="max-h-[400px] overflow-y-auto mt-4">
+
+            <div className="max-h-[400px] overflow-y-auto border border-border rounded-lg shadow-inner">
               <div className="hidden md:block">
-                <Table>
-                  <TableHeader><TableRow><TableHead>Empresa</TableHead><TableHead>Código</TableHead><TableHead>Descrição</TableHead><TableHead>Loc</TableHead><TableHead className="text-right">Qtd Sistema</TableHead></TableRow></TableHeader>
-                  <TableBody>
+                <table className="table table--hover m-0">
+                  <thead className="sticky top-0 bg-background z-10 shadow-sm">
+                    <tr>
+                      <th className="glass-header text-xs">Empresa</th>
+                      <th className="glass-header text-xs">Código</th>
+                      <th className="glass-header text-xs">Descrição</th>
+                      <th className="glass-header text-xs">Loc</th>
+                      <th className="glass-header text-right text-xs">Qtd Sistema</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {filteredPending.slice(0, 300).map((r, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="text-xs">{companies?.find((c) => c.id === r.company_id)?.nome}</TableCell>
-                        <TableCell className="font-mono text-xs">{r.codigo}</TableCell>
-                        <TableCell className="text-sm">{r.descricao}</TableCell>
-                        <TableCell className="text-xs">{r.localizacao}</TableCell>
-                        <TableCell className="text-right">{r.qty}</TableCell>
-                      </TableRow>
+                      <tr key={i}>
+                        <td className="text-xs text-muted-foreground">{companies?.find((c) => c.id === r.company_id)?.nome}</td>
+                        <td className="font-mono text-xs font-semibold">{r.codigo}</td>
+                        <td className="text-sm font-medium">{r.descricao}</td>
+                        <td className="text-xs text-muted-foreground">{r.localizacao}</td>
+                        <td className="text-right font-medium">{r.qty}</td>
+                      </tr>
                     ))}
-                  </TableBody>
-                </Table>
+                    {filteredPending.length > 300 && (
+                      <tr className="bg-muted/10">
+                        <td colSpan={5} className="text-center text-xs text-muted-foreground p-3 font-medium">
+                          Mostrando 300 de {filteredPending.length} registros. A lista completa será processada.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="md:hidden space-y-3">
+              
+              <div className="md:hidden space-y-3 p-3 bg-muted/10">
                 {filteredPending.slice(0, 300).map((r, i) => (
-                  <div key={i} className="border rounded-md p-3 bg-card shadow-sm flex flex-col gap-2">
+                  <div key={i} className="border border-border rounded-lg p-3 bg-card shadow-sm flex flex-col gap-2">
                     <div className="flex justify-between items-start">
-                      <span className="font-mono text-xs text-muted-foreground">{r.codigo}</span>
-                      <Badge variant="outline" className="text-[10px]">{companies?.find((c) => c.id === r.company_id)?.nome}</Badge>
+                      <span className="font-mono text-xs font-bold text-foreground bg-muted/50 px-1.5 py-0.5 rounded">{r.codigo}</span>
+                      <Badge variant="outline" className="text-[10px] bg-background">{companies?.find((c) => c.id === r.company_id)?.nome}</Badge>
                     </div>
-                    <div className="text-sm font-medium leading-snug">{r.descricao}</div>
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-muted-foreground">Loc: {r.localizacao || "-"}</span>
+                    <div className="text-sm font-medium leading-snug text-foreground">{r.descricao}</div>
+                    <div className="flex justify-between items-center text-xs pt-1 border-t border-border mt-1">
+                      <span className="text-muted-foreground">Loc: <strong className="text-foreground">{r.localizacao || "-"}</strong></span>
                       <span className="font-semibold text-sm">Qtd: {r.qty}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      <div className="flex justify-end pt-4">
-        <Button size="lg" onClick={() => confirm.mutate()} disabled={confirm.isPending || pending.length === 0 || !nome || !mes} className="w-full md:w-auto px-12">
-          <Save className="h-5 w-5 mr-2" />
-          Confirmar Estoque e Criar Contagem
-        </Button>
+      <div className="flex justify-end pt-4 pb-12">
+        <button 
+          className="btn btn--primary btn--lg w-full md:w-auto px-12 h-12 shadow-md shadow-primary/20 text-[15px]" 
+          onClick={() => confirm.mutate()} 
+          disabled={confirm.isPending || pending.length === 0 || !nome || !mes}
+        >
+          <Save size={18} className="mr-2" />
+          {confirm.isPending ? "Processando..." : "Confirmar Estoque e Criar Contagem"}
+        </button>
       </div>
-
     </div>
   );
 }

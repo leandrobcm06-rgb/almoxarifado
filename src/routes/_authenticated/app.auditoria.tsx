@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Eye, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { Eye, ShieldAlert, FileClock } from "lucide-react";
+import Modal from "@/components/Modal/Modal";
+import Skeleton from "@/components/UI/Skeleton";
+import EmptyState from "@/components/UI/EmptyState";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_authenticated/app/auditoria")({
   head: () => ({ meta: [{ title: "Auditoria | BCM Stock" }] }),
@@ -81,102 +79,177 @@ function Page() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Auditoria</h1>
-          <p className="text-muted-foreground">Rastreamento de ações e alterações realizadas no sistema.</p>
+    <div className="page-container animate-fade-in max-w-7xl mx-auto">
+      <div className="page-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title flex items-center gap-2"><ShieldAlert size={24} className="text-primary"/> Auditoria</h1>
+            <p className="page-subtitle">Rastreamento de ações e alterações realizadas no sistema (Últimos 100 registros).</p>
+          </div>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0 md:p-0">
-          <div className="hidden md:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data / Hora</TableHead>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>Ação</TableHead>
-                  <TableHead>Módulo</TableHead>
-                  <TableHead>Registro Afetado</TableHead>
-                  <TableHead className="w-24 text-center">Detalhes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Carregando logs...</TableCell></TableRow>
-                ) : logs?.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Nenhum registro de auditoria encontrado.</TableCell></TableRow>
-                ) : (
-                  logs?.map((log: any) => (
-                    <TableRow key={log.id}>
-                      <TableCell className="whitespace-nowrap">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</TableCell>
-                      <TableCell className="font-medium">{log.profiles?.nome || "Sistema"}</TableCell>
-                      <TableCell><span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-semibold">{log.acao}</span></TableCell>
-                      <TableCell>{translateEntity(log.entidade)}</TableCell>
-                      <TableCell className="font-medium max-w-[250px] truncate" title={getEntityName(log)}>{getEntityName(log)}</TableCell>
-                      <TableCell className="text-center">
-                        <Button variant="ghost" size="icon" onClick={() => setViewingData(log)} disabled={!log.dados}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="md:hidden space-y-4 p-4">
-            {isLoading ? (
-              <div className="text-center text-muted-foreground py-6">Carregando logs...</div>
-            ) : logs?.length === 0 ? (
-              <div className="text-center text-muted-foreground py-6">Nenhum registro de auditoria encontrado.</div>
-            ) : (
-              logs?.map((log: any) => (
-                <div key={log.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-2">
-                  <div className="flex justify-between items-start">
-                    <span className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs font-semibold">{log.acao}</span>
-                    <span className="text-xs text-muted-foreground">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</span>
-                  </div>
-                  <div className="text-sm font-medium">{log.profiles?.nome || "Sistema"}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {translateEntity(log.entidade)} <span className="font-medium ml-1 block truncate mt-1">{getEntityName(log)}</span>
-                  </div>
-                  <div className="flex justify-end mt-2">
-                    <Button variant="outline" size="sm" onClick={() => setViewingData(log)} disabled={!log.dados}>
-                      <Eye className="h-4 w-4 mr-2" /> Detalhes
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-
-      <Dialog open={!!viewingData} onOpenChange={() => setViewingData(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Detalhes da Ação</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><strong className="text-muted-foreground block">Usuário</strong>{viewingData?.profiles?.nome}</div>
-              <div><strong className="text-muted-foreground block">Ação</strong>{viewingData?.acao}</div>
-              <div><strong className="text-muted-foreground block">Entidade</strong>{viewingData?.entidade}</div>
-              <div><strong className="text-muted-foreground block">Data</strong>{viewingData ? format(new Date(viewingData.created_at), "dd/MM/yyyy HH:mm:ss") : ""}</div>
+      <div className="glass-panel p-0 rounded-xl border border-border overflow-hidden shadow-sm">
+        <div className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-4">
+              <Skeleton height="50px" width="100%" />
+              <Skeleton height="50px" width="100%" />
+              <Skeleton height="50px" width="100%" />
+              <Skeleton height="50px" width="100%" />
             </div>
+          ) : !logs || logs.length === 0 ? (
+            <EmptyState 
+              icon={FileClock} 
+              title="Nenhum log encontrado" 
+              description="Não há registros de auditoria no sistema no momento." 
+            />
+          ) : (
+            <>
+              <div className="hidden md:block table-responsive border-0 shadow-none rounded-none m-0">
+                <table className="table table--hover m-0 border-0">
+                  <thead className="bg-muted/10">
+                    <tr>
+                      <th className="glass-header w-44">Data / Hora</th>
+                      <th className="glass-header w-48">Usuário</th>
+                      <th className="glass-header w-32">Ação</th>
+                      <th className="glass-header w-48">Módulo</th>
+                      <th className="glass-header">Registro Afetado</th>
+                      <th className="glass-header w-24 text-center">Detalhes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {logs.map((log: any) => (
+                      <tr key={log.id}>
+                        <td className="text-xs text-muted-foreground font-mono font-medium whitespace-nowrap">
+                          {format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}
+                        </td>
+                        <td className="text-sm font-medium text-foreground">{log.profiles?.nome || "Sistema"}</td>
+                        <td>
+                          <Badge variant="outline" className={`text-xs font-semibold uppercase tracking-wider
+                            ${log.acao?.toLowerCase().includes('exclusão') || log.acao?.toLowerCase().includes('delete') ? 'bg-danger-bg text-danger border-danger-border' : 
+                              log.acao?.toLowerCase().includes('edição') || log.acao?.toLowerCase().includes('update') ? 'bg-warning-bg text-warning border-warning-border' : 
+                              log.acao?.toLowerCase().includes('cadastro') || log.acao?.toLowerCase().includes('insert') ? 'bg-success-bg text-success border-success-border' : 
+                              'bg-primary/10 text-primary border-primary/30'}`}
+                          >
+                            {log.acao}
+                          </Badge>
+                        </td>
+                        <td className="text-sm">{translateEntity(log.entidade)}</td>
+                        <td className="text-sm font-medium max-w-[250px] truncate" title={getEntityName(log)}>
+                          {getEntityName(log)}
+                        </td>
+                        <td className="text-center">
+                          <button 
+                            className="btn-icon bg-muted/50 border border-border hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors mx-auto" 
+                            onClick={() => setViewingData(log)} 
+                            disabled={!log.dados}
+                            title="Ver Detalhes do Log (JSON)"
+                          >
+                            <Eye size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile View */}
+              <div className="md:hidden space-y-3 p-3 bg-muted/5 h-full">
+                {logs.map((log: any) => (
+                  <div key={log.id} className="border border-border rounded-lg p-4 bg-card shadow-sm flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <Badge variant="outline" className={`text-[10px] font-semibold uppercase tracking-wider
+                        ${log.acao?.toLowerCase().includes('exclusão') || log.acao?.toLowerCase().includes('delete') ? 'bg-danger-bg text-danger border-danger-border' : 
+                          log.acao?.toLowerCase().includes('edição') || log.acao?.toLowerCase().includes('update') ? 'bg-warning-bg text-warning border-warning-border' : 
+                          log.acao?.toLowerCase().includes('cadastro') || log.acao?.toLowerCase().includes('insert') ? 'bg-success-bg text-success border-success-border' : 
+                          'bg-primary/10 text-primary border-primary/30'}`}
+                      >
+                        {log.acao}
+                      </Badge>
+                      <span className="text-xs font-mono text-muted-foreground">{format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss")}</span>
+                    </div>
+                    
+                    <div className="text-sm">
+                      <span className="block text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Usuário</span>
+                      <span className="font-medium text-foreground">{log.profiles?.nome || "Sistema"}</span>
+                    </div>
+                    
+                    <div className="bg-muted/30 p-3 rounded-md border border-border/50">
+                      <div className="text-xs mb-1">
+                        <span className="text-muted-foreground">Módulo:</span> <span className="font-medium">{translateEntity(log.entidade)}</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="text-muted-foreground">Registro:</span> <span className="font-medium truncate block mt-0.5">{getEntityName(log)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end pt-1 border-t border-border mt-1">
+                      <button 
+                        className="btn btn--outline btn--sm w-full" 
+                        onClick={() => setViewingData(log)} 
+                        disabled={!log.dados}
+                      >
+                        <Eye size={14} className="mr-1.5" /> Ver Detalhes (JSON)
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <Modal isOpen={!!viewingData} onClose={() => setViewingData(null)} title="Detalhes do Log de Auditoria" size="lg">
+        {viewingData && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-muted/20 p-4 rounded-xl border border-border">
+              <div>
+                <strong className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block mb-1">Usuário</strong>
+                <div className="text-sm font-medium">{viewingData?.profiles?.nome || "Sistema"}</div>
+              </div>
+              <div>
+                <strong className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block mb-1">Ação</strong>
+                <Badge variant="outline" className={`text-xs font-semibold
+                    ${viewingData?.acao?.toLowerCase().includes('exclusão') || viewingData?.acao?.toLowerCase().includes('delete') ? 'bg-danger-bg text-danger border-danger-border' : 
+                      viewingData?.acao?.toLowerCase().includes('edição') || viewingData?.acao?.toLowerCase().includes('update') ? 'bg-warning-bg text-warning border-warning-border' : 
+                      viewingData?.acao?.toLowerCase().includes('cadastro') || viewingData?.acao?.toLowerCase().includes('insert') ? 'bg-success-bg text-success border-success-border' : 
+                      'bg-primary/10 text-primary border-primary/30'}`}
+                  >
+                    {viewingData?.acao}
+                  </Badge>
+              </div>
+              <div>
+                <strong className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block mb-1">Entidade</strong>
+                <div className="text-sm font-medium">{translateEntity(viewingData?.entidade)}</div>
+              </div>
+              <div>
+                <strong className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground block mb-1">Data/Hora</strong>
+                <div className="text-sm font-mono">{format(new Date(viewingData.created_at), "dd/MM/yyyy HH:mm:ss")}</div>
+              </div>
+            </div>
+            
             <div>
-              <strong className="text-muted-foreground block mb-2">Dados (JSON)</strong>
-              <pre className="bg-muted p-4 rounded-md overflow-x-auto text-xs font-mono">
-                {JSON.stringify(viewingData?.dados, null, 2)}
-              </pre>
+              <strong className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5 mb-2 border-b border-border pb-2">
+                <FileClock size={14} /> Dados Técnicos (JSON)
+              </strong>
+              <div className="bg-muted/30 border border-border rounded-xl overflow-hidden">
+                <pre className="p-4 overflow-x-auto text-xs font-mono text-foreground leading-relaxed">
+                  {JSON.stringify(viewingData?.dados, null, 2)}
+                </pre>
+              </div>
+            </div>
+            
+            <div className="form-actions border-t border-border pt-4 mt-6">
+              <button type="button" className="btn btn--secondary w-full sm:w-auto" onClick={() => setViewingData(null)}>
+                Fechar Detalhes
+              </button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        )}
+      </Modal>
     </div>
   );
 }

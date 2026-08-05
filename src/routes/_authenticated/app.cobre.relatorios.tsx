@@ -1,11 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { FileSpreadsheet, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -168,55 +163,55 @@ function ReportsView() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Relatórios de Cobre</h1>
-        <p className="text-muted-foreground">Exporte dados do estoque e movimentações de cobre para análise.</p>
+    <div className="page-container animate-fade-in max-w-4xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Relatórios de Cobre</h1>
+            <p className="page-subtitle">Exporte dados do estoque e movimentações de cobre para análise.</p>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuração do Relatório</CardTitle>
-          <CardDescription>Selecione o tipo de relatório e aplique os filtros desejados antes de exportar.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      <div className="glass-panel p-6 md:p-8 rounded-xl border border-border">
+        <div className="space-y-6">
           <div className="space-y-2">
-            <Label>Selecione o Relatório</Label>
-            <Select value={reportType} onValueChange={setReportType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cobre_estoque">Posição Atual de Estoque (Pedaços Disponíveis)</SelectItem>
-                <SelectItem value="cobre_consumo">Histórico de Consumo (Saídas p/ Clientes e Obras)</SelectItem>
-                <SelectItem value="cobre_entradas">Histórico de Entradas (Devoluções e Novos Cortes)</SelectItem>
-              </SelectContent>
-            </Select>
+            <h3 className="font-semibold text-lg text-foreground font-display">Configuração do Relatório</h3>
+            <p className="text-sm text-muted-foreground">Selecione o tipo de relatório e aplique os filtros desejados antes de exportar.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Data Inicial (Filtro para históricos)</Label>
-              <Input type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} disabled={reportType === 'cobre_estoque'} />
+          <div className="form-group pt-4">
+            <label className="form-label">Selecione o Relatório</label>
+            <select className="form-input h-12 text-base" value={reportType} onChange={e => setReportType(e.target.value)}>
+              <option value="cobre_estoque">Posição Atual de Estoque (Pedaços Disponíveis)</option>
+              <option value="cobre_consumo">Histórico de Consumo (Saídas p/ Clientes e Obras)</option>
+              <option value="cobre_entradas">Histórico de Entradas (Devoluções e Novos Cortes)</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="form-group">
+              <label className="form-label">Data Inicial (Filtro para históricos)</label>
+              <input type="date" className="form-input" value={dateStart} onChange={e => setDateStart(e.target.value)} disabled={reportType === 'cobre_estoque'} />
             </div>
-            <div className="space-y-2">
-              <Label>Data Final (Filtro para históricos)</Label>
-              <Input type="date" value={dateEnd} onChange={e => setDateEnd(e.target.value)} disabled={reportType === 'cobre_estoque'} />
+            <div className="form-group">
+              <label className="form-label">Data Final (Filtro para históricos)</label>
+              <input type="date" className="form-input" value={dateEnd} onChange={e => setDateEnd(e.target.value)} disabled={reportType === 'cobre_estoque'} />
             </div>
           </div>
 
-          <div className="flex gap-4 pt-4 border-t">
-            <Button className="w-full flex-1" size="lg" disabled={loading} onClick={() => handleGenerate('csv')}>
-              <FileSpreadsheet className="h-5 w-5 mr-2" /> 
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border mt-4">
+            <button className="btn btn--primary flex-1 h-12 text-base" disabled={loading} onClick={() => handleGenerate('csv')}>
+              <FileSpreadsheet size={20} className="mr-2" /> 
               Exportar para Excel (CSV)
-            </Button>
-            <Button className="w-full flex-1" size="lg" variant="outline" disabled={loading} onClick={() => handleGenerate('pdf')}>
-              <Printer className="h-5 w-5 mr-2" /> 
+            </button>
+            <button className="btn btn--outline flex-1 h-12 text-base" disabled={loading} onClick={() => handleGenerate('pdf')}>
+              <Printer size={20} className="mr-2" /> 
               Gerar PDF (Imprimir)
-            </Button>
+            </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

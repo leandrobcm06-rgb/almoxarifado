@@ -1,14 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { FileDown, FileSpreadsheet, Download } from "lucide-react";
+import { FileDown, FileSpreadsheet, Monitor, ArrowRightLeft } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/app/patrimonios/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios de Patrimônios | BCM Stock" }] }),
@@ -17,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/app/patrimonios/relatorios
 
 function PatrimoniosRelatorios() {
   const [loading, setLoading] = useState(false);
+  const [abaAtiva, setAbaAtiva] = useState<'bens' | 'emprestimos'>('bens');
 
   const generateAssetsReport = async (type: 'pdf' | 'excel', filter: 'todos' | 'ativos' | 'inativos') => {
     setLoading(true);
@@ -143,101 +141,150 @@ function PatrimoniosRelatorios() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Relatórios de Patrimônios</h1>
-        <p className="text-sm text-muted-foreground">Exporte listagens e históricos para PDF ou Excel.</p>
+    <div className="page-container animate-fade-in max-w-7xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Relatórios de Patrimônios</h1>
+            <p className="page-subtitle">Exporte listagens e históricos para PDF ou Excel.</p>
+          </div>
+        </div>
       </div>
 
-      <Tabs defaultValue="bens" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="bens">Bens Patrimoniais</TabsTrigger>
-          <TabsTrigger value="emprestimos">Empréstimos</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="bens" className="space-y-4 mt-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Todos os Patrimônios</CardTitle>
-                <CardDescription>Inclui ativos e inativos.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => generateAssetsReport('pdf', 'todos')} disabled={loading}>
-                  <FileDown className="h-4 w-4 mr-2 text-red-500" /> PDF
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => generateAssetsReport('excel', 'todos')} disabled={loading}>
-                  <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" /> Excel
-                </Button>
-              </CardContent>
-            </Card>
+      <div className="page-tabs mb-6">
+        <button 
+          className={`page-tab ${abaAtiva === 'bens' ? 'page-tab--active' : ''}`}
+          onClick={() => setAbaAtiva('bens')}
+        >
+          <Monitor size={16} /> Bens Patrimoniais
+        </button>
+        <button 
+          className={`page-tab ${abaAtiva === 'emprestimos' ? 'page-tab--active' : ''}`}
+          onClick={() => setAbaAtiva('emprestimos')}
+        >
+          <ArrowRightLeft size={16} /> Empréstimos
+        </button>
+      </div>
+
+      <div className="px-0 sm:px-2 md:px-4">
+        {abaAtiva === 'bens' && (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-fade-in-up">
+            <div className="glass-panel p-6 rounded-xl border border-border flex flex-col h-full">
+              <h3 className="text-lg font-semibold font-display text-foreground mb-1">Todos os Patrimônios</h3>
+              <p className="text-sm text-muted-foreground mb-6 flex-1">Inclui todos os ativos e inativos cadastrados no sistema.</p>
+              
+              <div className="flex gap-3 mt-auto">
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-danger-bg hover:text-danger hover:border-danger-border transition-colors group" 
+                  onClick={() => generateAssetsReport('pdf', 'todos')} 
+                  disabled={loading}
+                >
+                  <FileDown size={16} className="mr-2 text-danger group-hover:scale-110 transition-transform" /> PDF
+                </button>
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-success-bg hover:text-success hover:border-success-border transition-colors group" 
+                  onClick={() => generateAssetsReport('excel', 'todos')} 
+                  disabled={loading}
+                >
+                  <FileSpreadsheet size={16} className="mr-2 text-success group-hover:scale-110 transition-transform" /> Excel
+                </button>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Somente Ativos</CardTitle>
-                <CardDescription>Apenas os bens em uso ou disponíveis.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => generateAssetsReport('pdf', 'ativos')} disabled={loading}>
-                  <FileDown className="h-4 w-4 mr-2 text-red-500" /> PDF
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => generateAssetsReport('excel', 'ativos')} disabled={loading}>
-                  <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" /> Excel
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="glass-panel p-6 rounded-xl border border-border flex flex-col h-full">
+              <h3 className="text-lg font-semibold font-display text-foreground mb-1">Somente Ativos</h3>
+              <p className="text-sm text-muted-foreground mb-6 flex-1">Apenas os bens em uso, disponíveis ou emprestados.</p>
+              
+              <div className="flex gap-3 mt-auto">
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-danger-bg hover:text-danger hover:border-danger-border transition-colors group" 
+                  onClick={() => generateAssetsReport('pdf', 'ativos')} 
+                  disabled={loading}
+                >
+                  <FileDown size={16} className="mr-2 text-danger group-hover:scale-110 transition-transform" /> PDF
+                </button>
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-success-bg hover:text-success hover:border-success-border transition-colors group" 
+                  onClick={() => generateAssetsReport('excel', 'ativos')} 
+                  disabled={loading}
+                >
+                  <FileSpreadsheet size={16} className="mr-2 text-success group-hover:scale-110 transition-transform" /> Excel
+                </button>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Somente Inativos</CardTitle>
-                <CardDescription>Bens desativados, descartados, etc.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => generateAssetsReport('pdf', 'inativos')} disabled={loading}>
-                  <FileDown className="h-4 w-4 mr-2 text-red-500" /> PDF
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => generateAssetsReport('excel', 'inativos')} disabled={loading}>
-                  <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" /> Excel
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="glass-panel p-6 rounded-xl border border-border flex flex-col h-full">
+              <h3 className="text-lg font-semibold font-display text-foreground mb-1">Somente Inativos</h3>
+              <p className="text-sm text-muted-foreground mb-6 flex-1">Apenas os bens desativados, descartados ou extraviados.</p>
+              
+              <div className="flex gap-3 mt-auto">
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-danger-bg hover:text-danger hover:border-danger-border transition-colors group" 
+                  onClick={() => generateAssetsReport('pdf', 'inativos')} 
+                  disabled={loading}
+                >
+                  <FileDown size={16} className="mr-2 text-danger group-hover:scale-110 transition-transform" /> PDF
+                </button>
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-success-bg hover:text-success hover:border-success-border transition-colors group" 
+                  onClick={() => generateAssetsReport('excel', 'inativos')} 
+                  disabled={loading}
+                >
+                  <FileSpreadsheet size={16} className="mr-2 text-success group-hover:scale-110 transition-transform" /> Excel
+                </button>
+              </div>
+            </div>
           </div>
-        </TabsContent>
-        
-        <TabsContent value="emprestimos" className="space-y-4 mt-4">
-          <div className="grid gap-4 md:grid-cols-2 max-w-3xl">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Todos os Empréstimos</CardTitle>
-                <CardDescription>Histórico completo de empréstimos e devoluções.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => generateLoansReport('pdf', 'todos')} disabled={loading}>
-                  <FileDown className="h-4 w-4 mr-2 text-red-500" /> PDF
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => generateLoansReport('excel', 'todos')} disabled={loading}>
-                  <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" /> Excel
-                </Button>
-              </CardContent>
-            </Card>
+        )}
+
+        {abaAtiva === 'emprestimos' && (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 animate-fade-in-up">
+            <div className="glass-panel p-6 rounded-xl border border-border flex flex-col h-full">
+              <h3 className="text-lg font-semibold font-display text-foreground mb-1">Todos os Empréstimos</h3>
+              <p className="text-sm text-muted-foreground mb-6 flex-1">Histórico completo de empréstimos, devoluções e atrasos.</p>
+              
+              <div className="flex gap-3 mt-auto">
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-danger-bg hover:text-danger hover:border-danger-border transition-colors group" 
+                  onClick={() => generateLoansReport('pdf', 'todos')} 
+                  disabled={loading}
+                >
+                  <FileDown size={16} className="mr-2 text-danger group-hover:scale-110 transition-transform" /> PDF
+                </button>
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-success-bg hover:text-success hover:border-success-border transition-colors group" 
+                  onClick={() => generateLoansReport('excel', 'todos')} 
+                  disabled={loading}
+                >
+                  <FileSpreadsheet size={16} className="mr-2 text-success group-hover:scale-110 transition-transform" /> Excel
+                </button>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Empréstimos em Aberto</CardTitle>
-                <CardDescription>Apenas os empréstimos ativos e atrasados.</CardDescription>
-              </CardHeader>
-              <CardContent className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => generateLoansReport('pdf', 'abertos')} disabled={loading}>
-                  <FileDown className="h-4 w-4 mr-2 text-red-500" /> PDF
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => generateLoansReport('excel', 'abertos')} disabled={loading}>
-                  <FileSpreadsheet className="h-4 w-4 mr-2 text-green-600" /> Excel
-                </Button>
-              </CardContent>
-            </Card>
+            <div className="glass-panel p-6 rounded-xl border border-border flex flex-col h-full">
+              <h3 className="text-lg font-semibold font-display text-foreground mb-1">Empréstimos em Aberto</h3>
+              <p className="text-sm text-muted-foreground mb-6 flex-1">Apenas os empréstimos ativos no momento e atrasados.</p>
+              
+              <div className="flex gap-3 mt-auto">
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-danger-bg hover:text-danger hover:border-danger-border transition-colors group" 
+                  onClick={() => generateLoansReport('pdf', 'abertos')} 
+                  disabled={loading}
+                >
+                  <FileDown size={16} className="mr-2 text-danger group-hover:scale-110 transition-transform" /> PDF
+                </button>
+                <button 
+                  className="btn btn--outline flex-1 border-border hover:bg-success-bg hover:text-success hover:border-success-border transition-colors group" 
+                  onClick={() => generateLoansReport('excel', 'abertos')} 
+                  disabled={loading}
+                >
+                  <FileSpreadsheet size={16} className="mr-2 text-success group-hover:scale-110 transition-transform" /> Excel
+                </button>
+              </div>
+            </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 }

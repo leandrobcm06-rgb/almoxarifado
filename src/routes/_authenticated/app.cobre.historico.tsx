@@ -1,13 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { ArrowDownRight, ArrowUpRight, FilterX } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, FilterX, History } from "lucide-react";
+import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/UI/Skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/historico")({
   head: () => ({ meta: [{ title: "Histórico de Cobre | BCM Stock" }] }),
@@ -63,106 +61,125 @@ function CopperHistory() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Extrato de Movimentações</h1>
-          <p className="text-muted-foreground">Histórico completo de entradas e saídas de pedaços de cobre.</p>
+    <div className="page-container animate-fade-in">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Extrato de Movimentações</h1>
+            <p className="page-subtitle">Histórico completo de entradas e saídas de pedaços de cobre.</p>
+          </div>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <CardTitle>Histórico de Transações</CardTitle>
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={filterPeriod} onValueChange={(v: any) => setFilterPeriod(v)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Período" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todo o período</SelectItem>
-                  <SelectItem value="current">Mês Atual</SelectItem>
-                  <SelectItem value="previous">Mês Anterior</SelectItem>
-                </SelectContent>
-              </Select>
+      <div className="filter-bar mb-6 flex flex-wrap items-end gap-4">
+        <div className="form-group mb-0">
+          <label className="form-label text-xs">Período</label>
+          <select 
+            className="form-input w-[180px]" 
+            value={filterPeriod} 
+            onChange={(e: any) => setFilterPeriod(e.target.value)}
+          >
+            <option value="all">Todo o período</option>
+            <option value="current">Mês Atual</option>
+            <option value="previous">Mês Anterior</option>
+          </select>
+        </div>
 
-              <Select value={filterType} onValueChange={(v: any) => setFilterType(v)}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="Tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="saida">Saídas (Cortes)</SelectItem>
-                  <SelectItem value="devolucao">Devoluções</SelectItem>
-                </SelectContent>
-              </Select>
+        <div className="form-group mb-0">
+          <label className="form-label text-xs">Tipo</label>
+          <select 
+            className="form-input w-[160px]" 
+            value={filterType} 
+            onChange={(e: any) => setFilterType(e.target.value)}
+          >
+            <option value="all">Todas</option>
+            <option value="saida">Saídas (Cortes)</option>
+            <option value="devolucao">Devoluções</option>
+          </select>
+        </div>
 
-              {(filterType !== "all" || filterPeriod !== "all") && (
-                <Button variant="ghost" size="icon" onClick={clearFilters} title="Limpar filtros">
-                  <FilterX className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
+        {(filterType !== "all" || filterPeriod !== "all") && (
+          <button className="btn btn--secondary h-[40px]" onClick={clearFilters} title="Limpar filtros">
+            <FilterX size={16} className="mr-2" /> Limpar Filtros
+          </button>
+        )}
+      </div>
+
+      <div className="glass-panel rounded-xl overflow-hidden border border-border">
+        <div className="p-5 border-b border-border bg-muted/20">
+          <h2 className="text-lg font-semibold font-display">Histórico de Transações</h2>
+        </div>
+        
+        <div className="p-0">
           {loading ? (
-            <div className="text-center p-8 text-muted-foreground">Carregando histórico...</div>
-          ) : movements.length === 0 ? (
-            <div className="text-center p-8 border border-dashed rounded-lg text-muted-foreground">
-              Nenhuma movimentação encontrada para os filtros selecionados.
+            <div className="p-6 space-y-4">
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
             </div>
+          ) : movements.length === 0 ? (
+            <EmptyState 
+              icon={History} 
+              title="Nenhuma movimentação encontrada" 
+              description="Não foram encontrados registros para os filtros selecionados."
+              action={
+                (filterType !== "all" || filterPeriod !== "all") ? (
+                  <button className="btn btn--primary" onClick={clearFilters}>Limpar Filtros</button>
+                ) : undefined
+              }
+            />
           ) : (
-            <div className="border rounded-md">
-              <div className="hidden md:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data/Hora</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Barra Original</TableHead>
-                      <TableHead className="text-right">Movimentação</TableHead>
-                      <TableHead>Cliente / PCO</TableHead>
-                      <TableHead>Responsável</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {movements.map((mov) => {
-                      const isSaida = mov.type === 'saida';
-                      return (
-                        <TableRow key={mov.id}>
-                          <TableCell className="whitespace-nowrap">
-                            {format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={isSaida ? "destructive" : "default"} className="flex w-fit items-center gap-1">
-                              {isSaida ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
-                              {isSaida ? "Saída" : "Devolução"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {mov.bar?.name} <span className="text-muted-foreground font-normal text-xs">({mov.bar?.auxiliary_code})</span>
-                          </TableCell>
-                          <TableCell className={`text-right font-bold ${isSaida ? "text-red-500" : "text-green-500"}`}>
-                            {isSaida ? "-" : "+"}{(mov.length_mm / 1000).toFixed(2)} m
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm font-medium">{mov.client || "-"}</div>
-                            <div className="text-xs text-muted-foreground">PCO: {mov.pco || "-"}</div>
-                          </TableCell>
-                          <TableCell>{mov.responsible || "-"}</TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+            <div className="table-responsive border-0 shadow-none rounded-none">
+              <table className="table table--hover m-0">
+                <thead>
+                  <tr>
+                    <th className="glass-header">Data/Hora</th>
+                    <th className="glass-header">Tipo</th>
+                    <th className="glass-header">Barra Original</th>
+                    <th className="glass-header text-right">Movimentação</th>
+                    <th className="glass-header">Cliente / PCO</th>
+                    <th className="glass-header">Responsável</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {movements.map((mov) => {
+                    const isSaida = mov.type === 'saida';
+                    return (
+                      <tr key={mov.id}>
+                        <td className="whitespace-nowrap text-muted-foreground">
+                          {format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}
+                        </td>
+                        <td>
+                          <Badge variant={isSaida ? "destructive" : "default"} className="flex w-fit items-center gap-1">
+                            {isSaida ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
+                            {isSaida ? "Saída" : "Devolução"}
+                          </Badge>
+                        </td>
+                        <td>
+                          <span className="font-medium text-foreground">{mov.bar?.name}</span>
+                          <span className="text-muted-foreground ml-2 text-xs font-mono">({mov.bar?.auxiliary_code})</span>
+                        </td>
+                        <td className={`text-right font-bold font-mono ${isSaida ? "text-danger" : "text-success"}`}>
+                          {isSaida ? "-" : "+"}{(mov.length_mm / 1000).toFixed(2)} m
+                        </td>
+                        <td>
+                          <div className="text-sm font-medium text-foreground">{mov.client || "-"}</div>
+                          <div className="text-xs text-muted-foreground">PCO: {mov.pco || "-"}</div>
+                        </td>
+                        <td className="text-muted-foreground">{mov.responsible || "-"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              
+              {/* Mobile View */}
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/10">
                 {movements.map((mov) => {
                   const isSaida = mov.type === 'saida';
                   return (
-                    <div key={mov.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
+                    <div key={mov.id} className="border border-border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
                       <div className="flex justify-between items-start">
                         <Badge variant={isSaida ? "destructive" : "default"} className="flex w-fit items-center gap-1">
                           {isSaida ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
@@ -171,23 +188,23 @@ function CopperHistory() {
                         <span className="text-xs text-muted-foreground">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</span>
                       </div>
                       <div>
-                        <div className="font-semibold">{mov.bar?.name}</div>
+                        <div className="font-semibold text-primary font-display">{mov.bar?.name}</div>
                         <div className="text-xs font-mono text-muted-foreground">{mov.bar?.auxiliary_code}</div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                      <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-3 rounded-md">
                         <div>
                           <span className="block text-xs text-muted-foreground">Movimentação</span>
-                          <span className={`font-bold ${isSaida ? "text-red-500" : "text-green-500"}`}>
+                          <span className={`font-bold ${isSaida ? "text-danger" : "text-success"}`}>
                             {isSaida ? "-" : "+"}{(mov.length_mm / 1000).toFixed(2)} m
                           </span>
                         </div>
                         <div>
                           <span className="block text-xs text-muted-foreground">Responsável</span>
-                          <span>{mov.responsible || "-"}</span>
+                          <span className="text-foreground">{mov.responsible || "-"}</span>
                         </div>
-                        <div className="col-span-2">
-                          <span className="block text-xs text-muted-foreground">Cliente / PCO</span>
-                          <span>{mov.client || "-"} {mov.pco ? `(PCO: ${mov.pco})` : ""}</span>
+                        <div className="col-span-2 border-t border-border mt-1 pt-2">
+                          <span className="block text-xs text-muted-foreground mb-1">Cliente / PCO</span>
+                          <span className="text-foreground">{mov.client || "-"} {mov.pco ? `(PCO: ${mov.pco})` : ""}</span>
                         </div>
                       </div>
                     </div>
@@ -196,8 +213,8 @@ function CopperHistory() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Layers, CheckCircle2, TrendingDown, ArrowLeftRight, Activity, Users, HardHat, Clock, Package2 } from "lucide-react";
+import { Layers, CheckCircle2, TrendingDown, ArrowLeftRight, Users, HardHat, Clock, Package2 } from "lucide-react";
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, 
   LineChart, Line, PieChart, Pie, Cell, Legend
@@ -15,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/app/cobre/")({
   component: CobreDashboard,
 });
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const COLORS = ['var(--primary)', '#22c993', '#f5a623', '#fb8332', '#b16cf7', '#17c5db'];
 
 function CobreDashboard() {
   const [loading, setLoading] = useState(true);
@@ -151,136 +150,141 @@ function CobreDashboard() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard de Cobre</h1>
+    <div className="page-container animate-fade-in">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Dashboard de Cobre</h1>
+            <p className="page-subtitle">Visão geral do estoque e consumo de barras de cobre.</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Barras</CardTitle>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Total de Barras</h3>
             <Layers className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : stats.totalBarras}</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold font-display">{loading ? "..." : stats.totalBarras}</div>
             <p className="text-xs text-muted-foreground">Matrizes cadastradas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estoque Total (m)</CardTitle>
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Estoque Total (m)</h3>
             <Package2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : (stats.estoqueTotalMm / 1000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} m</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold font-display text-primary">{loading ? "..." : (stats.estoqueTotalMm / 1000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} m</div>
             <p className="text-xs text-muted-foreground">Soma de todos pedaços</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pedaços Disponíveis</CardTitle>
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Pedaços Disponíveis</h3>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : stats.totalPedacos}</div>
-            <p className="text-xs text-muted-foreground">Em estoque</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saídas no Mês</CardTitle>
+          </div>
+          <div>
+            <div className="text-2xl font-bold font-display">{loading ? "..." : stats.totalPedacos}</div>
+            <p className="text-xs text-muted-foreground">Em estoque livre</p>
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Saídas no Mês</h3>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : stats.saidasMes}</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold font-display text-danger">{loading ? "..." : stats.saidasMes}</div>
             <p className="text-xs text-muted-foreground">Cortes registrados</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Devoluções no Mês</CardTitle>
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Devoluções no Mês</h3>
             <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{loading ? "..." : stats.devolucoesMes}</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold font-display text-success">{loading ? "..." : stats.devolucoesMes}</div>
             <p className="text-xs text-muted-foreground">Retornos ao estoque</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Maior Cliente</CardTitle>
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Maior Cliente</h3>
             <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold truncate">{loading ? "..." : stats.topCliente}</div>
+          </div>
+          <div>
+            <div className="text-xl font-bold font-display truncate" title={loading ? "" : stats.topCliente}>{loading ? "..." : stats.topCliente}</div>
             <p className="text-xs text-muted-foreground">Com mais retiradas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Maior PCO (Obra)</CardTitle>
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Maior PCO (Obra)</h3>
             <HardHat className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold truncate">{loading ? "..." : stats.topPco}</div>
+          </div>
+          <div>
+            <div className="text-xl font-bold font-display truncate" title={loading ? "" : stats.topPco}>{loading ? "..." : stats.topPco}</div>
             <p className="text-xs text-muted-foreground">Destino mais frequente</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Última Movimentação</CardTitle>
+          </div>
+        </div>
+        <div className="glass-panel rounded-xl p-5 border border-border">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <h3 className="text-sm font-medium text-foreground">Última Movimentação</h3>
             <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold">{loading ? "..." : stats.ultimaMovimentacao}</div>
+          </div>
+          <div>
+            <div className="text-lg font-bold font-display">{loading ? "..." : stats.ultimaMovimentacao}</div>
             <p className="text-xs text-muted-foreground">Data/Hora</p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Consumo por Mês (m)</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[250px]">
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="glass-panel rounded-xl border border-border overflow-hidden">
+          <div className="p-5 border-b border-border bg-muted/20">
+            <h3 className="text-lg font-semibold font-display">Consumo por Mês (m)</h3>
+          </div>
+          <div className="p-5 h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={charts.consumoPorMes}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-                <XAxis dataKey="name" fontSize={12} />
-                <YAxis fontSize={12} tickFormatter={(val) => (val / 1000).toFixed(1)} />
-                <Tooltip cursor={{ fill: "transparent" }} formatter={(value: number) => [`${(value / 1000).toFixed(2)} m`, "Consumo"]} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="consumo" fill="currentColor" className="fill-primary" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
+                <XAxis dataKey="name" fontSize={12} stroke="currentColor" opacity={0.6} />
+                <YAxis fontSize={12} stroke="currentColor" opacity={0.6} tickFormatter={(val) => (val / 1000).toFixed(1)} />
+                <Tooltip cursor={{ fill: "transparent" }} formatter={(value: number) => [`${(value / 1000).toFixed(2)} m`, "Consumo"]} contentStyle={{ borderRadius: '8px', backgroundColor: 'var(--bg-paper)', borderColor: 'var(--border)', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.5)' }} />
+                <Bar dataKey="consumo" fill="var(--primary)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Movimentações (Entradas x Saídas)</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[250px]">
+        <div className="glass-panel rounded-xl border border-border overflow-hidden">
+          <div className="p-5 border-b border-border bg-muted/20">
+            <h3 className="text-lg font-semibold font-display">Movimentações (Entradas x Saídas)</h3>
+          </div>
+          <div className="p-5 h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={charts.entradasXSaidas}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
-                <XAxis dataKey="name" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.15} />
+                <XAxis dataKey="name" fontSize={12} stroke="currentColor" opacity={0.6} />
+                <YAxis fontSize={12} stroke="currentColor" opacity={0.6} />
+                <Tooltip contentStyle={{ borderRadius: '8px', backgroundColor: 'var(--bg-paper)', borderColor: 'var(--border)', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.5)' }} />
                 <Legend />
-                <Line type="monotone" dataKey="Saídas" stroke="#ef4444" strokeWidth={2} />
-                <Line type="monotone" dataKey="Entradas" stroke="#22c55e" strokeWidth={2} />
+                <Line type="monotone" dataKey="Saídas" stroke="#ef4444" strokeWidth={2} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="Entradas" stroke="#22c993" strokeWidth={2} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Top 5 Clientes (Consumo m)</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[250px]">
+        <div className="glass-panel rounded-xl border border-border overflow-hidden">
+          <div className="p-5 border-b border-border bg-muted/20">
+            <h3 className="text-lg font-semibold font-display">Top 5 Clientes (Consumo m)</h3>
+          </div>
+          <div className="p-5 h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={charts.consumoPorCliente} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
@@ -288,29 +292,29 @@ function CobreDashboard() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => [`${(value / 1000).toFixed(2)} m`, "Consumo"]} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Tooltip formatter={(value: number) => [`${(value / 1000).toFixed(2)} m`, "Consumo"]} contentStyle={{ borderRadius: '8px', backgroundColor: 'var(--bg-paper)', borderColor: 'var(--border)', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.5)' }} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Estoque Disponível por Barra (m)</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[250px]">
+        <div className="glass-panel rounded-xl border border-border overflow-hidden">
+          <div className="p-5 border-b border-border bg-muted/20">
+            <h3 className="text-lg font-semibold font-display">Estoque Disponível por Barra (m)</h3>
+          </div>
+          <div className="p-5 h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={charts.estoquePorBarra} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.3} />
-                <XAxis type="number" fontSize={12} tickFormatter={(val) => (val / 1000).toFixed(1)} />
-                <YAxis dataKey="name" type="category" fontSize={12} width={100} />
-                <Tooltip cursor={{ fill: "transparent" }} formatter={(value: number) => [`${(value / 1000).toFixed(2)} m`, "Estoque"]} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Bar dataKey="value" fill="#8884d8" radius={[0, 4, 4, 0]} />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.15} />
+                <XAxis type="number" fontSize={12} stroke="currentColor" opacity={0.6} tickFormatter={(val) => (val / 1000).toFixed(1)} />
+                <YAxis dataKey="name" type="category" fontSize={12} stroke="currentColor" opacity={0.6} width={100} />
+                <Tooltip cursor={{ fill: "transparent" }} formatter={(value: number) => [`${(value / 1000).toFixed(2)} m`, "Estoque"]} contentStyle={{ borderRadius: '8px', backgroundColor: 'var(--bg-paper)', borderColor: 'var(--border)', boxShadow: '0 4px 12px -2px rgb(0 0 0 / 0.5)' }} />
+                <Bar dataKey="value" fill="var(--primary)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

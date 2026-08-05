@@ -1,14 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Search, Plus, ListPlus, Link as LinkIcon, Trash2, Edit, MoreVertical } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search, Plus, Trash2, Edit, MoreVertical, PackageX } from "lucide-react";
+import Modal from "@/components/Modal/Modal";
+import EmptyState from "@/components/UI/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -125,62 +121,29 @@ function CopperBars() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Cadastro de Barras</h1>
-          <p className="text-muted-foreground">Gerencie o estoque matriz de cobre.</p>
+    <div className="page-container animate-fade-in">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Cadastro de Barras</h1>
+            <p className="page-subtitle">Gerencie o estoque matriz de cobre.</p>
+          </div>
         </div>
-        <Dialog open={isAddOpen} onOpenChange={open => {
-          if(open) {
+        <div className="page-actions">
+          <button className="btn btn--primary" onClick={() => {
             setName(""); setCode(""); setLength(""); setNotes("");
-          }
-          setIsAddOpen(open);
-        }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" /> Nova Barra</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cadastrar Nova Barra</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSaveBar} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Nome da Barra</Label>
-                <Input required placeholder="Ex: Barra chata 3/4" value={name} onChange={e => setName(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Código Auxiliar</Label>
-                  <Input required placeholder="Ex: CB-001" value={code} onChange={e => setCode(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Comprimento Inicial (m)</Label>
-                  <Input type="number" step="0.01" required min="0.01" placeholder="Ex: 6.00" value={length} onChange={e => setLength(e.target.value)} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Material</Label>
-                <Input required value={material} onChange={e => setMaterial(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Observações</Label>
-                <Textarea value={notes} onChange={e => setNotes(e.target.value)} />
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={submitting}>{submitting ? "Salvando..." : "Salvar"}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+            setIsAddOpen(true);
+          }}>
+            <Plus size={16} className="mr-2" /> Nova Barra
+          </button>
+        </div>
       </div>
 
-      <div className="relative">
+      <div className="filter-bar mb-6 relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input 
+        <input 
           placeholder="Pesquisar por nome ou código..." 
-          className="pl-9 w-full md:w-[300px]"
+          className="form-input pl-9 w-full md:w-[320px]"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
@@ -189,9 +152,11 @@ function CopperBars() {
       {loading ? (
         <div className="text-center p-8 text-muted-foreground">Carregando barras...</div>
       ) : filteredBars.length === 0 ? (
-        <div className="text-center p-8 border border-dashed rounded-lg text-muted-foreground">
-          Nenhuma barra encontrada.
-        </div>
+        <EmptyState 
+          icon={PackageX} 
+          title="Nenhuma barra encontrada" 
+          description="A pesquisa não retornou nenhum resultado para os filtros atuais."
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredBars.map((bar) => {
@@ -199,11 +164,11 @@ function CopperBars() {
             const disponivelCount = bar.pieces?.filter((p: any) => p.status === 'disponivel').length || 0;
 
             return (
-              <Card key={bar.id} className="overflow-hidden">
-                <CardHeader className="bg-muted/30 pb-4">
+              <div key={bar.id} className="glass-panel overflow-hidden rounded-xl border border-border">
+                <div className="bg-muted/30 p-4 border-b border-border">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">{bar.name}</CardTitle>
+                      <h3 className="text-lg font-semibold font-display text-foreground">{bar.name}</h3>
                       <div className="text-sm text-muted-foreground font-mono mt-1">{bar.auxiliary_code}</div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -212,7 +177,7 @@ function CopperBars() {
                       </Badge>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
+                          <button className="btn-icon h-8 w-8 text-muted-foreground"><MoreVertical size={16} /></button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => openEdit(bar)}>
@@ -225,65 +190,92 @@ function CopperBars() {
                       </DropdownMenu>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
+                </div>
+                <div className="p-4">
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center pb-2 border-b border-border-light">
                       <span className="text-muted-foreground">Original:</span>
                       <span className="font-medium">{(bar.original_length_mm / 1000).toFixed(2)} m</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center pb-2 border-b border-border-light">
                       <span className="text-muted-foreground">Material:</span>
                       <span className="font-medium">{bar.material}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">Pedaços Disp.:</span>
-                      <span className="font-medium">{disponivelCount} parte(s)</span>
+                      <span className="font-medium text-primary">{disponivelCount} parte(s)</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
       )}
 
+      {/* Add Dialog */}
+      <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Cadastrar Nova Barra" size="md">
+        <form onSubmit={handleSaveBar}>
+          <div className="form-group">
+            <label className="form-label">Nome da Barra</label>
+            <input required placeholder="Ex: Barra chata 3/4" className="form-input" value={name} onChange={e => setName(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">Código Auxiliar</label>
+              <input required placeholder="Ex: CB-001" className="form-input" value={code} onChange={e => setCode(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Comprimento Inicial (m)</label>
+              <input type="number" step="0.01" required min="0.01" placeholder="Ex: 6.00" className="form-input" value={length} onChange={e => setLength(e.target.value)} />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Material</label>
+            <input required className="form-input" value={material} onChange={e => setMaterial(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Observações</label>
+            <textarea className="form-input min-h-[80px]" value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+          <div className="form-actions mt-6">
+            <button type="button" className="btn btn--ghost" onClick={() => setIsAddOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting}>{submitting ? "Salvando..." : "Salvar Barra"}</button>
+          </div>
+        </form>
+      </Modal>
+
       {/* Edit Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar Barra</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSaveBar} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nome da Barra</Label>
-              <Input required placeholder="Ex: Barra chata 3/4" value={name} onChange={e => setName(e.target.value)} />
+      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Editar Barra" size="md">
+        <form onSubmit={handleSaveBar}>
+          <div className="form-group">
+            <label className="form-label">Nome da Barra</label>
+            <input required placeholder="Ex: Barra chata 3/4" className="form-input" value={name} onChange={e => setName(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">Código Auxiliar</label>
+              <input required placeholder="Ex: CB-001" className="form-input" value={code} onChange={e => setCode(e.target.value)} />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Código Auxiliar</Label>
-                <Input required placeholder="Ex: CB-001" value={code} onChange={e => setCode(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Comprimento Inicial (m)</Label>
-                <Input type="number" step="0.01" required min="0.01" value={length} onChange={e => setLength(e.target.value)} />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Comprimento Inicial (m)</label>
+              <input type="number" step="0.01" required min="0.01" className="form-input" value={length} onChange={e => setLength(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label>Material</Label>
-              <Input required value={material} onChange={e => setMaterial(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Observações</Label>
-              <Textarea value={notes} onChange={e => setNotes(e.target.value)} />
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={submitting}>{submitting ? "Salvando..." : "Salvar"}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Material</label>
+            <input required className="form-input" value={material} onChange={e => setMaterial(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Observações</label>
+            <textarea className="form-input min-h-[80px]" value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+          <div className="form-actions mt-6">
+            <button type="button" className="btn btn--ghost" onClick={() => setIsEditOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting}>{submitting ? "Salvando..." : "Salvar Alterações"}</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

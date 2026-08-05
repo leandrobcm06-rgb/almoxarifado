@@ -1,12 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { FileSpreadsheet, Printer, Download, FileText } from "lucide-react";
+import { FileSpreadsheet, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -163,20 +158,23 @@ function ReportsView() {
         <head>
           <title>${title}</title>
           <style>
-            body { font-family: sans-serif; padding: 20px; }
-            h1 { text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f4f4f4; }
+            body { font-family: 'Inter', sans-serif; padding: 40px; color: #0f172a; }
+            h1 { text-align: center; font-family: 'Outfit', sans-serif; color: #0f172a; margin-bottom: 8px; }
+            .subtitle { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 30px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+            th, td { border: 1px solid #e2e8f0; padding: 12px 16px; text-align: left; }
+            th { background-color: #f8fafc; font-weight: 600; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; }
+            tr:nth-child(even) { background-color: #f8fafc; }
             @media print {
               .no-print { display: none; }
+              body { padding: 0; }
             }
           </style>
         </head>
         <body>
-          <button class="no-print" onclick="window.print()" style="padding: 10px 20px; margin-bottom: 20px; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px;">Imprimir PDF</button>
+          <button class="no-print" onclick="window.print()" style="padding: 10px 20px; margin-bottom: 20px; cursor: pointer; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-weight: 500;">Imprimir PDF</button>
           <h1>${title}</h1>
-          <p>Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}</p>
+          <div class="subtitle">Gerado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}</div>
           <table>
             <thead>
               <tr>${colTitles.map(t => `<th>${t}</th>`).join("")}</tr>
@@ -202,62 +200,63 @@ function ReportsView() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Central de Relatórios</h1>
-        <p className="text-muted-foreground">Exporte dados da ferramentaria e do estoque de cobre para análise.</p>
+    <div className="page-container animate-fade-in max-w-4xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Central de Relatórios</h1>
+            <p className="page-subtitle">Exporte dados da ferramentaria e do estoque de cobre para análise.</p>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Configuração do Relatório</CardTitle>
-          <CardDescription>Selecione o tipo de relatório e aplique os filtros desejados antes de exportar.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label>Selecione o Relatório</Label>
-            <Select value={reportType} onValueChange={setReportType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                <optgroup label="Módulo: Ferramentaria" className="p-1 font-semibold text-muted-foreground text-xs mt-2 mb-1">FERRAMENTARIA</optgroup>
-                <SelectItem value="tools_all">Todas as Ferramentas Cadastradas</SelectItem>
-                <SelectItem value="tools_available">Apenas Ferramentas Disponíveis</SelectItem>
-                <SelectItem value="tools_loaned">Apenas Ferramentas Emprestadas</SelectItem>
-                <SelectItem value="tools_broken">Ferramentas em Manutenção/Danificadas</SelectItem>
-                <SelectItem value="tools_history">Histórico Completo (Auditoria)</SelectItem>
-                
-                <optgroup label="Módulo: Cobre" className="p-1 font-semibold text-muted-foreground text-xs mt-4 mb-1 border-t">BARRAS DE COBRE</optgroup>
-                <SelectItem value="cobre_estoque">Posição Atual de Estoque (Pedaços)</SelectItem>
-                <SelectItem value="cobre_consumo">Histórico de Consumo (Clientes e Obras)</SelectItem>
-              </SelectContent>
-            </Select>
+      <div className="glass-panel p-8 rounded-2xl border border-border">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold font-display text-foreground">Configuração do Relatório</h2>
+          <p className="text-sm text-muted-foreground mt-1">Selecione o tipo de relatório e aplique os filtros desejados antes de exportar.</p>
+        </div>
+        
+        <div className="space-y-6">
+          <div className="form-group">
+            <label className="form-label">Selecione o Relatório</label>
+            <select className="form-input" value={reportType} onChange={e => setReportType(e.target.value)}>
+              <optgroup label="Módulo: Ferramentaria">
+                <option value="tools_all">Todas as Ferramentas Cadastradas</option>
+                <option value="tools_available">Apenas Ferramentas Disponíveis</option>
+                <option value="tools_loaned">Apenas Ferramentas Emprestadas</option>
+                <option value="tools_broken">Ferramentas em Manutenção/Danificadas</option>
+                <option value="tools_history">Histórico Completo (Auditoria)</option>
+              </optgroup>
+              <optgroup label="Módulo: Cobre">
+                <option value="cobre_estoque">Posição Atual de Estoque (Pedaços)</option>
+                <option value="cobre_consumo">Histórico de Consumo (Clientes e Obras)</option>
+              </optgroup>
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Data Inicial (Filtro para históricos)</Label>
-              <Input type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} disabled={!reportType.includes('history') && !reportType.includes('consumo')} />
+            <div className="form-group">
+              <label className="form-label">Data Inicial (Filtro para históricos)</label>
+              <input type="date" className="form-input" value={dateStart} onChange={e => setDateStart(e.target.value)} disabled={!reportType.includes('history') && !reportType.includes('consumo')} />
             </div>
-            <div className="space-y-2">
-              <Label>Data Final (Filtro para históricos)</Label>
-              <Input type="date" value={dateEnd} onChange={e => setDateEnd(e.target.value)} disabled={!reportType.includes('history') && !reportType.includes('consumo')} />
+            <div className="form-group">
+              <label className="form-label">Data Final (Filtro para históricos)</label>
+              <input type="date" className="form-input" value={dateEnd} onChange={e => setDateEnd(e.target.value)} disabled={!reportType.includes('history') && !reportType.includes('consumo')} />
             </div>
           </div>
 
-          <div className="flex gap-4 pt-4 border-t">
-            <Button className="w-full flex-1" size="lg" disabled={loading} onClick={() => handleGenerate('csv')}>
-              <FileSpreadsheet className="h-5 w-5 mr-2" /> 
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border mt-4">
+            <button className="btn btn--outline w-full flex-1 justify-center py-6 text-base" disabled={loading} onClick={() => handleGenerate('pdf')}>
+              <Printer size={20} className="mr-3" /> 
+              Visualizar / Imprimir PDF
+            </button>
+            <button className="btn btn--primary w-full flex-1 justify-center py-6 text-base" disabled={loading} onClick={() => handleGenerate('csv')}>
+              <FileSpreadsheet size={20} className="mr-3" /> 
               Exportar para Excel (CSV)
-            </Button>
-            <Button className="w-full flex-1" size="lg" variant="outline" disabled={loading} onClick={() => handleGenerate('pdf')}>
-              <Printer className="h-5 w-5 mr-2" /> 
-              Gerar PDF (Imprimir)
-            </Button>
+            </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

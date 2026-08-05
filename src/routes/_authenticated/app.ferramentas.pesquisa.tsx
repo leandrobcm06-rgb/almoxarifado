@@ -1,14 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, ExternalLink, HardHat, FileText } from "lucide-react";
+import { Search, ExternalLink, FileText, PackageSearch } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/UI/Skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/pesquisa")({
   head: () => ({ meta: [{ title: "Pesquisa Rápida | Ferramentaria" }] }),
@@ -85,163 +83,170 @@ function ToolsSearch() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Pesquisa Omnichannel</h1>
-        <p className="text-muted-foreground">Encontre ferramentas rapidamente por qualquer atributo, funcionário ou cliente.</p>
+    <div className="page-container animate-fade-in max-w-6xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Pesquisa Omnichannel</h1>
+            <p className="page-subtitle">Encontre ferramentas rapidamente por qualquer atributo, funcionário ou cliente.</p>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <form onSubmit={handleSearch} className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input 
-                placeholder="Digite o nome, patrimônio, categoria, marca, funcionário ou cliente..." 
-                className="pl-10 h-12 text-lg w-full shadow-sm"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-              />
-            </div>
-            <Button type="submit" size="lg" className="h-12 px-8" disabled={loading}>
-              {loading ? "Buscando..." : "Pesquisar"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      <div className="glass-panel p-6 rounded-xl border border-border mb-8">
+        <form onSubmit={handleSearch} className="flex gap-3 items-end">
+          <div className="relative flex-1 form-group mb-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <input 
+              placeholder="Digite o nome, patrimônio, categoria, marca, funcionário ou cliente..." 
+              className="form-input pl-12 h-14 text-lg shadow-sm"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="btn btn--primary h-14 px-8 text-lg" disabled={loading}>
+            {loading ? "Buscando..." : "Pesquisar"}
+          </button>
+        </form>
+      </div>
 
       {hasSearched && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Resultados da Pesquisa</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="glass-panel rounded-xl overflow-hidden border border-border animate-fade-in-up">
+          <div className="p-5 border-b border-border bg-muted/20">
+            <h2 className="text-lg font-semibold font-display">Resultados da Pesquisa</h2>
+          </div>
+          <div className="p-0">
             {loading ? (
-              <div className="text-center p-8 text-muted-foreground">Procurando...</div>
-            ) : results.length === 0 ? (
-              <div className="text-center p-8 border border-dashed rounded-lg text-muted-foreground">
-                Nenhum resultado encontrado para "{query}".
+              <div className="p-6 space-y-4">
+                <Skeleton height="60px" width="100%" />
+                <Skeleton height="60px" width="100%" />
+                <Skeleton height="60px" width="100%" />
               </div>
+            ) : results.length === 0 ? (
+              <EmptyState 
+                icon={PackageSearch} 
+                title="Nenhum resultado encontrado" 
+                description={`Não encontramos nenhuma ferramenta ou empréstimo associado a "${query}".`}
+              />
             ) : (
-              <div className="border rounded-md overflow-x-auto">
-                <div className="hidden md:block">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nome / Patrimônio</TableHead>
-                        <TableHead>Categoria / Marca</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead>Situação</TableHead>
-                        <TableHead>Último Empréstimo (Atual)</TableHead>
-                        <TableHead className="text-right">Ações Rápidas</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {results.map((tool) => {
-                        const loan = tool.active_loan;
-                        return (
-                          <TableRow key={tool.id}>
-                            <TableCell className="font-medium">
-                              <div className="text-base">{tool.name}</div>
-                              <div className="text-xs text-muted-foreground font-mono">{tool.patrimony_number || "S/N"}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div>{tool.category}</div>
-                              <div className="text-xs text-muted-foreground">{tool.brand}</div>
-                            </TableCell>
-                            <TableCell>
-                              <span className="capitalize">{tool.condition}</span>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={
-                                tool.status === 'disponivel' ? 'default' :
-                                tool.status === 'emprestada' ? 'secondary' : 'destructive'
-                              }>
-                                {tool.status.toUpperCase()}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {loan ? (
-                                <div className="text-sm">
-                                  <span className="font-medium">{loan.employee}</span>
-                                  {loan.client && <span className="text-muted-foreground block text-xs">{loan.client} {loan.pco ? `(PCO: ${loan.pco})` : ''}</span>}
-                                  <span className="text-xs text-muted-foreground block mt-1">Desde: {format(new Date(loan.loan_date), "dd/MM/yy")}</span>
-                                </div>
-                              ) : (
-                                <span className="text-muted-foreground text-sm">-</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Link to={`/app/ferramentas/lista`} search={{ q: tool.name }} title="Abrir no Cadastro">
-                                  <Button variant="outline" size="sm">
-                                    <ExternalLink className="h-4 w-4" />
-                                  </Button>
-                                </Link>
-                                <Link to={`/app/ferramentas/historico`} search={{ q: tool.name }} title="Ver Histórico">
-                                  <Button variant="outline" size="sm">
-                                    <FileText className="h-4 w-4" />
-                                  </Button>
-                                </Link>
+              <div className="table-responsive border-0 shadow-none rounded-none">
+                <table className="table table--hover m-0">
+                  <thead>
+                    <tr>
+                      <th className="glass-header">Nome / Patrimônio</th>
+                      <th className="glass-header">Categoria / Marca</th>
+                      <th className="glass-header">Estado</th>
+                      <th className="glass-header">Situação</th>
+                      <th className="glass-header">Último Empréstimo (Atual)</th>
+                      <th className="glass-header text-right">Ações Rápidas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.map((tool) => {
+                      const loan = tool.active_loan;
+                      return (
+                        <tr key={tool.id}>
+                          <td className="font-medium">
+                            <div className="text-base text-foreground">{tool.name}</div>
+                            <div className="text-xs text-muted-foreground font-mono">{tool.patrimony_number || "S/N"}</div>
+                          </td>
+                          <td>
+                            <div className="text-foreground font-medium">{tool.category}</div>
+                            <div className="text-xs text-muted-foreground">{tool.brand}</div>
+                          </td>
+                          <td>
+                            <span className="capitalize text-foreground font-medium">{tool.condition}</span>
+                          </td>
+                          <td>
+                            <Badge variant={
+                              tool.status === 'disponivel' ? 'default' :
+                              tool.status === 'emprestada' ? 'secondary' : 'destructive'
+                            } className={tool.status === 'emprestada' ? 'bg-primary/20 text-primary border-primary/30' : ''}>
+                              {tool.status.toUpperCase()}
+                            </Badge>
+                          </td>
+                          <td>
+                            {loan ? (
+                              <div className="text-sm">
+                                <span className="font-medium text-foreground">{loan.employee}</span>
+                                {loan.client && <span className="text-muted-foreground block text-xs">{loan.client} {loan.pco ? `(PCO: ${loan.pco})` : ''}</span>}
+                                <span className="text-xs text-muted-foreground block mt-1">Desde: {format(new Date(loan.loan_date), "dd/MM/yy")}</span>
                               </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-                <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+                            ) : (
+                              <span className="text-muted-foreground text-sm">-</span>
+                            )}
+                          </td>
+                          <td className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Link to={`/app/ferramentas/lista`} search={{ q: tool.name }} title="Abrir no Cadastro">
+                                <button className="btn-icon">
+                                  <ExternalLink size={16} />
+                                </button>
+                              </Link>
+                              <Link to={`/app/ferramentas/historico`} search={{ q: tool.name }} title="Ver Histórico">
+                                <button className="btn-icon">
+                                  <FileText size={16} />
+                                </button>
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                
+                <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/10">
                   {results.map((tool) => {
                     const loan = tool.active_loan;
                     return (
-                      <div key={tool.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
+                      <div key={tool.id} className="border border-border rounded-xl p-4 bg-card shadow-sm flex flex-col gap-3">
                         <div className="flex justify-between items-start">
                           <div>
-                            <div className="text-base font-semibold">{tool.name}</div>
+                            <div className="text-base font-semibold text-foreground font-display">{tool.name}</div>
                             <div className="text-xs text-muted-foreground font-mono">{tool.patrimony_number || "S/N"}</div>
                           </div>
                           <Badge variant={
                             tool.status === 'disponivel' ? 'default' :
                             tool.status === 'emprestada' ? 'secondary' : 'destructive'
-                          }>
+                          } className={tool.status === 'emprestada' ? 'bg-primary/20 text-primary border-primary/30' : ''}>
                             {tool.status.toUpperCase()}
                           </Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                        <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-3 rounded-md">
                           <div>
                             <span className="block text-xs text-muted-foreground">Categoria</span>
-                            <span className="font-medium">{tool.category || "-"}</span>
+                            <span className="font-medium text-foreground">{tool.category || "-"}</span>
                           </div>
                           <div>
                             <span className="block text-xs text-muted-foreground">Marca</span>
-                            <span className="font-medium">{tool.brand || "-"}</span>
+                            <span className="font-medium text-foreground">{tool.brand || "-"}</span>
                           </div>
                           <div className="col-span-2">
                             <span className="block text-xs text-muted-foreground">Estado</span>
-                            <span className="capitalize">{tool.condition}</span>
+                            <span className="capitalize font-medium text-foreground">{tool.condition}</span>
                           </div>
                           {loan && (
-                            <div className="col-span-2 pt-2 border-t border-muted-foreground/20 mt-1">
-                              <span className="block text-xs text-muted-foreground mb-1">Último Empréstimo (Atual)</span>
+                            <div className="col-span-2 pt-3 border-t border-border mt-1">
+                              <span className="block text-xs text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Último Empréstimo (Atual)</span>
                               <div className="flex flex-col gap-0.5">
-                                <span className="font-medium text-sm">{loan.employee}</span>
+                                <span className="font-medium text-sm text-foreground">{loan.employee}</span>
                                 {loan.client && <span className="text-muted-foreground text-xs">{loan.client} {loan.pco ? `(PCO: ${loan.pco})` : ''}</span>}
-                                <span className="text-xs text-muted-foreground">Desde: {format(new Date(loan.loan_date), "dd/MM/yy")}</span>
+                                <span className="text-xs text-muted-foreground mt-1">Desde: {format(new Date(loan.loan_date), "dd/MM/yy")}</span>
                               </div>
                             </div>
                           )}
                         </div>
-                        <div className="flex justify-end gap-2 pt-1 border-t">
+                        <div className="flex justify-end gap-2 pt-2 border-t border-border mt-1">
                           <Link to={`/app/ferramentas/lista`} search={{ q: tool.name }} title="Abrir no Cadastro">
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
+                            <button className="btn btn--outline btn--sm">
+                              <ExternalLink size={14} className="mr-2" /> Cadastro
+                            </button>
                           </Link>
                           <Link to={`/app/ferramentas/historico`} search={{ q: tool.name }} title="Ver Histórico">
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                              <FileText className="h-4 w-4" />
-                            </Button>
+                            <button className="btn btn--outline btn--sm">
+                              <FileText size={14} className="mr-2" /> Histórico
+                            </button>
                           </Link>
                         </div>
                       </div>
@@ -250,8 +255,8 @@ function ToolsSearch() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );

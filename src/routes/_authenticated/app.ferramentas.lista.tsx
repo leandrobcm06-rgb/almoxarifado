@@ -2,16 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Search, Plus, Wrench, Edit, Trash2, Camera, Info } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Search, Plus, Edit, Trash2, Camera, Info, PackageX } from "lucide-react";
+import Modal from "@/components/Modal/Modal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/UI/Skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/lista")({
   head: () => ({ meta: [{ title: "Cadastro de Ferramentas | BCM Stock" }] }),
@@ -177,131 +174,63 @@ function ToolsList() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Acervo de Ferramentas</h1>
-          <p className="text-muted-foreground">Gerencie todas as ferramentas da empresa.</p>
+    <div className="page-container animate-fade-in">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Acervo de Ferramentas</h1>
+            <p className="page-subtitle">Gerencie todas as ferramentas da empresa.</p>
+          </div>
         </div>
-        <Dialog open={isAddOpen} onOpenChange={(v) => { if(!v) resetForm(); setIsAddOpen(v); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" /> Nova Ferramenta</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingTool ? "Editar Ferramenta" : "Cadastrar Nova Ferramenta"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Nome (obrigatório)</Label>
-                  <Input required value={name} onChange={e => setName(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Categoria (obrigatório)</Label>
-                  <Input required placeholder="Ex: Elétrica, Manual..." value={category} onChange={e => setCategory(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Marca (obrigatório)</Label>
-                  <Input required value={brand} onChange={e => setBrand(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Modelo (obrigatório)</Label>
-                  <Input required value={model} onChange={e => setModel(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Número de Patrimônio</Label>
-                  <Input value={patrimonyNumber} onChange={e => setPatrimonyNumber(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Número de Série</Label>
-                  <Input value={serialNumber} onChange={e => setSerialNumber(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Estado de Conservação</Label>
-                  <Select value={condition} onValueChange={setCondition}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="nova">Nova</SelectItem>
-                      <SelectItem value="boa">Boa</SelectItem>
-                      <SelectItem value="regular">Regular</SelectItem>
-                      <SelectItem value="ruim">Ruim</SelectItem>
-                      <SelectItem value="manutencao">Em Manutenção</SelectItem>
-                      <SelectItem value="danificada">Danificada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Localização (obrigatório)</Label>
-                  <Select value={locationId} onValueChange={setLocationId} required>
-                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                    <SelectContent>
-                      {locations?.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Data de Aquisição (obrigatório)</Label>
-                  <Input type="date" required value={acquisitionDate} onChange={e => setAcquisitionDate(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Valor da Ferramenta (obrigatório)</Label>
-                  <Input type="number" step="0.01" required value={value} onChange={e => setValue(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Foto da Ferramenta</Label>
-                  <Input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files?.[0] || null)} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Especificações Técnicas (obrigatório)</Label>
-                <Textarea required rows={3} value={specifications} onChange={e => setSpecifications(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Observações Gerais</Label>
-                <Textarea rows={2} value={notes} onChange={e => setNotes(e.target.value)} />
-              </div>
-              
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={submitting || !locationId}>{submitting ? "Salvando..." : "Salvar Ferramenta"}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="page-actions">
+          <button className="btn btn--primary" onClick={() => { resetForm(); setIsAddOpen(true); }}>
+            <Plus size={16} className="mr-2" /> Nova Ferramenta
+          </button>
+        </div>
       </div>
 
-      <div className="relative">
+      <div className="filter-bar mb-6 relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input 
+        <input 
           placeholder="Pesquisar por nome, categoria ou patrimônio..." 
-          className="pl-9 w-full md:w-[400px]"
+          className="form-input pl-9 w-full md:w-[400px]"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
       </div>
 
       {loading ? (
-        <div className="text-center p-8 text-muted-foreground">Carregando ferramentas...</div>
-      ) : filteredTools.length === 0 ? (
-        <div className="text-center p-8 border border-dashed rounded-lg text-muted-foreground">
-          Nenhuma ferramenta encontrada.
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <Skeleton height="350px" width="100%" />
+          <Skeleton height="350px" width="100%" />
+          <Skeleton height="350px" width="100%" />
         </div>
+      ) : filteredTools.length === 0 ? (
+        <EmptyState 
+          icon={PackageX} 
+          title="Nenhuma ferramenta encontrada" 
+          description="Você ainda não cadastrou nenhuma ferramenta ou a pesquisa não retornou resultados."
+          action={
+            <button className="btn btn--primary" onClick={() => { resetForm(); setIsAddOpen(true); }}>
+              Cadastrar Ferramenta
+            </button>
+          }
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredTools.map((tool) => (
-            <Card key={tool.id} className="overflow-hidden">
-              <div className="aspect-video w-full bg-muted flex items-center justify-center overflow-hidden">
+            <div key={tool.id} className="glass-panel overflow-hidden flex flex-col rounded-xl border border-border transition-all hover:border-primary/50">
+              <div className="aspect-video w-full bg-muted/20 flex items-center justify-center overflow-hidden border-b border-border">
                 {tool.photo_url ? (
                   <img src={tool.photo_url} alt={tool.name} className="w-full h-full object-cover" />
                 ) : (
-                  <Camera className="h-10 w-10 text-muted-foreground/50" />
+                  <Camera className="h-10 w-10 text-muted-foreground/30" />
                 )}
               </div>
-              <CardContent className="p-4">
-                <div className="flex justify-between items-start mb-2">
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-bold text-lg leading-tight">{tool.name}</h3>
+                    <h3 className="font-semibold text-lg leading-tight font-display text-foreground">{tool.name}</h3>
                     <p className="text-sm text-muted-foreground">{tool.brand}</p>
                   </div>
                   <Badge variant={
@@ -312,72 +241,158 @@ function ToolsList() {
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-y-1 text-sm mt-4">
-                  <div className="text-muted-foreground">Categoria:</div>
-                  <div className="font-medium text-right truncate" title={tool.category}>{tool.category}</div>
-                  
-                  <div className="text-muted-foreground">Patrimônio:</div>
-                  <div className="font-medium text-right truncate">{tool.patrimony_number || "-"}</div>
-                  
-                  <div className="text-muted-foreground">Estado:</div>
-                  <div className="font-medium text-right capitalize">{tool.condition}</div>
+                <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm mt-auto mb-5 bg-muted/20 p-3 rounded-md">
+                  <div>
+                    <div className="text-xs text-muted-foreground">Categoria</div>
+                    <div className="font-medium text-foreground truncate" title={tool.category}>{tool.category}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground">Patrimônio</div>
+                    <div className="font-medium text-foreground truncate">{tool.patrimony_number || "-"}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-xs text-muted-foreground">Estado Físico</div>
+                    <div className="font-medium text-foreground capitalize">{tool.condition}</div>
+                  </div>
                 </div>
 
-                <div className="flex gap-2 mt-4 pt-4 border-t">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setViewingTool(tool)}>
-                    <Info className="h-4 w-4 mr-1" /> Detalhes
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEditClick(tool)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600" onClick={() => handleDelete(tool.id, tool.status)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <div className="flex gap-2 mt-auto pt-4 border-t border-border">
+                  <button className="btn btn--secondary flex-1" onClick={() => setViewingTool(tool)}>
+                    <Info size={16} className="mr-1" /> Detalhes
+                  </button>
+                  <button className="btn-icon" title="Editar" onClick={() => handleEditClick(tool)}>
+                    <Edit size={16} />
+                  </button>
+                  <button className="btn-icon text-danger hover:text-danger hover:bg-danger-bg" title="Excluir" onClick={() => handleDelete(tool.id, tool.status)}>
+                    <Trash2 size={16} />
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Visualização Detalhada Modal */}
-      <Dialog open={!!viewingTool} onOpenChange={() => setViewingTool(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Detalhes da Ferramenta</DialogTitle>
-          </DialogHeader>
-          {viewingTool && (
-            <div className="space-y-4">
-              {viewingTool.photo_url && (
-                <div className="w-full h-64 rounded-md overflow-hidden bg-black flex justify-center">
-                  <img src={viewingTool.photo_url} alt={viewingTool.name} className="object-contain h-full" />
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><strong className="block text-muted-foreground">Nome</strong> {viewingTool.name}</div>
-                <div><strong className="block text-muted-foreground">Categoria</strong> {viewingTool.category}</div>
-                <div><strong className="block text-muted-foreground">Marca</strong> {viewingTool.brand}</div>
-                <div><strong className="block text-muted-foreground">Modelo</strong> {viewingTool.model}</div>
-                <div><strong className="block text-muted-foreground">Nº Patrimônio</strong> {viewingTool.patrimony_number || '-'}</div>
-                <div><strong className="block text-muted-foreground">Nº Série</strong> {viewingTool.serial_number || '-'}</div>
-                <div><strong className="block text-muted-foreground">Situação</strong> <Badge>{viewingTool.status}</Badge></div>
-                <div><strong className="block text-muted-foreground">Localização</strong> {viewingTool.tool_locations?.name || '-'}</div>
-                <div><strong className="block text-muted-foreground">Estado Físico</strong> <span className="capitalize">{viewingTool.condition}</span></div>
-                <div><strong className="block text-muted-foreground">Data Aquisição</strong> {viewingTool.acquisition_date || '-'}</div>
-                <div><strong className="block text-muted-foreground">Valor Estimado</strong> {viewingTool.value ? `R$ ${viewingTool.value}` : '-'}</div>
-              </div>
-              <div className="text-sm">
-                <strong className="block text-muted-foreground">Especificações</strong>
-                <p className="whitespace-pre-wrap">{viewingTool.specifications}</p>
-              </div>
-              <div className="text-sm">
-                <strong className="block text-muted-foreground">Observações</strong>
-                <p className="whitespace-pre-wrap">{viewingTool.notes || '-'}</p>
-              </div>
+      {/* Cadastro/Edição Modal */}
+      <Modal isOpen={isAddOpen} onClose={() => { setIsAddOpen(false); resetForm(); }} title={editingTool ? "Editar Ferramenta" : "Cadastrar Nova Ferramenta"} size="lg">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">Nome (obrigatório)</label>
+              <input required className="form-input" value={name} onChange={e => setName(e.target.value)} />
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            <div className="form-group">
+              <label className="form-label">Categoria (obrigatório)</label>
+              <input required placeholder="Ex: Elétrica, Manual..." className="form-input" value={category} onChange={e => setCategory(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Marca (obrigatório)</label>
+              <input required className="form-input" value={brand} onChange={e => setBrand(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Modelo (obrigatório)</label>
+              <input required className="form-input" value={model} onChange={e => setModel(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Número de Patrimônio</label>
+              <input className="form-input" value={patrimonyNumber} onChange={e => setPatrimonyNumber(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Número de Série</label>
+              <input className="form-input" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Estado de Conservação</label>
+              <Select value={condition} onValueChange={setCondition}>
+                <SelectTrigger className="form-input h-[42px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nova">Nova</SelectItem>
+                  <SelectItem value="boa">Boa</SelectItem>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="ruim">Ruim</SelectItem>
+                  <SelectItem value="manutencao">Em Manutenção</SelectItem>
+                  <SelectItem value="danificada">Danificada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Localização (obrigatório)</label>
+              <Select value={locationId} onValueChange={setLocationId} required>
+                <SelectTrigger className="form-input h-[42px]"><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  {locations?.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Data de Aquisição (obrigatório)</label>
+              <input type="date" required className="form-input" value={acquisitionDate} onChange={e => setAcquisitionDate(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Valor da Ferramenta (obrigatório)</label>
+              <input type="number" step="0.01" required className="form-input" value={value} onChange={e => setValue(e.target.value)} />
+            </div>
+            <div className="form-group md:col-span-2">
+              <label className="form-label">Foto da Ferramenta</label>
+              <input type="file" accept="image/*" className="form-input file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90" onChange={e => setPhotoFile(e.target.files?.[0] || null)} />
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Especificações Técnicas (obrigatório)</label>
+            <textarea required rows={3} className="form-input min-h-[80px]" value={specifications} onChange={e => setSpecifications(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Observações Gerais</label>
+            <textarea rows={2} className="form-input min-h-[80px]" value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+          
+          <div className="form-actions mt-8">
+            <button type="button" className="btn btn--ghost" onClick={() => { setIsAddOpen(false); resetForm(); }}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting || !locationId}>{submitting ? "Salvando..." : "Salvar Ferramenta"}</button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Visualização Detalhada Modal */}
+      <Modal isOpen={!!viewingTool} onClose={() => setViewingTool(null)} title="Detalhes da Ferramenta" size="md">
+        {viewingTool && (
+          <div className="space-y-6">
+            {viewingTool.photo_url && (
+              <div className="w-full h-64 rounded-xl overflow-hidden bg-black/5 flex justify-center border border-border">
+                <img src={viewingTool.photo_url} alt={viewingTool.name} className="object-contain h-full" />
+              </div>
+            )}
+            
+            <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm bg-muted/20 p-5 rounded-xl border border-border">
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Nome</strong> <span className="font-medium text-foreground">{viewingTool.name}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Categoria</strong> <span className="text-foreground">{viewingTool.category}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Marca</strong> <span className="text-foreground">{viewingTool.brand}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Modelo</strong> <span className="text-foreground">{viewingTool.model}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Nº Patrimônio</strong> <span className="text-foreground">{viewingTool.patrimony_number || '-'}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Nº Série</strong> <span className="text-foreground">{viewingTool.serial_number || '-'}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Situação</strong> <Badge variant={viewingTool.status === 'disponivel' ? 'default' : viewingTool.status === 'emprestada' ? 'secondary' : 'destructive'}>{viewingTool.status.toUpperCase()}</Badge></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Localização</strong> <span className="text-foreground">{viewingTool.tool_locations?.name || '-'}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Estado Físico</strong> <span className="capitalize text-foreground">{viewingTool.condition}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Data Aquisição</strong> <span className="text-foreground">{viewingTool.acquisition_date || '-'}</span></div>
+              <div><strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-1">Valor Estimado</strong> <span className="text-foreground">{viewingTool.value ? `R$ ${viewingTool.value}` : '-'}</span></div>
+            </div>
+            
+            <div className="text-sm bg-muted/20 p-5 rounded-xl border border-border">
+              <strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-2">Especificações</strong>
+              <p className="whitespace-pre-wrap text-foreground leading-relaxed">{viewingTool.specifications}</p>
+            </div>
+            
+            <div className="text-sm bg-muted/20 p-5 rounded-xl border border-border">
+              <strong className="block text-muted-foreground text-xs uppercase tracking-wider mb-2">Observações</strong>
+              <p className="whitespace-pre-wrap text-foreground leading-relaxed">{viewingTool.notes || '-'}</p>
+            </div>
+            
+            <div className="form-actions mt-6">
+              <button className="btn btn--primary w-full" onClick={() => setViewingTool(null)}>Fechar</button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

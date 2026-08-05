@@ -1,11 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
@@ -112,75 +107,83 @@ function CopperExit() {
   const selectedPiece = pieces.find(p => p.id === selectedPieceId);
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Saída de Material (Corte)</h1>
-        <p className="text-muted-foreground">Registre um corte para retirar material de um pedaço existente.</p>
+    <div className="page-container animate-fade-in max-w-3xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Saída de Material (Corte)</h1>
+            <p className="page-subtitle">Registre um corte para retirar material de um pedaço existente.</p>
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <form onSubmit={handleRegisterExit} className="space-y-6">
-            
-            <div className="space-y-4">
-              <h3 className="font-medium border-b pb-2">Material de Origem</h3>
-              <div className="space-y-2">
-                <Label>Pedaço a ser cortado</Label>
-                <Select disabled={loading} value={selectedPieceId} onValueChange={setSelectedPieceId} required>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma barra/pedaço disponível..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {pieces.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.bar?.name} ({p.bar?.auxiliary_code}) - Restante: {(p.current_length_mm / 1000).toFixed(2)} m
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedPiece && (
-                  <p className="text-xs text-muted-foreground">
-                    Corte máximo permitido: <strong>{(selectedPiece.current_length_mm / 1000).toFixed(2)} m</strong>. Se você cortar o total, o pedaço será encerrado automaticamente.
-                  </p>
-                )}
+      <div className="glass-panel p-6 md:p-8 rounded-xl border border-border">
+        <form onSubmit={handleRegisterExit} className="space-y-8">
+          
+          <div className="space-y-5">
+            <h3 className="font-semibold text-lg text-foreground border-b border-border pb-2 font-display">
+              Material de Origem
+            </h3>
+            <div className="form-group">
+              <label className="form-label">Pedaço a ser cortado</label>
+              <Select disabled={loading} value={selectedPieceId} onValueChange={setSelectedPieceId} required>
+                <SelectTrigger className="form-input bg-card h-11">
+                  <SelectValue placeholder="Selecione uma barra/pedaço disponível..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {pieces.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.bar?.name} ({p.bar?.auxiliary_code}) - Restante: {(p.current_length_mm / 1000).toFixed(2)} m
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedPiece && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Corte máximo permitido: <strong>{(selectedPiece.current_length_mm / 1000).toFixed(2)} m</strong>. Se você cortar o total, o pedaço será encerrado automaticamente.
+                </p>
+              )}
+            </div>
+            <div className="form-group">
+              <label className="form-label">Tamanho do Corte Retirado (m)</label>
+              <input type="number" step="0.01" required min="0.01" max={selectedPiece ? (selectedPiece.current_length_mm / 1000) : undefined} className="form-input" value={cutLength} onChange={e => setCutLength(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="space-y-5">
+            <h3 className="font-semibold text-lg text-foreground border-b border-border pb-2 font-display">
+              Destino e Responsável
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="form-group">
+                <label className="form-label">Cliente</label>
+                <input required placeholder="Ex: Nome da Empresa" className="form-input" value={client} onChange={e => setClient(e.target.value)} />
               </div>
-              <div className="space-y-2">
-                <Label>Tamanho do Corte Retirado (m)</Label>
-                <Input type="number" step="0.01" required min="0.01" max={selectedPiece ? (selectedPiece.current_length_mm / 1000) : undefined} value={cutLength} onChange={e => setCutLength(e.target.value)} />
+              <div className="form-group">
+                <label className="form-label">PCO (Obra)</label>
+                <input required placeholder="Ex: 123456" className="form-input" value={pco} onChange={e => setPco(e.target.value)} />
               </div>
             </div>
-
-            <div className="space-y-4 pt-2">
-              <h3 className="font-medium border-b pb-2">Destino e Responsável</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Cliente</Label>
-                  <Input required placeholder="Ex: Nome da Empresa" value={client} onChange={e => setClient(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>PCO (Obra)</Label>
-                  <Input required placeholder="Ex: 123456" value={pco} onChange={e => setPco(e.target.value)} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Responsável pela retirada</Label>
-                <Input required placeholder="Nome do funcionário ou solicitante" value={responsible} onChange={e => setResponsible(e.target.value)} />
-              </div>
+            <div className="form-group">
+              <label className="form-label">Responsável pela retirada</label>
+              <input required placeholder="Nome do funcionário ou solicitante" className="form-input" value={responsible} onChange={e => setResponsible(e.target.value)} />
             </div>
+          </div>
 
-            <div className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label>Observações Adicionais</Label>
-                <Textarea placeholder="Detalhes adicionais sobre a saída (opcional)" value={notes} onChange={e => setNotes(e.target.value)} />
-              </div>
+          <div className="space-y-5">
+            <h3 className="font-semibold text-lg text-foreground border-b border-border pb-2 font-display">
+              Observações Adicionais
+            </h3>
+            <div className="form-group">
+              <textarea placeholder="Detalhes adicionais sobre a saída (opcional)" className="form-input min-h-[100px]" value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
+          </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={submitting || loading}>
-              {submitting ? "Registrando..." : "Registrar Saída"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          <button type="submit" className="btn btn--primary w-full py-3 text-base" disabled={submitting || loading}>
+            {submitting ? "Registrando Saída..." : "Registrar Saída"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

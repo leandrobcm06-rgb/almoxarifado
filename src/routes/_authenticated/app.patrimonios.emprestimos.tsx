@@ -1,16 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Search, Plus, ArrowRightLeft, ArrowDownToLine, Info } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Plus, ArrowRightLeft, ArrowDownToLine, Monitor } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Modal from "@/components/Modal/Modal";
+import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/UI/Skeleton";
 
 // Search params for pre-selecting asset
 type EmprestimosSearch = { assetId?: string };
@@ -201,189 +197,251 @@ function EmprestimosList() {
     );
   }, [loans, search]);
 
-  const statusColors: Record<string, string> = { 
-    "em aberto": "default", 
-    "devolvido": "success", 
-    "atrasado": "destructive",
-    "cancelado": "secondary"
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Empréstimos de Patrimônios</h1>
-          <p className="text-sm text-muted-foreground">Registre e controle as saídas e devoluções dos bens.</p>
+    <div className="page-container animate-fade-in max-w-7xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Empréstimos de Patrimônios</h1>
+            <p className="page-subtitle">Registre e controle as saídas e devoluções dos bens.</p>
+          </div>
         </div>
-        <Dialog open={isLoanOpen} onOpenChange={(v) => { if (!v) resetLoanForm(); setIsLoanOpen(v); }}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" />Novo Empréstimo</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Registrar Empréstimo</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleLoanSubmit} className="grid grid-cols-2 gap-4 py-4">
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="assetId">Patrimônio *</Label>
-                <Select value={assetId} onValueChange={setAssetId} required>
-                  <SelectTrigger><SelectValue placeholder="Selecione um patrimônio disponível" /></SelectTrigger>
-                  <SelectContent>
-                    {availableAssets.map(a => (
-                      <SelectItem key={a.id} value={a.id}>{a.asset_number} - {a.description}</SelectItem>
-                    ))}
-                    {availableAssets.length === 0 && <SelectItem value="none" disabled>Nenhum disponível</SelectItem>}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="withdrawnBy">Retirado por (Pessoa) *</Label>
-                <Input id="withdrawnBy" required value={withdrawnBy} onChange={(e) => setWithdrawnBy(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="destination">Setor ou Empresa de Destino *</Label>
-                <Input id="destination" required value={destination} onChange={(e) => setDestination(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="authorizedBy">Autorizado por *</Label>
-                <Input id="authorizedBy" required value={authorizedBy} onChange={(e) => setAuthorizedBy(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reason">Motivo do Empréstimo *</Label>
-                <Input id="reason" required value={reason} onChange={(e) => setReason(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="loanDate">Data do Empréstimo *</Label>
-                <Input id="loanDate" type="date" required value={loanDate} onChange={(e) => setLoanDate(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="expectedReturn">Previsão de Devolução *</Label>
-                <Input id="expectedReturn" type="date" required value={expectedReturn} onChange={(e) => setExpectedReturn(e.target.value)} />
-              </div>
-              <div className="col-span-2 space-y-2">
-                <Label htmlFor="notes">Observações</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="resize-none" rows={3} />
-              </div>
-              <DialogFooter className="col-span-2 mt-4">
-                <Button type="button" variant="outline" onClick={() => setIsLoanOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={submitting || !assetId}>{submitting ? "Salvando..." : "Registrar Saída"}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="page-actions">
+          <button className="btn btn--primary" onClick={() => { resetLoanForm(); setIsLoanOpen(true); }}>
+            <Plus size={16} className="mr-2" /> Novo Empréstimo
+          </button>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <CardTitle>Histórico e Empréstimos Atuais</CardTitle>
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Pesquisar..." className="pl-8" value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
+      <div className="filter-bar mb-6">
+        <div className="relative w-full sm:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input 
+            placeholder="Pesquisar por patrimônio, pessoa, destino..." 
+            className="form-input pl-10 w-full shadow-sm" 
+            value={search} 
+            onChange={(e) => setSearch(e.target.value)} 
+          />
+        </div>
+      </div>
+
+      <div className="glass-panel rounded-xl overflow-hidden border border-border">
+        <div className="p-0">
           {loading ? (
-            <div className="p-8 text-center text-muted-foreground">Carregando empréstimos...</div>
+            <div className="p-6 space-y-4">
+              <Skeleton height="50px" width="100%" />
+              <Skeleton height="50px" width="100%" />
+              <Skeleton height="50px" width="100%" />
+              <Skeleton height="50px" width="100%" />
+            </div>
           ) : filtered.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">Nenhum empréstimo encontrado.</div>
+            <EmptyState 
+              icon={ArrowRightLeft} 
+              title={search ? "Nenhum empréstimo encontrado" : "Nenhum empréstimo registrado"} 
+              description={search ? `Não encontramos resultados para "${search}".` : "Comece registrando a saída do primeiro patrimônio."}
+              action={!search ? (
+                <button className="btn btn--primary" onClick={() => { resetLoanForm(); setIsLoanOpen(true); }}>
+                  Registrar Primeiro Empréstimo
+                </button>
+              ) : undefined}
+            />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-muted text-muted-foreground">
+            <div className="table-responsive border-0 shadow-none rounded-none">
+              <table className="table table--hover m-0">
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 font-medium">Patrimônio</th>
-                    <th className="px-4 py-3 font-medium">Retirado por</th>
-                    <th className="px-4 py-3 font-medium hidden md:table-cell">Destino</th>
-                    <th className="px-4 py-3 font-medium">Saída</th>
-                    <th className="px-4 py-3 font-medium">Devolução Prev.</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium text-right">Ações</th>
+                    <th className="glass-header">Patrimônio</th>
+                    <th className="glass-header">Retirado por</th>
+                    <th className="glass-header hidden md:table-cell">Destino</th>
+                    <th className="glass-header">Saída</th>
+                    <th className="glass-header">Devolução Prev.</th>
+                    <th className="glass-header text-center">Status</th>
+                    <th className="glass-header text-right">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody>
                   {filtered.map((l) => (
-                    <tr key={l.id} className="hover:bg-muted/50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{l.asset?.description}</div>
-                        <div className="text-xs text-muted-foreground">{l.asset?.asset_number}</div>
+                    <tr key={l.id}>
+                      <td>
+                        <div className="font-semibold text-foreground text-sm">{l.asset?.description}</div>
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5">{l.asset?.asset_number}</div>
                       </td>
-                      <td className="px-4 py-3">{l.withdrawn_by}</td>
-                      <td className="px-4 py-3 hidden md:table-cell">{l.destination}</td>
-                      <td className="px-4 py-3">{new Date(l.loan_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
-                      <td className="px-4 py-3">{new Date(l.expected_return_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant={statusColors[l.status] as any || "outline"}>
+                      <td className="font-medium text-foreground">{l.withdrawn_by}</td>
+                      <td className="hidden md:table-cell text-muted-foreground">{l.destination}</td>
+                      <td className="text-foreground">{new Date(l.loan_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
+                      <td className="text-foreground">{new Date(l.expected_return_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
+                      <td className="text-center">
+                        <Badge 
+                          variant={l.status === 'atrasado' ? 'destructive' : l.status === 'devolvido' ? 'default' : 'secondary'}
+                          className={l.status === 'em aberto' ? 'bg-primary/20 text-primary border-primary/30' : l.status === 'devolvido' ? 'bg-success-bg text-success border-success-border' : ''}
+                        >
                           {l.status === 'em aberto' ? 'Em aberto' : l.status.charAt(0).toUpperCase() + l.status.slice(1)}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
-                        {(l.status === 'em aberto' || l.status === 'atrasado') && (
-                          <Button variant="ghost" size="sm" className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => handleOpenReturn(l)}>
-                            <ArrowDownToLine className="h-4 w-4 mr-2" /> Devolver
-                          </Button>
+                      <td className="text-right whitespace-nowrap">
+                        {(l.status === 'em aberto' || l.status === 'atrasado') ? (
+                          <button className="btn btn--outline btn--sm text-primary border-primary hover:bg-primary-bg ml-auto" onClick={() => handleOpenReturn(l)}>
+                            <ArrowDownToLine size={14} className="mr-2" /> Devolver
+                          </button>
+                        ) : (
+                          <span className="text-xs font-medium text-success text-right block w-full">Devolvido</span>
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+
+              {/* Mobile View */}
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/10">
+                {filtered.map((l) => (
+                  <div key={l.id} className="border border-border rounded-xl p-4 bg-card shadow-sm flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold text-foreground text-base font-display">{l.asset?.description}</div>
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5">{l.asset?.asset_number}</div>
+                      </div>
+                      <Badge 
+                        variant={l.status === 'atrasado' ? 'destructive' : l.status === 'devolvido' ? 'default' : 'secondary'}
+                        className={l.status === 'em aberto' ? 'bg-primary/20 text-primary border-primary/30' : l.status === 'devolvido' ? 'bg-success-bg text-success border-success-border' : ''}
+                      >
+                        {l.status === 'em aberto' ? 'Em aberto' : l.status.charAt(0).toUpperCase() + l.status.slice(1)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-3 rounded-lg mt-1">
+                      <div>
+                        <span className="block text-xs text-muted-foreground mb-0.5">Retirado por</span>
+                        <span className="font-medium text-foreground">{l.withdrawn_by}</span>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-muted-foreground mb-0.5">Destino</span>
+                        <span className="font-medium text-foreground">{l.destination}</span>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-muted-foreground mb-0.5">Saída</span>
+                        <span className="font-medium text-foreground">{new Date(l.loan_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-muted-foreground mb-0.5">Devolução Prev.</span>
+                        <span className="font-medium text-foreground">{new Date(l.expected_return_date).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                      </div>
+                    </div>
+
+                    {(l.status === 'em aberto' || l.status === 'atrasado') && (
+                      <div className="flex justify-end pt-2 border-t border-border mt-1">
+                        <button className="btn btn--outline btn--sm text-primary border-primary hover:bg-primary-bg" onClick={() => handleOpenReturn(l)}>
+                          <ArrowDownToLine size={14} className="mr-2" /> Devolver Patrimônio
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Return Dialog */}
-      <Dialog open={isReturnOpen} onOpenChange={setIsReturnOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Registrar Devolução</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleReturnSubmit} className="grid grid-cols-2 gap-4 py-4">
-            <div className="col-span-2 text-sm bg-muted/50 p-3 rounded-md mb-2">
-              <strong>Patrimônio:</strong> {returningLoan?.asset?.asset_number} - {returningLoan?.asset?.description}
+      <Modal isOpen={isLoanOpen} onClose={() => { resetLoanForm(); setIsLoanOpen(false); }} title="Registrar Empréstimo de Patrimônio" size="lg">
+        <form onSubmit={handleLoanSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <div className="form-group md:col-span-2">
+              <label className="form-label" htmlFor="assetId">Patrimônio *</label>
+              <select id="assetId" className="form-input" value={assetId} onChange={e => setAssetId(e.target.value)} required>
+                <option value="">Selecione um patrimônio disponível...</option>
+                {availableAssets.map(a => (
+                  <option key={a.id} value={a.id}>{a.asset_number} - {a.description}</option>
+                ))}
+                {availableAssets.length === 0 && <option value="none" disabled>Nenhum disponível</option>}
+              </select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="actualReturn">Data da Devolução *</Label>
-              <Input id="actualReturn" type="date" required value={actualReturn} onChange={(e) => setActualReturn(e.target.value)} />
+            <div className="form-group">
+              <label className="form-label" htmlFor="withdrawnBy">Retirado por (Pessoa) *</label>
+              <input id="withdrawnBy" required className="form-input" value={withdrawnBy} onChange={(e) => setWithdrawnBy(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="returnCondition">Estado de conservação *</Label>
-              <Select value={returnCondition} onValueChange={setReturnCondition}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Ruim">Ruim</SelectItem>
-                  <SelectItem value="Regular">Regular</SelectItem>
-                  <SelectItem value="Bom">Bom</SelectItem>
-                  <SelectItem value="Ótimo">Ótimo</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="form-group">
+              <label className="form-label" htmlFor="destination">Setor ou Empresa de Destino *</label>
+              <input id="destination" required className="form-input" value={destination} onChange={(e) => setDestination(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="returnedBy">Devolvido por *</Label>
-              <Input id="returnedBy" required value={returnedBy} onChange={(e) => setReturnedBy(e.target.value)} />
+            <div className="form-group">
+              <label className="form-label" htmlFor="authorizedBy">Autorizado por *</label>
+              <input id="authorizedBy" required className="form-input" value={authorizedBy} onChange={(e) => setAuthorizedBy(e.target.value)} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="receivedBy">Recebido por *</Label>
-              <Input id="receivedBy" required value={receivedBy} onChange={(e) => setReceivedBy(e.target.value)} />
+            <div className="form-group">
+              <label className="form-label" htmlFor="reason">Motivo do Empréstimo *</label>
+              <input id="reason" required className="form-input" value={reason} onChange={(e) => setReason(e.target.value)} />
             </div>
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="returnDamages">Registro de Avarias</Label>
-              <Input id="returnDamages" placeholder="Ocorreu algum dano?" value={returnDamages} onChange={(e) => setReturnDamages(e.target.value)} />
+            <div className="form-group">
+              <label className="form-label" htmlFor="loanDate">Data do Empréstimo *</label>
+              <input id="loanDate" type="date" required className="form-input" value={loanDate} onChange={(e) => setLoanDate(e.target.value)} />
             </div>
-            <div className="col-span-2 space-y-2">
-              <Label htmlFor="returnNotes">Observações</Label>
-              <Textarea id="returnNotes" value={returnNotes} onChange={(e) => setReturnNotes(e.target.value)} className="resize-none" rows={2} />
+            <div className="form-group">
+              <label className="form-label" htmlFor="expectedReturn">Previsão de Devolução *</label>
+              <input id="expectedReturn" type="date" required className="form-input" value={expectedReturn} onChange={(e) => setExpectedReturn(e.target.value)} />
+            </div>
+            <div className="form-group md:col-span-2">
+              <label className="form-label" htmlFor="notes">Observações adicionais</label>
+              <textarea id="notes" className="form-input min-h-[80px]" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </div>
+          </div>
+          <div className="form-actions mt-8">
+            <button type="button" className="btn btn--ghost" onClick={() => setIsLoanOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting || !assetId}>{submitting ? "Registrando..." : "Registrar Saída"}</button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal isOpen={isReturnOpen} onClose={() => setIsReturnOpen(false)} title="Registrar Devolução" size="md">
+        <form onSubmit={handleReturnSubmit} className="space-y-6">
+          <div className="p-4 bg-muted/20 border border-border rounded-lg text-sm text-foreground mb-6">
+            <span className="block text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Patrimônio Sendo Devolvido</span>
+            <strong className="font-mono">{returningLoan?.asset?.asset_number}</strong> - {returningLoan?.asset?.description}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <div className="form-group md:col-span-2">
+              <label className="form-label" htmlFor="actualReturn">Data da Devolução *</label>
+              <input id="actualReturn" type="date" required className="form-input" value={actualReturn} onChange={(e) => setActualReturn(e.target.value)} />
             </div>
             
-            <DialogFooter className="col-span-2 mt-4">
-              <Button type="button" variant="outline" onClick={() => setIsReturnOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={submitting}>{submitting ? "Processando..." : "Confirmar Devolução"}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+            <div className="form-group md:col-span-2">
+              <label className="form-label" htmlFor="returnCondition">Estado de conservação ao retornar *</label>
+              <select id="returnCondition" className="form-input" value={returnCondition} onChange={(e) => setReturnCondition(e.target.value)}>
+                <option value="Ótimo">Ótimo</option>
+                <option value="Bom">Bom</option>
+                <option value="Regular">Regular</option>
+                <option value="Ruim">Ruim</option>
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label" htmlFor="returnedBy">Devolvido por *</label>
+              <input id="returnedBy" required className="form-input" value={returnedBy} onChange={(e) => setReturnedBy(e.target.value)} />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label" htmlFor="receivedBy">Recebido por *</label>
+              <input id="receivedBy" required className="form-input" value={receivedBy} onChange={(e) => setReceivedBy(e.target.value)} />
+            </div>
+            
+            <div className="form-group md:col-span-2">
+              <label className="form-label" htmlFor="returnDamages">Registro de Avarias</label>
+              <input id="returnDamages" className="form-input" placeholder="Ocorreu algum dano?" value={returnDamages} onChange={(e) => setReturnDamages(e.target.value)} />
+            </div>
+            
+            <div className="form-group md:col-span-2">
+              <label className="form-label" htmlFor="returnNotes">Observações adicionais</label>
+              <textarea id="returnNotes" className="form-input min-h-[80px]" value={returnNotes} onChange={(e) => setReturnNotes(e.target.value)} />
+            </div>
+          </div>
+          
+          <div className="form-actions mt-8">
+            <button type="button" className="btn btn--ghost" onClick={() => setIsReturnOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting}>{submitting ? "Processando..." : "Confirmar Devolução"}</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -15,10 +15,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAjustesRouteImport } from './routes/_authenticated/app.ajustes'
+import { Route as AuthenticatedAppAuditoriaRouteImport } from './routes/_authenticated/app.auditoria'
 import { Route as AuthenticatedAppDivergenciasRouteImport } from './routes/_authenticated/app.divergencias'
 import { Route as AuthenticatedAppEmpresasRouteImport } from './routes/_authenticated/app.empresas'
-import { Route as AuthenticatedAppEstoqueRouteImport } from './routes/_authenticated/app.estoque'
-import { Route as AuthenticatedAppProdutosRouteImport } from './routes/_authenticated/app.produtos'
 import { Route as AuthenticatedAppUsuariosRouteImport } from './routes/_authenticated/app.usuarios'
 import { Route as AuthenticatedAppCobreIndexRouteImport } from './routes/_authenticated/app.cobre.index'
 import { Route as AuthenticatedAppCobreBarrasRouteImport } from './routes/_authenticated/app.cobre.barras'
@@ -31,12 +30,20 @@ import { Route as AuthenticatedAppCobreRelatoriosRouteImport } from './routes/_a
 import { Route as AuthenticatedAppCobreSaidaRouteImport } from './routes/_authenticated/app.cobre.saida'
 import { Route as AuthenticatedAppContagensIndexRouteImport } from './routes/_authenticated/app.contagens.index'
 import { Route as AuthenticatedAppContagensIdRouteImport } from './routes/_authenticated/app.contagens.$id'
+import { Route as AuthenticatedAppContagensNovaRouteImport } from './routes/_authenticated/app.contagens.nova'
 import { Route as AuthenticatedAppFerramentasIndexRouteImport } from './routes/_authenticated/app.ferramentas.index'
 import { Route as AuthenticatedAppFerramentasEmprestimosRouteImport } from './routes/_authenticated/app.ferramentas.emprestimos'
 import { Route as AuthenticatedAppFerramentasHistoricoRouteImport } from './routes/_authenticated/app.ferramentas.historico'
 import { Route as AuthenticatedAppFerramentasListaRouteImport } from './routes/_authenticated/app.ferramentas.lista'
+import { Route as AuthenticatedAppFerramentasLocalizacoesRouteImport } from './routes/_authenticated/app.ferramentas.localizacoes'
 import { Route as AuthenticatedAppFerramentasPesquisaRouteImport } from './routes/_authenticated/app.ferramentas.pesquisa'
 import { Route as AuthenticatedAppFerramentasRelatoriosRouteImport } from './routes/_authenticated/app.ferramentas.relatorios'
+import { Route as AuthenticatedAppPatrimoniosIndexRouteImport } from './routes/_authenticated/app.patrimonios.index'
+import { Route as AuthenticatedAppPatrimoniosIdRouteImport } from './routes/_authenticated/app.patrimonios.$id'
+import { Route as AuthenticatedAppPatrimoniosEmprestimosRouteImport } from './routes/_authenticated/app.patrimonios.emprestimos'
+import { Route as AuthenticatedAppPatrimoniosInativosRouteImport } from './routes/_authenticated/app.patrimonios.inativos'
+import { Route as AuthenticatedAppPatrimoniosListaRouteImport } from './routes/_authenticated/app.patrimonios.lista'
+import { Route as AuthenticatedAppPatrimoniosRelatoriosRouteImport } from './routes/_authenticated/app.patrimonios.relatorios'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -67,6 +74,12 @@ const AuthenticatedAppAjustesRoute = AuthenticatedAppAjustesRouteImport.update({
   path: '/ajustes',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppAuditoriaRoute =
+  AuthenticatedAppAuditoriaRouteImport.update({
+    id: '/auditoria',
+    path: '/auditoria',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppDivergenciasRoute =
   AuthenticatedAppDivergenciasRouteImport.update({
     id: '/divergencias',
@@ -77,17 +90,6 @@ const AuthenticatedAppEmpresasRoute =
   AuthenticatedAppEmpresasRouteImport.update({
     id: '/empresas',
     path: '/empresas',
-    getParentRoute: () => AuthenticatedAppRoute,
-  } as any)
-const AuthenticatedAppEstoqueRoute = AuthenticatedAppEstoqueRouteImport.update({
-  id: '/estoque',
-  path: '/estoque',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
-const AuthenticatedAppProdutosRoute =
-  AuthenticatedAppProdutosRouteImport.update({
-    id: '/produtos',
-    path: '/produtos',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppUsuariosRoute =
@@ -162,6 +164,12 @@ const AuthenticatedAppContagensIdRoute =
     path: '/contagens/$id',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppContagensNovaRoute =
+  AuthenticatedAppContagensNovaRouteImport.update({
+    id: '/contagens/nova',
+    path: '/contagens/nova',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppFerramentasIndexRoute =
   AuthenticatedAppFerramentasIndexRouteImport.update({
     id: '/ferramentas/',
@@ -186,6 +194,12 @@ const AuthenticatedAppFerramentasListaRoute =
     path: '/ferramentas/lista',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppFerramentasLocalizacoesRoute =
+  AuthenticatedAppFerramentasLocalizacoesRouteImport.update({
+    id: '/ferramentas/localizacoes',
+    path: '/ferramentas/localizacoes',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppFerramentasPesquisaRoute =
   AuthenticatedAppFerramentasPesquisaRouteImport.update({
     id: '/ferramentas/pesquisa',
@@ -198,16 +212,51 @@ const AuthenticatedAppFerramentasRelatoriosRoute =
     path: '/ferramentas/relatorios',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppPatrimoniosIndexRoute =
+  AuthenticatedAppPatrimoniosIndexRouteImport.update({
+    id: '/patrimonios/',
+    path: '/patrimonios/',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPatrimoniosIdRoute =
+  AuthenticatedAppPatrimoniosIdRouteImport.update({
+    id: '/patrimonios/$id',
+    path: '/patrimonios/$id',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPatrimoniosEmprestimosRoute =
+  AuthenticatedAppPatrimoniosEmprestimosRouteImport.update({
+    id: '/patrimonios/emprestimos',
+    path: '/patrimonios/emprestimos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPatrimoniosInativosRoute =
+  AuthenticatedAppPatrimoniosInativosRouteImport.update({
+    id: '/patrimonios/inativos',
+    path: '/patrimonios/inativos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPatrimoniosListaRoute =
+  AuthenticatedAppPatrimoniosListaRouteImport.update({
+    id: '/patrimonios/lista',
+    path: '/patrimonios/lista',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppPatrimoniosRelatoriosRoute =
+  AuthenticatedAppPatrimoniosRelatoriosRouteImport.update({
+    id: '/patrimonios/relatorios',
+    path: '/patrimonios/relatorios',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/ajustes': typeof AuthenticatedAppAjustesRoute
+  '/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/app/divergencias': typeof AuthenticatedAppDivergenciasRoute
   '/app/empresas': typeof AuthenticatedAppEmpresasRoute
-  '/app/estoque': typeof AuthenticatedAppEstoqueRoute
-  '/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/app/usuarios': typeof AuthenticatedAppUsuariosRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/cobre/barras': typeof AuthenticatedAppCobreBarrasRoute
@@ -219,23 +268,30 @@ export interface FileRoutesByFullPath {
   '/app/cobre/relatorios': typeof AuthenticatedAppCobreRelatoriosRoute
   '/app/cobre/saida': typeof AuthenticatedAppCobreSaidaRoute
   '/app/contagens/$id': typeof AuthenticatedAppContagensIdRoute
+  '/app/contagens/nova': typeof AuthenticatedAppContagensNovaRoute
   '/app/ferramentas/emprestimos': typeof AuthenticatedAppFerramentasEmprestimosRoute
   '/app/ferramentas/historico': typeof AuthenticatedAppFerramentasHistoricoRoute
   '/app/ferramentas/lista': typeof AuthenticatedAppFerramentasListaRoute
+  '/app/ferramentas/localizacoes': typeof AuthenticatedAppFerramentasLocalizacoesRoute
   '/app/ferramentas/pesquisa': typeof AuthenticatedAppFerramentasPesquisaRoute
   '/app/ferramentas/relatorios': typeof AuthenticatedAppFerramentasRelatoriosRoute
+  '/app/patrimonios/$id': typeof AuthenticatedAppPatrimoniosIdRoute
+  '/app/patrimonios/emprestimos': typeof AuthenticatedAppPatrimoniosEmprestimosRoute
+  '/app/patrimonios/inativos': typeof AuthenticatedAppPatrimoniosInativosRoute
+  '/app/patrimonios/lista': typeof AuthenticatedAppPatrimoniosListaRoute
+  '/app/patrimonios/relatorios': typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   '/app/cobre/': typeof AuthenticatedAppCobreIndexRoute
   '/app/contagens/': typeof AuthenticatedAppContagensIndexRoute
   '/app/ferramentas/': typeof AuthenticatedAppFerramentasIndexRoute
+  '/app/patrimonios/': typeof AuthenticatedAppPatrimoniosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/ajustes': typeof AuthenticatedAppAjustesRoute
+  '/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/app/divergencias': typeof AuthenticatedAppDivergenciasRoute
   '/app/empresas': typeof AuthenticatedAppEmpresasRoute
-  '/app/estoque': typeof AuthenticatedAppEstoqueRoute
-  '/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/app/usuarios': typeof AuthenticatedAppUsuariosRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/cobre/barras': typeof AuthenticatedAppCobreBarrasRoute
@@ -247,14 +303,22 @@ export interface FileRoutesByTo {
   '/app/cobre/relatorios': typeof AuthenticatedAppCobreRelatoriosRoute
   '/app/cobre/saida': typeof AuthenticatedAppCobreSaidaRoute
   '/app/contagens/$id': typeof AuthenticatedAppContagensIdRoute
+  '/app/contagens/nova': typeof AuthenticatedAppContagensNovaRoute
   '/app/ferramentas/emprestimos': typeof AuthenticatedAppFerramentasEmprestimosRoute
   '/app/ferramentas/historico': typeof AuthenticatedAppFerramentasHistoricoRoute
   '/app/ferramentas/lista': typeof AuthenticatedAppFerramentasListaRoute
+  '/app/ferramentas/localizacoes': typeof AuthenticatedAppFerramentasLocalizacoesRoute
   '/app/ferramentas/pesquisa': typeof AuthenticatedAppFerramentasPesquisaRoute
   '/app/ferramentas/relatorios': typeof AuthenticatedAppFerramentasRelatoriosRoute
+  '/app/patrimonios/$id': typeof AuthenticatedAppPatrimoniosIdRoute
+  '/app/patrimonios/emprestimos': typeof AuthenticatedAppPatrimoniosEmprestimosRoute
+  '/app/patrimonios/inativos': typeof AuthenticatedAppPatrimoniosInativosRoute
+  '/app/patrimonios/lista': typeof AuthenticatedAppPatrimoniosListaRoute
+  '/app/patrimonios/relatorios': typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   '/app/cobre': typeof AuthenticatedAppCobreIndexRoute
   '/app/contagens': typeof AuthenticatedAppContagensIndexRoute
   '/app/ferramentas': typeof AuthenticatedAppFerramentasIndexRoute
+  '/app/patrimonios': typeof AuthenticatedAppPatrimoniosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -263,10 +327,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/ajustes': typeof AuthenticatedAppAjustesRoute
+  '/_authenticated/app/auditoria': typeof AuthenticatedAppAuditoriaRoute
   '/_authenticated/app/divergencias': typeof AuthenticatedAppDivergenciasRoute
   '/_authenticated/app/empresas': typeof AuthenticatedAppEmpresasRoute
-  '/_authenticated/app/estoque': typeof AuthenticatedAppEstoqueRoute
-  '/_authenticated/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/_authenticated/app/usuarios': typeof AuthenticatedAppUsuariosRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/cobre/barras': typeof AuthenticatedAppCobreBarrasRoute
@@ -278,14 +341,22 @@ export interface FileRoutesById {
   '/_authenticated/app/cobre/relatorios': typeof AuthenticatedAppCobreRelatoriosRoute
   '/_authenticated/app/cobre/saida': typeof AuthenticatedAppCobreSaidaRoute
   '/_authenticated/app/contagens/$id': typeof AuthenticatedAppContagensIdRoute
+  '/_authenticated/app/contagens/nova': typeof AuthenticatedAppContagensNovaRoute
   '/_authenticated/app/ferramentas/emprestimos': typeof AuthenticatedAppFerramentasEmprestimosRoute
   '/_authenticated/app/ferramentas/historico': typeof AuthenticatedAppFerramentasHistoricoRoute
   '/_authenticated/app/ferramentas/lista': typeof AuthenticatedAppFerramentasListaRoute
+  '/_authenticated/app/ferramentas/localizacoes': typeof AuthenticatedAppFerramentasLocalizacoesRoute
   '/_authenticated/app/ferramentas/pesquisa': typeof AuthenticatedAppFerramentasPesquisaRoute
   '/_authenticated/app/ferramentas/relatorios': typeof AuthenticatedAppFerramentasRelatoriosRoute
+  '/_authenticated/app/patrimonios/$id': typeof AuthenticatedAppPatrimoniosIdRoute
+  '/_authenticated/app/patrimonios/emprestimos': typeof AuthenticatedAppPatrimoniosEmprestimosRoute
+  '/_authenticated/app/patrimonios/inativos': typeof AuthenticatedAppPatrimoniosInativosRoute
+  '/_authenticated/app/patrimonios/lista': typeof AuthenticatedAppPatrimoniosListaRoute
+  '/_authenticated/app/patrimonios/relatorios': typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   '/_authenticated/app/cobre/': typeof AuthenticatedAppCobreIndexRoute
   '/_authenticated/app/contagens/': typeof AuthenticatedAppContagensIndexRoute
   '/_authenticated/app/ferramentas/': typeof AuthenticatedAppFerramentasIndexRoute
+  '/_authenticated/app/patrimonios/': typeof AuthenticatedAppPatrimoniosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -294,10 +365,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app'
     | '/app/ajustes'
+    | '/app/auditoria'
     | '/app/divergencias'
     | '/app/empresas'
-    | '/app/estoque'
-    | '/app/produtos'
     | '/app/usuarios'
     | '/app/'
     | '/app/cobre/barras'
@@ -309,23 +379,30 @@ export interface FileRouteTypes {
     | '/app/cobre/relatorios'
     | '/app/cobre/saida'
     | '/app/contagens/$id'
+    | '/app/contagens/nova'
     | '/app/ferramentas/emprestimos'
     | '/app/ferramentas/historico'
     | '/app/ferramentas/lista'
+    | '/app/ferramentas/localizacoes'
     | '/app/ferramentas/pesquisa'
     | '/app/ferramentas/relatorios'
+    | '/app/patrimonios/$id'
+    | '/app/patrimonios/emprestimos'
+    | '/app/patrimonios/inativos'
+    | '/app/patrimonios/lista'
+    | '/app/patrimonios/relatorios'
     | '/app/cobre/'
     | '/app/contagens/'
     | '/app/ferramentas/'
+    | '/app/patrimonios/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/app/ajustes'
+    | '/app/auditoria'
     | '/app/divergencias'
     | '/app/empresas'
-    | '/app/estoque'
-    | '/app/produtos'
     | '/app/usuarios'
     | '/app'
     | '/app/cobre/barras'
@@ -337,14 +414,22 @@ export interface FileRouteTypes {
     | '/app/cobre/relatorios'
     | '/app/cobre/saida'
     | '/app/contagens/$id'
+    | '/app/contagens/nova'
     | '/app/ferramentas/emprestimos'
     | '/app/ferramentas/historico'
     | '/app/ferramentas/lista'
+    | '/app/ferramentas/localizacoes'
     | '/app/ferramentas/pesquisa'
     | '/app/ferramentas/relatorios'
+    | '/app/patrimonios/$id'
+    | '/app/patrimonios/emprestimos'
+    | '/app/patrimonios/inativos'
+    | '/app/patrimonios/lista'
+    | '/app/patrimonios/relatorios'
     | '/app/cobre'
     | '/app/contagens'
     | '/app/ferramentas'
+    | '/app/patrimonios'
   id:
     | '__root__'
     | '/'
@@ -352,10 +437,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/app'
     | '/_authenticated/app/ajustes'
+    | '/_authenticated/app/auditoria'
     | '/_authenticated/app/divergencias'
     | '/_authenticated/app/empresas'
-    | '/_authenticated/app/estoque'
-    | '/_authenticated/app/produtos'
     | '/_authenticated/app/usuarios'
     | '/_authenticated/app/'
     | '/_authenticated/app/cobre/barras'
@@ -367,14 +451,22 @@ export interface FileRouteTypes {
     | '/_authenticated/app/cobre/relatorios'
     | '/_authenticated/app/cobre/saida'
     | '/_authenticated/app/contagens/$id'
+    | '/_authenticated/app/contagens/nova'
     | '/_authenticated/app/ferramentas/emprestimos'
     | '/_authenticated/app/ferramentas/historico'
     | '/_authenticated/app/ferramentas/lista'
+    | '/_authenticated/app/ferramentas/localizacoes'
     | '/_authenticated/app/ferramentas/pesquisa'
     | '/_authenticated/app/ferramentas/relatorios'
+    | '/_authenticated/app/patrimonios/$id'
+    | '/_authenticated/app/patrimonios/emprestimos'
+    | '/_authenticated/app/patrimonios/inativos'
+    | '/_authenticated/app/patrimonios/lista'
+    | '/_authenticated/app/patrimonios/relatorios'
     | '/_authenticated/app/cobre/'
     | '/_authenticated/app/contagens/'
     | '/_authenticated/app/ferramentas/'
+    | '/_authenticated/app/patrimonios/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -427,6 +519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAjustesRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/auditoria': {
+      id: '/_authenticated/app/auditoria'
+      path: '/auditoria'
+      fullPath: '/app/auditoria'
+      preLoaderRoute: typeof AuthenticatedAppAuditoriaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/divergencias': {
       id: '/_authenticated/app/divergencias'
       path: '/divergencias'
@@ -439,20 +538,6 @@ declare module '@tanstack/react-router' {
       path: '/empresas'
       fullPath: '/app/empresas'
       preLoaderRoute: typeof AuthenticatedAppEmpresasRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/estoque': {
-      id: '/_authenticated/app/estoque'
-      path: '/estoque'
-      fullPath: '/app/estoque'
-      preLoaderRoute: typeof AuthenticatedAppEstoqueRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
-    '/_authenticated/app/produtos': {
-      id: '/_authenticated/app/produtos'
-      path: '/produtos'
-      fullPath: '/app/produtos'
-      preLoaderRoute: typeof AuthenticatedAppProdutosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/usuarios': {
@@ -539,6 +624,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppContagensIdRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/contagens/nova': {
+      id: '/_authenticated/app/contagens/nova'
+      path: '/contagens/nova'
+      fullPath: '/app/contagens/nova'
+      preLoaderRoute: typeof AuthenticatedAppContagensNovaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/ferramentas/': {
       id: '/_authenticated/app/ferramentas/'
       path: '/ferramentas'
@@ -567,6 +659,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppFerramentasListaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/ferramentas/localizacoes': {
+      id: '/_authenticated/app/ferramentas/localizacoes'
+      path: '/ferramentas/localizacoes'
+      fullPath: '/app/ferramentas/localizacoes'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasLocalizacoesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/ferramentas/pesquisa': {
       id: '/_authenticated/app/ferramentas/pesquisa'
       path: '/ferramentas/pesquisa'
@@ -581,15 +680,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppFerramentasRelatoriosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/patrimonios/': {
+      id: '/_authenticated/app/patrimonios/'
+      path: '/patrimonios'
+      fullPath: '/app/patrimonios/'
+      preLoaderRoute: typeof AuthenticatedAppPatrimoniosIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/patrimonios/$id': {
+      id: '/_authenticated/app/patrimonios/$id'
+      path: '/patrimonios/$id'
+      fullPath: '/app/patrimonios/$id'
+      preLoaderRoute: typeof AuthenticatedAppPatrimoniosIdRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/patrimonios/emprestimos': {
+      id: '/_authenticated/app/patrimonios/emprestimos'
+      path: '/patrimonios/emprestimos'
+      fullPath: '/app/patrimonios/emprestimos'
+      preLoaderRoute: typeof AuthenticatedAppPatrimoniosEmprestimosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/patrimonios/inativos': {
+      id: '/_authenticated/app/patrimonios/inativos'
+      path: '/patrimonios/inativos'
+      fullPath: '/app/patrimonios/inativos'
+      preLoaderRoute: typeof AuthenticatedAppPatrimoniosInativosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/patrimonios/lista': {
+      id: '/_authenticated/app/patrimonios/lista'
+      path: '/patrimonios/lista'
+      fullPath: '/app/patrimonios/lista'
+      preLoaderRoute: typeof AuthenticatedAppPatrimoniosListaRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/patrimonios/relatorios': {
+      id: '/_authenticated/app/patrimonios/relatorios'
+      path: '/patrimonios/relatorios'
+      fullPath: '/app/patrimonios/relatorios'
+      preLoaderRoute: typeof AuthenticatedAppPatrimoniosRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAjustesRoute: typeof AuthenticatedAppAjustesRoute
+  AuthenticatedAppAuditoriaRoute: typeof AuthenticatedAppAuditoriaRoute
   AuthenticatedAppDivergenciasRoute: typeof AuthenticatedAppDivergenciasRoute
   AuthenticatedAppEmpresasRoute: typeof AuthenticatedAppEmpresasRoute
-  AuthenticatedAppEstoqueRoute: typeof AuthenticatedAppEstoqueRoute
-  AuthenticatedAppProdutosRoute: typeof AuthenticatedAppProdutosRoute
   AuthenticatedAppUsuariosRoute: typeof AuthenticatedAppUsuariosRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppCobreBarrasRoute: typeof AuthenticatedAppCobreBarrasRoute
@@ -601,22 +741,29 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppCobreRelatoriosRoute: typeof AuthenticatedAppCobreRelatoriosRoute
   AuthenticatedAppCobreSaidaRoute: typeof AuthenticatedAppCobreSaidaRoute
   AuthenticatedAppContagensIdRoute: typeof AuthenticatedAppContagensIdRoute
+  AuthenticatedAppContagensNovaRoute: typeof AuthenticatedAppContagensNovaRoute
   AuthenticatedAppFerramentasEmprestimosRoute: typeof AuthenticatedAppFerramentasEmprestimosRoute
   AuthenticatedAppFerramentasHistoricoRoute: typeof AuthenticatedAppFerramentasHistoricoRoute
   AuthenticatedAppFerramentasListaRoute: typeof AuthenticatedAppFerramentasListaRoute
+  AuthenticatedAppFerramentasLocalizacoesRoute: typeof AuthenticatedAppFerramentasLocalizacoesRoute
   AuthenticatedAppFerramentasPesquisaRoute: typeof AuthenticatedAppFerramentasPesquisaRoute
   AuthenticatedAppFerramentasRelatoriosRoute: typeof AuthenticatedAppFerramentasRelatoriosRoute
+  AuthenticatedAppPatrimoniosIdRoute: typeof AuthenticatedAppPatrimoniosIdRoute
+  AuthenticatedAppPatrimoniosEmprestimosRoute: typeof AuthenticatedAppPatrimoniosEmprestimosRoute
+  AuthenticatedAppPatrimoniosInativosRoute: typeof AuthenticatedAppPatrimoniosInativosRoute
+  AuthenticatedAppPatrimoniosListaRoute: typeof AuthenticatedAppPatrimoniosListaRoute
+  AuthenticatedAppPatrimoniosRelatoriosRoute: typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   AuthenticatedAppCobreIndexRoute: typeof AuthenticatedAppCobreIndexRoute
   AuthenticatedAppContagensIndexRoute: typeof AuthenticatedAppContagensIndexRoute
   AuthenticatedAppFerramentasIndexRoute: typeof AuthenticatedAppFerramentasIndexRoute
+  AuthenticatedAppPatrimoniosIndexRoute: typeof AuthenticatedAppPatrimoniosIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAjustesRoute: AuthenticatedAppAjustesRoute,
+  AuthenticatedAppAuditoriaRoute: AuthenticatedAppAuditoriaRoute,
   AuthenticatedAppDivergenciasRoute: AuthenticatedAppDivergenciasRoute,
   AuthenticatedAppEmpresasRoute: AuthenticatedAppEmpresasRoute,
-  AuthenticatedAppEstoqueRoute: AuthenticatedAppEstoqueRoute,
-  AuthenticatedAppProdutosRoute: AuthenticatedAppProdutosRoute,
   AuthenticatedAppUsuariosRoute: AuthenticatedAppUsuariosRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppCobreBarrasRoute: AuthenticatedAppCobreBarrasRoute,
@@ -629,18 +776,30 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCobreRelatoriosRoute: AuthenticatedAppCobreRelatoriosRoute,
   AuthenticatedAppCobreSaidaRoute: AuthenticatedAppCobreSaidaRoute,
   AuthenticatedAppContagensIdRoute: AuthenticatedAppContagensIdRoute,
+  AuthenticatedAppContagensNovaRoute: AuthenticatedAppContagensNovaRoute,
   AuthenticatedAppFerramentasEmprestimosRoute:
     AuthenticatedAppFerramentasEmprestimosRoute,
   AuthenticatedAppFerramentasHistoricoRoute:
     AuthenticatedAppFerramentasHistoricoRoute,
   AuthenticatedAppFerramentasListaRoute: AuthenticatedAppFerramentasListaRoute,
+  AuthenticatedAppFerramentasLocalizacoesRoute:
+    AuthenticatedAppFerramentasLocalizacoesRoute,
   AuthenticatedAppFerramentasPesquisaRoute:
     AuthenticatedAppFerramentasPesquisaRoute,
   AuthenticatedAppFerramentasRelatoriosRoute:
     AuthenticatedAppFerramentasRelatoriosRoute,
+  AuthenticatedAppPatrimoniosIdRoute: AuthenticatedAppPatrimoniosIdRoute,
+  AuthenticatedAppPatrimoniosEmprestimosRoute:
+    AuthenticatedAppPatrimoniosEmprestimosRoute,
+  AuthenticatedAppPatrimoniosInativosRoute:
+    AuthenticatedAppPatrimoniosInativosRoute,
+  AuthenticatedAppPatrimoniosListaRoute: AuthenticatedAppPatrimoniosListaRoute,
+  AuthenticatedAppPatrimoniosRelatoriosRoute:
+    AuthenticatedAppPatrimoniosRelatoriosRoute,
   AuthenticatedAppCobreIndexRoute: AuthenticatedAppCobreIndexRoute,
   AuthenticatedAppContagensIndexRoute: AuthenticatedAppContagensIndexRoute,
   AuthenticatedAppFerramentasIndexRoute: AuthenticatedAppFerramentasIndexRoute,
+  AuthenticatedAppPatrimoniosIndexRoute: AuthenticatedAppPatrimoniosIndexRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =

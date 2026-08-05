@@ -1,17 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Search, Plus, Scissors, ArrowLeftRight } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Scissors, History } from "lucide-react";
+import Modal from "@/components/Modal/Modal";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
+import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/UI/Skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/cobre/movimentacoes")({
   head: () => ({ meta: [{ title: "Movimentações de Cobre | BCM Stock" }] }),
@@ -109,8 +106,6 @@ function CobreMovimentacoes() {
         if (pieceError) throw pieceError;
 
       } else {
-        // Para devolução, assumimos que criamos um novo pedaço disponível atrelado à barra original
-        // Ou atualizamos o pedaço existente. O mais seguro é criar um novo pedaço devolvido.
         throw new Error("Devolução direta requer seleção da barra original. Funcionalidade em desenvolvimento.");
       }
 
@@ -126,135 +121,144 @@ function CobreMovimentacoes() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Histórico de Movimentações</h1>
-          <p className="text-muted-foreground">Registre saídas e cortes do estoque de cobre.</p>
+    <div className="page-container animate-fade-in">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Histórico de Movimentações</h1>
+            <p className="page-subtitle">Registre saídas e cortes do estoque de cobre.</p>
+          </div>
         </div>
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
-            <Button><Scissors className="h-4 w-4 mr-2" /> Registrar Saída</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Registrar Saída (Corte)</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleRegisterMovement} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Pedaço a ser cortado</Label>
-                <Select value={selectedPieceId} onValueChange={setSelectedPieceId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um pedaço disponível..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availablePieces.map(p => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.bar?.name} ({p.bar?.auxiliary_code}) - {(p.current_length_mm / 1000).toFixed(2)} m disp.
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tamanho do Corte (m)</Label>
-                  <Input type="number" required min="0.01" step="0.01" placeholder="Ex: 0.5" value={lengthM} onChange={e => setLengthM(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>PCO (Obra)</Label>
-                  <Input placeholder="Ex: PCO-1234" value={pco} onChange={e => setPco(e.target.value)} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Cliente</Label>
-                <Input required placeholder="Nome do cliente" value={clientName} onChange={e => setClientName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Solicitante</Label>
-                <Input required placeholder="Quem solicitou o material" value={userRequesting} onChange={e => setUserRequesting(e.target.value)} />
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={submitting}>{submitting ? "Registrando..." : "Registrar Saída"}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="page-actions">
+          <button className="btn btn--primary" onClick={() => setIsAddOpen(true)}>
+            <Scissors size={16} className="mr-2" /> Registrar Saída
+          </button>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Histórico de Cortes e Saídas</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 md:p-0">
-          <div className="hidden md:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Barra Origem</TableHead>
-                  <TableHead>Tamanho Cortado</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>PCO</TableHead>
-                  <TableHead>Solicitante</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando...</TableCell>
-                  </TableRow>
-                ) : movements.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhuma movimentação registrada.</TableCell>
-                  </TableRow>
-                ) : (
-                  movements.map((mov) => (
-                    <TableRow key={mov.id}>
-                      <TableCell className="whitespace-nowrap">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</TableCell>
-                      <TableCell className="font-medium">
-                        {mov.piece?.bar?.name} <span className="text-muted-foreground text-xs">({mov.piece?.bar?.auxiliary_code})</span>
-                      </TableCell>
-                      <TableCell>
+      <div className="glass-panel rounded-xl overflow-hidden border border-border">
+        <div className="p-5 border-b border-border bg-muted/20">
+          <h2 className="text-lg font-semibold font-display">Histórico de Cortes e Saídas</h2>
+        </div>
+        
+        <div className="p-0">
+          {loading ? (
+            <div className="p-6 space-y-4">
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+            </div>
+          ) : movements.length === 0 ? (
+            <EmptyState 
+              icon={History} 
+              title="Nenhuma movimentação registrada" 
+              description="Você ainda não registrou nenhum corte ou saída de cobre."
+            />
+          ) : (
+            <div className="table-responsive border-0 shadow-none rounded-none">
+              <table className="table table--hover m-0">
+                <thead>
+                  <tr>
+                    <th className="glass-header">Data</th>
+                    <th className="glass-header">Barra Origem</th>
+                    <th className="glass-header">Tamanho Cortado</th>
+                    <th className="glass-header">Cliente</th>
+                    <th className="glass-header">PCO</th>
+                    <th className="glass-header">Solicitante</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {movements.map((mov) => (
+                    <tr key={mov.id}>
+                      <td className="whitespace-nowrap text-muted-foreground">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</td>
+                      <td>
+                        <span className="font-semibold text-foreground">{mov.piece?.bar?.name}</span>
+                        <span className="text-muted-foreground ml-2 text-xs font-mono">({mov.piece?.bar?.auxiliary_code})</span>
+                      </td>
+                      <td>
                         <Badge variant="destructive">-{((mov.length_mm || 0) / 1000).toFixed(2)} m</Badge>
-                      </TableCell>
-                      <TableCell>{mov.client_name}</TableCell>
-                      <TableCell>{mov.pco || '-'}</TableCell>
-                      <TableCell>{mov.user_requesting}</TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                      </td>
+                      <td className="text-foreground font-medium">{mov.client_name}</td>
+                      <td className="text-foreground">{mov.pco || '-'}</td>
+                      <td className="text-foreground">{mov.user_requesting}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/10">
+                {movements.map((mov) => (
+                  <div key={mov.id} className="border border-border rounded-md p-4 bg-card shadow-sm flex flex-col gap-3">
+                    <div className="flex justify-between items-start">
+                      <span className="text-xs text-muted-foreground">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</span>
+                      <Badge variant="destructive">-{((mov.length_mm || 0) / 1000).toFixed(2)} m</Badge>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-primary font-display">{mov.piece?.bar?.name}</div>
+                      <div className="text-xs text-muted-foreground font-mono">{mov.piece?.bar?.auxiliary_code}</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-3 rounded-md mt-1">
+                      <div>
+                        <span className="block text-xs text-muted-foreground">Cliente</span>
+                        <span className="text-foreground">{mov.client_name}</span>
+                      </div>
+                      <div>
+                        <span className="block text-xs text-muted-foreground">PCO</span>
+                        <span className="text-foreground">{mov.pco || '-'}</span>
+                      </div>
+                      <div className="col-span-2 pt-2 border-t border-border mt-1">
+                        <span className="block text-xs text-muted-foreground mb-1">Solicitante</span>
+                        <span className="text-foreground">{mov.user_requesting}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Registrar Saída (Corte)" size="md">
+        <form onSubmit={handleRegisterMovement}>
+          <div className="form-group">
+            <label className="form-label">Pedaço a ser cortado</label>
+            <Select value={selectedPieceId} onValueChange={setSelectedPieceId}>
+              <SelectTrigger className="form-input h-10">
+                <SelectValue placeholder="Selecione um pedaço disponível..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availablePieces.map(p => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.bar?.name} ({p.bar?.auxiliary_code}) - {(p.current_length_mm / 1000).toFixed(2)} m disp.
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="md:hidden space-y-4 p-4">
-            {loading ? (
-              <div className="text-center text-muted-foreground py-6">Carregando...</div>
-            ) : movements.length === 0 ? (
-              <div className="text-center text-muted-foreground py-6">Nenhuma movimentação registrada.</div>
-            ) : (
-              movements.map((mov) => (
-                <div key={mov.id} className="border rounded-md p-4 bg-card shadow-sm flex flex-col gap-2">
-                  <div className="flex justify-between items-start">
-                    <span className="text-xs text-muted-foreground">{format(new Date(mov.created_at), "dd/MM/yyyy HH:mm")}</span>
-                    <Badge variant="destructive">-{((mov.length_mm || 0) / 1000).toFixed(2)} m</Badge>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-sm">{mov.piece?.bar?.name}</div>
-                    <div className="text-xs text-muted-foreground font-mono">{mov.piece?.bar?.auxiliary_code}</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md mt-1">
-                    <div><span className="block text-xs text-muted-foreground">Cliente</span>{mov.client_name}</div>
-                    <div><span className="block text-xs text-muted-foreground">PCO</span>{mov.pco || '-'}</div>
-                    <div className="col-span-2"><span className="block text-xs text-muted-foreground">Solicitante</span>{mov.user_requesting}</div>
-                  </div>
-                </div>
-              ))
-            )}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">Tamanho do Corte (m)</label>
+              <input type="number" required min="0.01" step="0.01" placeholder="Ex: 0.5" className="form-input" value={lengthM} onChange={e => setLengthM(e.target.value)} />
+            </div>
+            <div className="form-group">
+              <label className="form-label">PCO (Obra)</label>
+              <input placeholder="Ex: PCO-1234" className="form-input" value={pco} onChange={e => setPco(e.target.value)} />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="form-group">
+            <label className="form-label">Cliente</label>
+            <input required placeholder="Nome do cliente" className="form-input" value={clientName} onChange={e => setClientName(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Solicitante</label>
+            <input required placeholder="Quem solicitou o material" className="form-input" value={userRequesting} onChange={e => setUserRequesting(e.target.value)} />
+          </div>
+          <div className="form-actions mt-6">
+            <button type="button" className="btn btn--ghost" onClick={() => setIsAddOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting}>{submitting ? "Registrando..." : "Registrar Saída"}</button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

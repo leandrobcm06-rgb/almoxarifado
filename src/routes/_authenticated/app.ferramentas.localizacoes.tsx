@@ -2,14 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, MapPin } from "lucide-react";
+import Modal from "@/components/Modal/Modal";
+import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/UI/Skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/localizacoes")({
   head: () => ({ meta: [{ title: "Localizações | Ferramentas" }] }),
@@ -84,89 +81,104 @@ function Page() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Localizações de Ferramentas</h1>
-          <p className="text-sm text-muted-foreground">Gerencie os locais (caixas, armários, salas) onde as ferramentas são guardadas.</p>
+    <div className="page-container animate-fade-in max-w-4xl mx-auto">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Localizações</h1>
+            <p className="page-subtitle">Gerencie os locais (caixas, armários, salas) onde as ferramentas são guardadas.</p>
+          </div>
         </div>
-        <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); setName(""); setEditingId(null); } else setOpen(true); }}>
-          <DialogTrigger asChild>
-            <Button onClick={handleOpenNew}><Plus className="h-4 w-4 mr-2" />Nova Localização</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingId ? "Editar Localização" : "Nova Localização"}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3">
-              <div>
-                <Label>Nome da Localização</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Armário A, Gaveta 2..." />
-              </div>
-              <Button onClick={() => saveMutation.mutate()} disabled={!name || saveMutation.isPending} className="w-full">
-                {saveMutation.isPending ? "Salvando..." : "Salvar"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <div className="page-actions">
+          <button className="btn btn--primary" onClick={handleOpenNew}>
+            <Plus size={16} className="mr-2" /> Nova Localização
+          </button>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0 md:p-0">
-          <div className="hidden md:block">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead className="w-24 text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-6">Carregando...</TableCell></TableRow>
-                ) : data?.length === 0 ? (
-                  <TableRow><TableCell colSpan={2} className="text-center text-muted-foreground py-6">Nenhuma localização cadastrada.</TableCell></TableRow>
-                ) : (
-                  data?.map((loc) => (
-                    <TableRow key={loc.id}>
-                      <TableCell className="font-medium">{loc.name}</TableCell>
-                      <TableCell className="text-right flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(loc)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => { if (confirm("Excluir esta localização?")) deleteMutation.mutate(loc.id); }}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="md:hidden space-y-4 p-4">
-            {isLoading ? (
-              <div className="text-center text-muted-foreground py-6">Carregando...</div>
-            ) : data?.length === 0 ? (
-              <div className="text-center text-muted-foreground py-6">Nenhuma localização cadastrada.</div>
-            ) : (
-              data?.map((loc) => (
-                <div key={loc.id} className="border rounded-md p-4 bg-card shadow-sm flex items-center justify-between">
-                  <div className="font-medium text-base">{loc.name}</div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(loc)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-red-500 border-red-200 hover:bg-red-50" onClick={() => { if (confirm("Excluir esta localização?")) deleteMutation.mutate(loc.id); }}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+      <div className="glass-panel rounded-xl overflow-hidden border border-border">
+        <div className="p-0">
+          {isLoading ? (
+            <div className="p-6 space-y-4">
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+            </div>
+          ) : data?.length === 0 ? (
+            <EmptyState 
+              icon={MapPin} 
+              title="Nenhuma localização cadastrada" 
+              description="Cadastre locais para organizar suas ferramentas."
+              action={
+                <button className="btn btn--primary" onClick={handleOpenNew}>
+                  Cadastrar Primeira Localização
+                </button>
+              }
+            />
+          ) : (
+            <div className="table-responsive border-0 shadow-none rounded-none">
+              <table className="table table--hover m-0">
+                <thead>
+                  <tr>
+                    <th className="glass-header">Nome</th>
+                    <th className="glass-header text-right w-32">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data?.map((loc) => (
+                    <tr key={loc.id}>
+                      <td className="font-medium text-foreground">{loc.name}</td>
+                      <td className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <button className="btn-icon" onClick={() => handleEdit(loc)} title="Editar">
+                            <Edit size={16} />
+                          </button>
+                          <button className="btn-icon text-danger hover:text-danger hover:bg-danger-bg" onClick={() => { if (confirm("Excluir esta localização?")) deleteMutation.mutate(loc.id); }} title="Excluir">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/10">
+                {data?.map((loc) => (
+                  <div key={loc.id} className="border border-border rounded-xl p-4 bg-card shadow-sm flex items-center justify-between">
+                    <div className="font-medium text-base text-foreground font-display">{loc.name}</div>
+                    <div className="flex gap-2">
+                      <button className="btn btn--outline btn--sm px-3" onClick={() => handleEdit(loc)}>
+                        <Edit size={14} />
+                      </button>
+                      <button className="btn btn--outline btn--sm px-3 text-danger border-danger-border hover:bg-danger-bg" onClick={() => { if (confirm("Excluir esta localização?")) deleteMutation.mutate(loc.id); }}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Modal isOpen={open} onClose={() => { setOpen(false); setName(""); setEditingId(null); }} title={editingId ? "Editar Localização" : "Nova Localização"} size="sm">
+        <div className="space-y-6">
+          <div className="form-group">
+            <label className="form-label">Nome da Localização</label>
+            <input className="form-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Armário A, Gaveta 2..." />
           </div>
-        </CardContent>
-      </Card>
+          <div className="form-actions mt-8">
+            <button className="btn btn--ghost w-full sm:w-auto" onClick={() => { setOpen(false); setName(""); setEditingId(null); }}>
+              Cancelar
+            </button>
+            <button className="btn btn--primary w-full sm:w-auto" onClick={() => saveMutation.mutate()} disabled={!name || saveMutation.isPending}>
+              {saveMutation.isPending ? "Salvando..." : "Salvar Localização"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

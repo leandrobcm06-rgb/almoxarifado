@@ -1,18 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { HardHat, User, ArrowLeftRight, Calendar, Paperclip, Download, Maximize2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HardHat, ArrowLeftRight, Paperclip, Download, PackageOpen } from "lucide-react";
+import Modal from "@/components/Modal/Modal";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
-import { Textarea } from "@/components/ui/textarea";
+import EmptyState from "@/components/UI/EmptyState";
+import Skeleton from "@/components/UI/Skeleton";
 
 export const Route = createFileRoute("/_authenticated/app/ferramentas/emprestimos")({
   head: () => ({ meta: [{ title: "Empréstimos | Ferramentaria" }] }),
@@ -196,194 +192,151 @@ function FerramentasEmprestimos() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Empréstimos</h1>
-          <p className="text-muted-foreground">Controle de ferramentas com colaboradores e obras.</p>
+    <div className="page-container animate-fade-in">
+      <div className="page-header">
+        <div className="page-title-area">
+          <div className="page-title-text">
+            <h1 className="page-title">Empréstimos</h1>
+            <p className="page-subtitle">Controle de ferramentas com colaboradores e obras.</p>
+          </div>
         </div>
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
-            <Button><HardHat className="h-4 w-4 mr-2" /> Novo Empréstimo</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Registrar Saída de Ferramenta</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleRegisterLoan} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Ferramenta</Label>
-                <Select required value={selectedToolId} onValueChange={setSelectedToolId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma ferramenta disponível..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTools.map(t => (
-                      <SelectItem key={t.id} value={t.id}>
-                        {t.name} {t.patrimony_number ? `(${t.patrimony_number})` : ''}
-                      </SelectItem>
-                    ))}
-                    {availableTools.length === 0 && (
-                      <SelectItem value="none" disabled>Nenhuma ferramenta disponível</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Funcionário</Label>
-                <Input required placeholder="Nome de quem retirou a ferramenta" value={employee} onChange={e => setEmployee(e.target.value)} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Cliente / Empresa</Label>
-                  <Input placeholder="Ex: ABC Construções" value={client} onChange={e => setClient(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>PCO (Obra)</Label>
-                  <Input placeholder="Ex: 12345" value={pco} onChange={e => setPco(e.target.value)} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Data Prevista p/ Devolução (Opcional)</Label>
-                <Input type="date" value={expectedReturnDate} onChange={e => setExpectedReturnDate(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Comprovante Assinado (Opcional)</Label>
-                <Input type="file" accept="image/*,application/pdf" onChange={e => setReceiptFile(e.target.files?.[0] || null)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Observações</Label>
-                <Textarea placeholder="Qualquer detalhe extra..." value={notes} onChange={e => setNotes(e.target.value)} />
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={submitting || availableTools.length === 0}>
-                  {submitting ? "Registrando..." : "Registrar"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="page-actions">
+          <button className="btn btn--primary" onClick={() => setIsAddOpen(true)}>
+            <HardHat size={16} className="mr-2" /> Novo Empréstimo
+          </button>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
+      <div className="glass-panel rounded-xl overflow-hidden border border-border">
+        <div className="p-0">
           {loading ? (
-            <div className="text-center p-8 text-muted-foreground">Carregando histórico...</div>
-          ) : loans.length === 0 ? (
-            <div className="text-center p-8 border border-dashed rounded-lg text-muted-foreground">
-              Nenhum empréstimo registrado.
+            <div className="p-6 space-y-4">
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
+              <Skeleton height="40px" width="100%" />
             </div>
+          ) : loans.length === 0 ? (
+            <EmptyState 
+              icon={PackageOpen} 
+              title="Nenhum empréstimo registrado" 
+              description="Você não possui nenhum empréstimo de ferramenta no momento."
+              action={
+                <button className="btn btn--primary" onClick={() => setIsAddOpen(true)}>
+                  Registrar Primeiro Empréstimo
+                </button>
+              }
+            />
           ) : (
-            <div className="rounded-md border">
-              <div className="hidden md:block">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Ferramenta</TableHead>
-                      <TableHead>Funcionário / Obra</TableHead>
-                      <TableHead>Previsão Volta</TableHead>
-                      <TableHead>Comprovante</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ação</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {loans.map((loan) => (
-                      <TableRow key={loan.id}>
-                        <TableCell className="font-medium whitespace-nowrap">
-                          {format(new Date(loan.loan_date), "dd/MM/yyyy HH:mm")}
-                        </TableCell>
-                        <TableCell>
-                          {loan.tool?.name}
-                          {loan.tool?.patrimony_number && <span className="block text-xs text-muted-foreground">{loan.tool.patrimony_number}</span>}
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">{loan.employee}</div>
-                          <div className="text-xs text-muted-foreground">{loan.client ? `${loan.client} (PCO: ${loan.pco || '-'})` : '-'}</div>
-                        </TableCell>
-                        <TableCell>
-                          {loan.expected_return_date ? format(new Date(loan.expected_return_date), "dd/MM/yyyy") : "-"}
-                        </TableCell>
-                        <TableCell>
-                          {loan.proof_image_url ? (
-                            <Button variant="ghost" size="sm" onClick={() => setViewReceipt(loan.proof_image_url)} title="Ver Comprovante">
-                              <Paperclip className="h-4 w-4 text-blue-500" />
-                            </Button>
-                          ) : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={loan.status === 'ativo' ? "secondary" : "outline"}>
-                            {loan.status === 'ativo' ? 'Emprestada' : 'Devolvida'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {loan.status === 'ativo' && (
-                            <Button variant="outline" size="sm" onClick={() => {
-                              setSelectedLoanToReturn(loan);
-                              setIsReturnOpen(true);
-                            }}>
-                              <ArrowLeftRight className="h-4 w-4 mr-2" /> Devolver
-                            </Button>
-                          )}
-                          {loan.status === 'devolvido' && loan.actual_return_date && (
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              Voltou em {format(new Date(loan.actual_return_date), "dd/MM/yy")}
-                            </span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/20">
+            <div className="table-responsive border-0 shadow-none rounded-none">
+              <table className="table table--hover m-0">
+                <thead>
+                  <tr>
+                    <th className="glass-header">Data</th>
+                    <th className="glass-header">Ferramenta</th>
+                    <th className="glass-header">Funcionário / Obra</th>
+                    <th className="glass-header">Previsão Volta</th>
+                    <th className="glass-header text-center">Comprovante</th>
+                    <th className="glass-header">Status</th>
+                    <th className="glass-header text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loans.map((loan) => (
+                    <tr key={loan.id}>
+                      <td className="whitespace-nowrap text-muted-foreground">
+                        {format(new Date(loan.loan_date), "dd/MM/yyyy HH:mm")}
+                      </td>
+                      <td>
+                        <div className="font-semibold text-foreground font-display">{loan.tool?.name}</div>
+                        {loan.tool?.patrimony_number && <div className="text-xs font-mono text-muted-foreground">{loan.tool.patrimony_number}</div>}
+                      </td>
+                      <td>
+                        <div className="font-medium text-foreground">{loan.employee}</div>
+                        <div className="text-xs text-muted-foreground">{loan.client ? `${loan.client} (PCO: ${loan.pco || '-'})` : '-'}</div>
+                      </td>
+                      <td className="text-foreground">
+                        {loan.expected_return_date ? format(new Date(loan.expected_return_date), "dd/MM/yyyy") : "-"}
+                      </td>
+                      <td className="text-center">
+                        {loan.proof_image_url ? (
+                          <button className="btn-icon mx-auto text-primary" onClick={() => setViewReceipt(loan.proof_image_url)} title="Ver Comprovante">
+                            <Paperclip size={16} />
+                          </button>
+                        ) : <span className="text-muted-foreground">-</span>}
+                      </td>
+                      <td>
+                        <Badge variant={loan.status === 'ativo' ? "secondary" : "outline"} className={loan.status === 'ativo' ? 'bg-primary/20 text-primary border-primary/30' : ''}>
+                          {loan.status === 'ativo' ? 'Emprestada' : 'Devolvida'}
+                        </Badge>
+                      </td>
+                      <td className="text-right">
+                        {loan.status === 'ativo' ? (
+                          <button className="btn btn--outline btn--sm ml-auto" onClick={() => {
+                            setSelectedLoanToReturn(loan);
+                            setIsReturnOpen(true);
+                          }}>
+                            <ArrowLeftRight size={14} className="mr-2" /> Devolver
+                          </button>
+                        ) : loan.actual_return_date ? (
+                          <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                            Voltou em {format(new Date(loan.actual_return_date), "dd/MM/yy")}
+                          </span>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="md:hidden flex flex-col gap-3 p-3 bg-muted/10">
                 {loans.map((loan) => (
-                  <div key={loan.id} className="border rounded-md p-4 bg-card shadow-sm space-y-3">
+                  <div key={loan.id} className="border border-border rounded-xl p-4 bg-card shadow-sm flex flex-col gap-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <div className="font-semibold text-primary">{loan.tool?.name}</div>
+                        <div className="font-semibold text-foreground font-display">{loan.tool?.name}</div>
                         {loan.tool?.patrimony_number && <div className="text-xs font-mono text-muted-foreground">{loan.tool.patrimony_number}</div>}
                       </div>
-                      <Badge variant={loan.status === 'ativo' ? "secondary" : "outline"}>{loan.status === 'ativo' ? 'Emprestada' : 'Devolvida'}</Badge>
+                      <Badge variant={loan.status === 'ativo' ? "secondary" : "outline"} className={loan.status === 'ativo' ? 'bg-primary/20 text-primary border-primary/30' : ''}>
+                        {loan.status === 'ativo' ? 'Emprestada' : 'Devolvida'}
+                      </Badge>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-2 rounded-md">
+                    <div className="grid grid-cols-2 gap-2 text-sm bg-muted/30 p-3 rounded-md mt-1">
                       <div className="col-span-2">
                         <span className="block text-xs text-muted-foreground">Funcionário</span>
-                        <span className="font-medium">{loan.employee}</span>
+                        <span className="font-medium text-foreground">{loan.employee}</span>
                       </div>
                       <div className="col-span-2">
                         <span className="block text-xs text-muted-foreground">Obra / Cliente</span>
-                        <span>{loan.client ? `${loan.client} (PCO: ${loan.pco || '-'})` : '-'}</span>
+                        <span className="text-foreground">{loan.client ? `${loan.client} (PCO: ${loan.pco || '-'})` : '-'}</span>
                       </div>
                       <div>
                         <span className="block text-xs text-muted-foreground">Data Retirada</span>
-                        <span>{format(new Date(loan.loan_date), "dd/MM/yy HH:mm")}</span>
+                        <span className="text-foreground">{format(new Date(loan.loan_date), "dd/MM/yy HH:mm")}</span>
                       </div>
                       <div>
                         <span className="block text-xs text-muted-foreground">Previsão Volta</span>
-                        <span>{loan.expected_return_date ? format(new Date(loan.expected_return_date), "dd/MM/yy") : "-"}</span>
+                        <span className="text-foreground">{loan.expected_return_date ? format(new Date(loan.expected_return_date), "dd/MM/yy") : "-"}</span>
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center pt-2 border-t">
+                    <div className="flex justify-between items-center pt-3 border-t border-border mt-1">
                       {loan.proof_image_url ? (
-                        <Button variant="ghost" size="sm" onClick={() => setViewReceipt(loan.proof_image_url)} className="h-8 px-2 text-blue-500">
-                          <Paperclip className="h-4 w-4 mr-1" /> Ver Comprovante
-                        </Button>
+                        <button className="btn btn--ghost text-primary px-2" onClick={() => setViewReceipt(loan.proof_image_url)}>
+                          <Paperclip size={14} className="mr-1" /> Comprovante
+                        </button>
                       ) : <span className="text-xs text-muted-foreground italic">Sem comprovante</span>}
                       
                       {loan.status === 'ativo' ? (
-                        <Button variant="outline" size="sm" className="h-8" onClick={() => {
+                        <button className="btn btn--outline btn--sm" onClick={() => {
                           setSelectedLoanToReturn(loan);
                           setIsReturnOpen(true);
                         }}>
-                          <ArrowLeftRight className="h-3 w-3 mr-1" /> Devolver
-                        </Button>
+                          <ArrowLeftRight size={14} className="mr-1" /> Devolver
+                        </button>
                       ) : loan.actual_return_date ? (
-                        <span className="text-xs text-muted-foreground">Voltou em {format(new Date(loan.actual_return_date), "dd/MM/yy")}</span>
+                        <span className="text-xs text-muted-foreground font-medium">Voltou em {format(new Date(loan.actual_return_date), "dd/MM/yy")}</span>
                       ) : null}
                     </div>
                   </div>
@@ -391,69 +344,117 @@ function FerramentasEmprestimos() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Modal de Devolução */}
-      <Dialog open={isReturnOpen} onOpenChange={setIsReturnOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Registrar Devolução</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleReturnTool} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Ferramenta Sendo Devolvida</Label>
-              <div className="p-3 bg-muted rounded-md text-sm font-medium">
-                {selectedLoanToReturn?.tool?.name} - {selectedLoanToReturn?.employee}
-              </div>
+      <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Registrar Saída de Ferramenta" size="lg">
+        <form onSubmit={handleRegisterLoan} className="space-y-4">
+          <div className="form-group">
+            <label className="form-label">Ferramenta (obrigatório)</label>
+            <Select required value={selectedToolId} onValueChange={setSelectedToolId}>
+              <SelectTrigger className="form-input h-10">
+                <SelectValue placeholder="Selecione uma ferramenta disponível..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableTools.map(t => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.name} {t.patrimony_number ? `(${t.patrimony_number})` : ''}
+                  </SelectItem>
+                ))}
+                {availableTools.length === 0 && (
+                  <SelectItem value="none" disabled>Nenhuma ferramenta disponível</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Funcionário (obrigatório)</label>
+            <input required placeholder="Nome de quem retirou a ferramenta" className="form-input" value={employee} onChange={e => setEmployee(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">Cliente / Empresa</label>
+              <input placeholder="Ex: ABC Construções" className="form-input" value={client} onChange={e => setClient(e.target.value)} />
             </div>
-            
-            <div className="space-y-2">
-              <Label>Estado de Conservação ao Retornar</Label>
-              <Select value={returnCondition} onValueChange={setReturnCondition}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="boa">Boa (Pronta para uso)</SelectItem>
-                  <SelectItem value="regular">Regular</SelectItem>
-                  <SelectItem value="ruim">Ruim</SelectItem>
-                  <SelectItem value="manutencao">Necessita Manutenção (Indisponibilizar)</SelectItem>
-                  <SelectItem value="danificada">Danificada (Indisponibilizar)</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="form-group">
+              <label className="form-label">PCO (Obra)</label>
+              <input placeholder="Ex: 12345" className="form-input" value={pco} onChange={e => setPco(e.target.value)} />
             </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Data Prevista p/ Devolução (Opcional)</label>
+            <input type="date" className="form-input" value={expectedReturnDate} onChange={e => setExpectedReturnDate(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Comprovante Assinado (Opcional)</label>
+            <input type="file" accept="image/*,application/pdf" className="form-input file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90" onChange={e => setReceiptFile(e.target.files?.[0] || null)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Observações</label>
+            <textarea placeholder="Qualquer detalhe extra..." className="form-input min-h-[80px]" value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+          <div className="form-actions mt-6">
+            <button type="button" className="btn btn--ghost" onClick={() => setIsAddOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting || availableTools.length === 0}>
+              {submitting ? "Registrando..." : "Registrar Saída"}
+            </button>
+          </div>
+        </form>
+      </Modal>
 
-            <div className="space-y-2">
-              <Label>Observações na Devolução</Label>
-              <Textarea placeholder="Peça quebrada, atraso justificado, etc..." value={returnNotes} onChange={e => setReturnNotes(e.target.value)} />
+      <Modal isOpen={isReturnOpen} onClose={() => setIsReturnOpen(false)} title="Registrar Devolução" size="md">
+        <form onSubmit={handleReturnTool} className="space-y-6">
+          <div className="form-group">
+            <label className="form-label">Ferramenta Sendo Devolvida</label>
+            <div className="p-4 bg-muted/20 border border-border rounded-lg text-sm font-medium text-foreground flex items-center justify-between">
+              <span>{selectedLoanToReturn?.tool?.name}</span>
+              <span className="text-muted-foreground font-normal bg-card px-2 py-1 rounded shadow-sm border border-border">{selectedLoanToReturn?.employee}</span>
             </div>
+          </div>
+          
+          <div className="form-group">
+            <label className="form-label">Estado de Conservação ao Retornar</label>
+            <Select value={returnCondition} onValueChange={setReturnCondition}>
+              <SelectTrigger className="form-input h-10"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="boa">Boa (Pronta para uso)</SelectItem>
+                <SelectItem value="regular">Regular</SelectItem>
+                <SelectItem value="ruim">Ruim</SelectItem>
+                <SelectItem value="manutencao">Necessita Manutenção (Indisponibilizar)</SelectItem>
+                <SelectItem value="danificada">Danificada (Indisponibilizar)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsReturnOpen(false)}>Cancelar</Button>
-              <Button type="submit" disabled={submitting}>{submitting ? "Processando..." : "Confirmar Devolução"}</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          <div className="form-group">
+            <label className="form-label">Observações na Devolução</label>
+            <textarea placeholder="Peça quebrada, atraso justificado, etc..." className="form-input min-h-[100px]" value={returnNotes} onChange={e => setReturnNotes(e.target.value)} />
+          </div>
 
-      {/* Modal Visualização de Comprovante */}
-      <Dialog open={!!viewReceipt} onOpenChange={() => setViewReceipt(null)}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Comprovante de Empréstimo</DialogTitle>
-          </DialogHeader>
-          <div className="flex justify-center p-4 bg-muted rounded-md overflow-hidden min-h-[300px]">
+          <div className="form-actions mt-8">
+            <button type="button" className="btn btn--ghost" onClick={() => setIsReturnOpen(false)}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={submitting}>
+              {submitting ? "Processando..." : "Confirmar Devolução"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal isOpen={!!viewReceipt} onClose={() => setViewReceipt(null)} title="Comprovante de Empréstimo" size="lg">
+        <div className="space-y-6">
+          <div className="flex justify-center p-4 bg-black/5 rounded-xl border border-border overflow-hidden min-h-[300px]">
             {viewReceipt && (
-              <img src={viewReceipt} alt="Comprovante" className="max-h-[70vh] object-contain" />
+              <img src={viewReceipt} alt="Comprovante" className="max-h-[70vh] object-contain rounded-md" />
             )}
           </div>
-          <DialogFooter>
+          <div className="flex justify-end gap-3">
+            <button type="button" className="btn btn--ghost" onClick={() => setViewReceipt(null)}>Fechar</button>
             <a href={viewReceipt || '#'} target="_blank" rel="noopener noreferrer" download>
-              <Button variant="outline"><Download className="h-4 w-4 mr-2" /> Baixar Original</Button>
+              <button className="btn btn--primary"><Download size={16} className="mr-2" /> Baixar Original</button>
             </a>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

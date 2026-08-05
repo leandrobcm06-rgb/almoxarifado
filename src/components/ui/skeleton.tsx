@@ -1,7 +1,21 @@
 import { cn } from "@/lib/utils";
 
-function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("animate-pulse rounded-md bg-primary/10", className)} {...props} />;
-}
+type SkeletonProps = {
+  variant?: "rectangular" | "circular" | "text";
+  width?: string | number;
+  height?: string | number;
+  className?: string;
+};
 
-export { Skeleton };
+export default function Skeleton({ variant = "rectangular", width, height, className }: SkeletonProps) {
+  return (
+    <div
+      className={cn(
+        "animate-pulse bg-muted",
+        variant === "circular" ? "rounded-full" : "rounded-md",
+        className
+      )}
+      style={{ width, height }}
+    />
+  );
+}
