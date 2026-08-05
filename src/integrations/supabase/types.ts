@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -39,6 +39,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      forklift_companies: {
+        Row: { id: string; name: string; active: boolean; created_at: string; }
+        Insert: { id?: string; name: string; active?: boolean; created_at?: string; }
+        Update: { id?: string; name?: string; active?: boolean; created_at?: string; }
+        Relationships: []
+      }
+      forklift_clients: {
+        Row: { id: string; name: string; active: boolean; created_at: string; }
+        Insert: { id?: string; name: string; active?: boolean; created_at?: string; }
+        Update: { id?: string; name?: string; active?: boolean; created_at?: string; }
+        Relationships: []
+      }
+      forklift_pcos: {
+        Row: { id: string; name: string; active: boolean; created_at: string; }
+        Insert: { id?: string; name: string; active?: boolean; created_at?: string; }
+        Update: { id?: string; name?: string; active?: boolean; created_at?: string; }
+        Relationships: []
+      }
+      forklift_services: {
+        Row: { id: string; name: string; active: boolean; created_at: string; }
+        Insert: { id?: string; name: string; active?: boolean; created_at?: string; }
+        Update: { id?: string; name?: string; active?: boolean; created_at?: string; }
+        Relationships: []
+      }
+      forklift_usages: {
+        Row: { id: string; service_id: string | null; service_other: string | null; client_id: string | null; client_other: string | null; pco_id: string | null; pco_other: string | null; date: string; start_time: string; end_time: string; total_hours: number; company_id: string; observations: string | null; status_payment: string; billable: boolean; user_id: string | null; created_at: string; updated_at: string; }
+        Insert: { id?: string; service_id?: string | null; service_other?: string | null; client_id?: string | null; client_other?: string | null; pco_id?: string | null; pco_other?: string | null; date: string; start_time: string; end_time: string; total_hours: number; company_id: string; observations?: string | null; status_payment?: string; billable?: boolean; user_id?: string | null; created_at?: string; updated_at?: string; }
+        Update: { id?: string; service_id?: string | null; service_other?: string | null; client_id?: string | null; client_other?: string | null; pco_id?: string | null; pco_other?: string | null; date?: string; start_time?: string; end_time?: string; total_hours?: number; company_id?: string; observations?: string | null; status_payment?: string; billable?: boolean; user_id?: string | null; created_at?: string; updated_at?: string; }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           acao: string

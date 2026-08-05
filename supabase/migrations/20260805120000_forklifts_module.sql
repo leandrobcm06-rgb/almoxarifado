@@ -84,4 +84,4 @@ EXECUTE FUNCTION set_updated_at_forklift_usages();
 -- Audit trigger
 CREATE TRIGGER audit_forklift_usages
   AFTER INSERT OR UPDATE OR DELETE ON forklift_usages
-  FOR EACH ROW EXECUTE FUNCTION public.audit_trigger_func();
+  FOR EACH ROW EXECUTE FUNCTION public.tg_audit_log_v2();

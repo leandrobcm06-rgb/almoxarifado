@@ -31,6 +31,10 @@ import { Route as AuthenticatedAppCobreSaidaRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppContagensIndexRouteImport } from './routes/_authenticated/app.contagens.index'
 import { Route as AuthenticatedAppContagensIdRouteImport } from './routes/_authenticated/app.contagens.$id'
 import { Route as AuthenticatedAppContagensNovaRouteImport } from './routes/_authenticated/app.contagens.nova'
+import { Route as AuthenticatedAppEmpilhadeirasIndexRouteImport } from './routes/_authenticated/app.empilhadeiras.index'
+import { Route as AuthenticatedAppEmpilhadeirasCadastrosRouteImport } from './routes/_authenticated/app.empilhadeiras.cadastros'
+import { Route as AuthenticatedAppEmpilhadeirasLancamentosRouteImport } from './routes/_authenticated/app.empilhadeiras.lancamentos'
+import { Route as AuthenticatedAppEmpilhadeirasRelatoriosRouteImport } from './routes/_authenticated/app.empilhadeiras.relatorios'
 import { Route as AuthenticatedAppFerramentasIndexRouteImport } from './routes/_authenticated/app.ferramentas.index'
 import { Route as AuthenticatedAppFerramentasEmprestimosRouteImport } from './routes/_authenticated/app.ferramentas.emprestimos'
 import { Route as AuthenticatedAppFerramentasHistoricoRouteImport } from './routes/_authenticated/app.ferramentas.historico'
@@ -170,6 +174,30 @@ const AuthenticatedAppContagensNovaRoute =
     path: '/contagens/nova',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppEmpilhadeirasIndexRoute =
+  AuthenticatedAppEmpilhadeirasIndexRouteImport.update({
+    id: '/empilhadeiras/',
+    path: '/empilhadeiras/',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppEmpilhadeirasCadastrosRoute =
+  AuthenticatedAppEmpilhadeirasCadastrosRouteImport.update({
+    id: '/empilhadeiras/cadastros',
+    path: '/empilhadeiras/cadastros',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppEmpilhadeirasLancamentosRoute =
+  AuthenticatedAppEmpilhadeirasLancamentosRouteImport.update({
+    id: '/empilhadeiras/lancamentos',
+    path: '/empilhadeiras/lancamentos',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppEmpilhadeirasRelatoriosRoute =
+  AuthenticatedAppEmpilhadeirasRelatoriosRouteImport.update({
+    id: '/empilhadeiras/relatorios',
+    path: '/empilhadeiras/relatorios',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppFerramentasIndexRoute =
   AuthenticatedAppFerramentasIndexRouteImport.update({
     id: '/ferramentas/',
@@ -269,6 +297,9 @@ export interface FileRoutesByFullPath {
   '/app/cobre/saida': typeof AuthenticatedAppCobreSaidaRoute
   '/app/contagens/$id': typeof AuthenticatedAppContagensIdRoute
   '/app/contagens/nova': typeof AuthenticatedAppContagensNovaRoute
+  '/app/empilhadeiras/cadastros': typeof AuthenticatedAppEmpilhadeirasCadastrosRoute
+  '/app/empilhadeiras/lancamentos': typeof AuthenticatedAppEmpilhadeirasLancamentosRoute
+  '/app/empilhadeiras/relatorios': typeof AuthenticatedAppEmpilhadeirasRelatoriosRoute
   '/app/ferramentas/emprestimos': typeof AuthenticatedAppFerramentasEmprestimosRoute
   '/app/ferramentas/historico': typeof AuthenticatedAppFerramentasHistoricoRoute
   '/app/ferramentas/lista': typeof AuthenticatedAppFerramentasListaRoute
@@ -282,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/app/patrimonios/relatorios': typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   '/app/cobre/': typeof AuthenticatedAppCobreIndexRoute
   '/app/contagens/': typeof AuthenticatedAppContagensIndexRoute
+  '/app/empilhadeiras/': typeof AuthenticatedAppEmpilhadeirasIndexRoute
   '/app/ferramentas/': typeof AuthenticatedAppFerramentasIndexRoute
   '/app/patrimonios/': typeof AuthenticatedAppPatrimoniosIndexRoute
 }
@@ -304,6 +336,9 @@ export interface FileRoutesByTo {
   '/app/cobre/saida': typeof AuthenticatedAppCobreSaidaRoute
   '/app/contagens/$id': typeof AuthenticatedAppContagensIdRoute
   '/app/contagens/nova': typeof AuthenticatedAppContagensNovaRoute
+  '/app/empilhadeiras/cadastros': typeof AuthenticatedAppEmpilhadeirasCadastrosRoute
+  '/app/empilhadeiras/lancamentos': typeof AuthenticatedAppEmpilhadeirasLancamentosRoute
+  '/app/empilhadeiras/relatorios': typeof AuthenticatedAppEmpilhadeirasRelatoriosRoute
   '/app/ferramentas/emprestimos': typeof AuthenticatedAppFerramentasEmprestimosRoute
   '/app/ferramentas/historico': typeof AuthenticatedAppFerramentasHistoricoRoute
   '/app/ferramentas/lista': typeof AuthenticatedAppFerramentasListaRoute
@@ -317,6 +352,7 @@ export interface FileRoutesByTo {
   '/app/patrimonios/relatorios': typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   '/app/cobre': typeof AuthenticatedAppCobreIndexRoute
   '/app/contagens': typeof AuthenticatedAppContagensIndexRoute
+  '/app/empilhadeiras': typeof AuthenticatedAppEmpilhadeirasIndexRoute
   '/app/ferramentas': typeof AuthenticatedAppFerramentasIndexRoute
   '/app/patrimonios': typeof AuthenticatedAppPatrimoniosIndexRoute
 }
@@ -342,6 +378,9 @@ export interface FileRoutesById {
   '/_authenticated/app/cobre/saida': typeof AuthenticatedAppCobreSaidaRoute
   '/_authenticated/app/contagens/$id': typeof AuthenticatedAppContagensIdRoute
   '/_authenticated/app/contagens/nova': typeof AuthenticatedAppContagensNovaRoute
+  '/_authenticated/app/empilhadeiras/cadastros': typeof AuthenticatedAppEmpilhadeirasCadastrosRoute
+  '/_authenticated/app/empilhadeiras/lancamentos': typeof AuthenticatedAppEmpilhadeirasLancamentosRoute
+  '/_authenticated/app/empilhadeiras/relatorios': typeof AuthenticatedAppEmpilhadeirasRelatoriosRoute
   '/_authenticated/app/ferramentas/emprestimos': typeof AuthenticatedAppFerramentasEmprestimosRoute
   '/_authenticated/app/ferramentas/historico': typeof AuthenticatedAppFerramentasHistoricoRoute
   '/_authenticated/app/ferramentas/lista': typeof AuthenticatedAppFerramentasListaRoute
@@ -355,6 +394,7 @@ export interface FileRoutesById {
   '/_authenticated/app/patrimonios/relatorios': typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   '/_authenticated/app/cobre/': typeof AuthenticatedAppCobreIndexRoute
   '/_authenticated/app/contagens/': typeof AuthenticatedAppContagensIndexRoute
+  '/_authenticated/app/empilhadeiras/': typeof AuthenticatedAppEmpilhadeirasIndexRoute
   '/_authenticated/app/ferramentas/': typeof AuthenticatedAppFerramentasIndexRoute
   '/_authenticated/app/patrimonios/': typeof AuthenticatedAppPatrimoniosIndexRoute
 }
@@ -380,6 +420,9 @@ export interface FileRouteTypes {
     | '/app/cobre/saida'
     | '/app/contagens/$id'
     | '/app/contagens/nova'
+    | '/app/empilhadeiras/cadastros'
+    | '/app/empilhadeiras/lancamentos'
+    | '/app/empilhadeiras/relatorios'
     | '/app/ferramentas/emprestimos'
     | '/app/ferramentas/historico'
     | '/app/ferramentas/lista'
@@ -393,6 +436,7 @@ export interface FileRouteTypes {
     | '/app/patrimonios/relatorios'
     | '/app/cobre/'
     | '/app/contagens/'
+    | '/app/empilhadeiras/'
     | '/app/ferramentas/'
     | '/app/patrimonios/'
   fileRoutesByTo: FileRoutesByTo
@@ -415,6 +459,9 @@ export interface FileRouteTypes {
     | '/app/cobre/saida'
     | '/app/contagens/$id'
     | '/app/contagens/nova'
+    | '/app/empilhadeiras/cadastros'
+    | '/app/empilhadeiras/lancamentos'
+    | '/app/empilhadeiras/relatorios'
     | '/app/ferramentas/emprestimos'
     | '/app/ferramentas/historico'
     | '/app/ferramentas/lista'
@@ -428,6 +475,7 @@ export interface FileRouteTypes {
     | '/app/patrimonios/relatorios'
     | '/app/cobre'
     | '/app/contagens'
+    | '/app/empilhadeiras'
     | '/app/ferramentas'
     | '/app/patrimonios'
   id:
@@ -452,6 +500,9 @@ export interface FileRouteTypes {
     | '/_authenticated/app/cobre/saida'
     | '/_authenticated/app/contagens/$id'
     | '/_authenticated/app/contagens/nova'
+    | '/_authenticated/app/empilhadeiras/cadastros'
+    | '/_authenticated/app/empilhadeiras/lancamentos'
+    | '/_authenticated/app/empilhadeiras/relatorios'
     | '/_authenticated/app/ferramentas/emprestimos'
     | '/_authenticated/app/ferramentas/historico'
     | '/_authenticated/app/ferramentas/lista'
@@ -465,6 +516,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/patrimonios/relatorios'
     | '/_authenticated/app/cobre/'
     | '/_authenticated/app/contagens/'
+    | '/_authenticated/app/empilhadeiras/'
     | '/_authenticated/app/ferramentas/'
     | '/_authenticated/app/patrimonios/'
   fileRoutesById: FileRoutesById
@@ -631,6 +683,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppContagensNovaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/empilhadeiras/': {
+      id: '/_authenticated/app/empilhadeiras/'
+      path: '/empilhadeiras'
+      fullPath: '/app/empilhadeiras/'
+      preLoaderRoute: typeof AuthenticatedAppEmpilhadeirasIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/empilhadeiras/cadastros': {
+      id: '/_authenticated/app/empilhadeiras/cadastros'
+      path: '/empilhadeiras/cadastros'
+      fullPath: '/app/empilhadeiras/cadastros'
+      preLoaderRoute: typeof AuthenticatedAppEmpilhadeirasCadastrosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/empilhadeiras/lancamentos': {
+      id: '/_authenticated/app/empilhadeiras/lancamentos'
+      path: '/empilhadeiras/lancamentos'
+      fullPath: '/app/empilhadeiras/lancamentos'
+      preLoaderRoute: typeof AuthenticatedAppEmpilhadeirasLancamentosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/empilhadeiras/relatorios': {
+      id: '/_authenticated/app/empilhadeiras/relatorios'
+      path: '/empilhadeiras/relatorios'
+      fullPath: '/app/empilhadeiras/relatorios'
+      preLoaderRoute: typeof AuthenticatedAppEmpilhadeirasRelatoriosRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/ferramentas/': {
       id: '/_authenticated/app/ferramentas/'
       path: '/ferramentas'
@@ -742,6 +822,9 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppCobreSaidaRoute: typeof AuthenticatedAppCobreSaidaRoute
   AuthenticatedAppContagensIdRoute: typeof AuthenticatedAppContagensIdRoute
   AuthenticatedAppContagensNovaRoute: typeof AuthenticatedAppContagensNovaRoute
+  AuthenticatedAppEmpilhadeirasCadastrosRoute: typeof AuthenticatedAppEmpilhadeirasCadastrosRoute
+  AuthenticatedAppEmpilhadeirasLancamentosRoute: typeof AuthenticatedAppEmpilhadeirasLancamentosRoute
+  AuthenticatedAppEmpilhadeirasRelatoriosRoute: typeof AuthenticatedAppEmpilhadeirasRelatoriosRoute
   AuthenticatedAppFerramentasEmprestimosRoute: typeof AuthenticatedAppFerramentasEmprestimosRoute
   AuthenticatedAppFerramentasHistoricoRoute: typeof AuthenticatedAppFerramentasHistoricoRoute
   AuthenticatedAppFerramentasListaRoute: typeof AuthenticatedAppFerramentasListaRoute
@@ -755,6 +838,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppPatrimoniosRelatoriosRoute: typeof AuthenticatedAppPatrimoniosRelatoriosRoute
   AuthenticatedAppCobreIndexRoute: typeof AuthenticatedAppCobreIndexRoute
   AuthenticatedAppContagensIndexRoute: typeof AuthenticatedAppContagensIndexRoute
+  AuthenticatedAppEmpilhadeirasIndexRoute: typeof AuthenticatedAppEmpilhadeirasIndexRoute
   AuthenticatedAppFerramentasIndexRoute: typeof AuthenticatedAppFerramentasIndexRoute
   AuthenticatedAppPatrimoniosIndexRoute: typeof AuthenticatedAppPatrimoniosIndexRoute
 }
@@ -777,6 +861,12 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCobreSaidaRoute: AuthenticatedAppCobreSaidaRoute,
   AuthenticatedAppContagensIdRoute: AuthenticatedAppContagensIdRoute,
   AuthenticatedAppContagensNovaRoute: AuthenticatedAppContagensNovaRoute,
+  AuthenticatedAppEmpilhadeirasCadastrosRoute:
+    AuthenticatedAppEmpilhadeirasCadastrosRoute,
+  AuthenticatedAppEmpilhadeirasLancamentosRoute:
+    AuthenticatedAppEmpilhadeirasLancamentosRoute,
+  AuthenticatedAppEmpilhadeirasRelatoriosRoute:
+    AuthenticatedAppEmpilhadeirasRelatoriosRoute,
   AuthenticatedAppFerramentasEmprestimosRoute:
     AuthenticatedAppFerramentasEmprestimosRoute,
   AuthenticatedAppFerramentasHistoricoRoute:
@@ -798,6 +888,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
     AuthenticatedAppPatrimoniosRelatoriosRoute,
   AuthenticatedAppCobreIndexRoute: AuthenticatedAppCobreIndexRoute,
   AuthenticatedAppContagensIndexRoute: AuthenticatedAppContagensIndexRoute,
+  AuthenticatedAppEmpilhadeirasIndexRoute:
+    AuthenticatedAppEmpilhadeirasIndexRoute,
   AuthenticatedAppFerramentasIndexRoute: AuthenticatedAppFerramentasIndexRoute,
   AuthenticatedAppPatrimoniosIndexRoute: AuthenticatedAppPatrimoniosIndexRoute,
 }
