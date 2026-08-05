@@ -119,7 +119,7 @@ function AuthedLayout() {
       )}>
         <div className="p-4 border-b flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <img src="/Logo.jpeg" alt="BCM" className="h-12 w-12 rounded object-contain shrink-0" />
+            <img src="/Logo.jpeg" alt="BCM" className="h-16 w-auto max-w-[120px] rounded object-contain shrink-0" />
             <div className="min-w-0">
               <div className="text-xl font-bold font-display tracking-tight truncate">BCM Stock</div>
             </div>
