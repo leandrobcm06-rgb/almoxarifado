@@ -60,7 +60,7 @@ function WelcomePage() {
       </div>
 
       <div className="flex flex-col items-center justify-center py-10 mb-10 rounded-2xl border border-border/50 bg-gradient-to-b from-muted/30 to-background shadow-sm animate-scale-in">
-        <img src="/Logo.jpeg" alt="BCM Stock Logo" className="h-28 md:h-36 object-contain rounded-2xl bg-white shadow-md p-2 transition-transform hover:scale-105 duration-300" />
+        <img src="/Logo.jpeg" alt="BCM Stock Logo" className="h-32 md:h-48 object-contain transition-transform hover:scale-105 duration-300" />
       </div>
 
       <div>

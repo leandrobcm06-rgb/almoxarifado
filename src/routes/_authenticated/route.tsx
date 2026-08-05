@@ -117,12 +117,11 @@ function AuthedLayout() {
         "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-sidebar text-sidebar-foreground border-r flex flex-col transition-transform",
         open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
       )}>
-        <div className="p-4 border-b flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <img src="/Logo.jpeg" alt="BCM" className="h-9 w-9 rounded object-contain bg-white/5 p-1 shrink-0" />
+        <div className="p-4 border-b flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src="/Logo.jpeg" alt="BCM" className="h-12 w-12 rounded object-contain shrink-0" />
             <div className="min-w-0">
-              <div className="font-semibold truncate">BCM Stock</div>
-              <div className="text-xs text-muted-foreground truncate">BCM · Controle de estoque</div>
+              <div className="text-xl font-bold font-display tracking-tight truncate">BCM Stock</div>
             </div>
           </div>
           <button onClick={() => setOpen(false)} className="lg:hidden"><X className="h-5 w-5" /></button>
